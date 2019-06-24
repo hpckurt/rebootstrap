@@ -2774,27 +2774,13 @@ fi
 
 if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
 if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
-if test -f "$REPODIR/stamps/libseccomp_1"; then
-	echo "skipping stage1 rebuild of libseccomp"
-else
-	cross_build_setup libseccomp libseccomp_1
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nopython ./
-	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnopython
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/libseccomp_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf libseccomp_1
-fi
-progress_mark "libseccomp stage1 cross build"
-mark_built libseccomp
-fi
+	cross_build libseccomp nopython libseccomp_1
+	progress_mark "libseccomp stage1 cross build"
+	mark_built libseccomp
 # needed by man-db, systemd
 
-automatically_cross_build_packages
+	automatically_cross_build_packages
+fi
 
 if test -f "$REPODIR/stamps/systemd_1"; then
 	echo "skipping stage1 rebuild of systemd"
