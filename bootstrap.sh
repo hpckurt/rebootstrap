@@ -2809,27 +2809,13 @@ fi
 automatically_cross_build_packages
 
 if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-if test -f "$REPODIR/stamps/libcap-ng_1"; then
-	echo "skipping rebuild of libcap-ng stage1"
-else
-	cross_build_setup libcap-ng libcap-ng_1
 	assert_built attr
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pnopython ./
-	check_binNMU
-	drop_privs dpkg-buildpackage -B -uc -us -a$HOST_ARCH -Pnopython
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/libcap-ng_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf libcap-ng_1
-fi
-progress_mark "libcap-ng stage1 cross build"
-mark_built libcap-ng
-# needed by audit, dbus
+	cross_build libcap-ng nopython libcap-ng_1
+	mark_built libcap-ng
+	# needed by audit, dbus
 
-automatically_cross_build_packages
+	automatically_cross_build_packages
+fi
 
 if test -f "$REPODIR/stamps/libprelude_1"; then
 	echo "skipping rebuild of libprelude stage1"
