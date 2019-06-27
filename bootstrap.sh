@@ -2803,19 +2803,16 @@ else
 fi
 progress_mark "systemd stage1 cross build"
 mark_built systemd
-fi
 # needed by util-linux
 
 automatically_cross_build_packages
 
-if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-	assert_built attr
-	cross_build libcap-ng nopython libcap-ng_1
-	mark_built libcap-ng
-	# needed by audit, dbus
+assert_built attr
+cross_build libcap-ng nopython libcap-ng_1
+mark_built libcap-ng
+# needed by audit, dbus
 
-	automatically_cross_build_packages
-fi
+automatically_cross_build_packages
 
 if test -f "$REPODIR/stamps/libprelude_1"; then
 	echo "skipping rebuild of libprelude stage1"
