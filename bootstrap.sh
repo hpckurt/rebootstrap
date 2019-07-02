@@ -2814,26 +2814,8 @@ mark_built libcap-ng
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/libprelude_1"; then
-	echo "skipping rebuild of libprelude stage1"
-else
-	cross_build_setup libprelude libprelude_1
-	assert_built "gnutls28 libgcrypt20 libtool"
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pnolua,noperl,nopython,noruby ./
-	check_binNMU
-	(
-		buildenv_libprelude
-		drop_privs_exec dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -Pnolua,noperl,nopython,noruby
-	)
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/libprelude_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf libprelude_1
-fi
-progress_mark "libprelude stage1 cross build"
+assert_built "gnutls28 libgcrypt20 libtool"
+cross_build libprelude "nolua noperl nopython noruby" libprelude_1
 mark_built libprelude
 # needed by audit, dbus
 
