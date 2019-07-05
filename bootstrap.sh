@@ -2669,21 +2669,18 @@ automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
 cross_build util-linux stage1 util-linux_1
-progress_mark "util-linux stage1 cross build"
 mark_built util-linux
 # essential, needed by e2fsprogs
 
 automatically_cross_build_packages
 
 cross_build db5.3 "pkg.db5.3.notcl nojava" db5.3_1
-progress_mark "db5.3 stage1 cross build"
 mark_built db5.3
 # needed by perl, python2.7, needed for db-defaults and thus by freebsd-glue
 
 automatically_cross_build_packages
 
 cross_build libxml2 nopython libxml2_1
-progress_mark "libxml2 nopython cross build"
 mark_built libxml2
 # needed by autogen
 
@@ -2719,7 +2716,6 @@ mark_built build-essential
 automatically_cross_build_packages
 
 cross_build pam stage1 pam_1
-progress_mark "pam stage1 cross build"
 mark_built pam
 # needed by shadow
 
@@ -2750,7 +2746,6 @@ automatically_cross_build_packages
 assert_built "libevent expat nettle"
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any || assert_built libbsd
 cross_build unbound pkg.unbound.libonly unbound_1
-progress_mark "unbound stage1 cross build"
 mark_built unbound
 # needed by gnutls28
 
@@ -2758,7 +2753,6 @@ automatically_cross_build_packages
 
 assert_built "gnutls28 cyrus-sasl2"
 cross_build openldap stage1 openldap_1
-progress_mark "openldap stage1 cross build"
 mark_built openldap
 # needed by curl
 
@@ -2775,7 +2769,6 @@ fi
 if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
 if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
 	cross_build libseccomp nopython libseccomp_1
-	progress_mark "libseccomp stage1 cross build"
 	mark_built libseccomp
 # needed by man-db, systemd
 
