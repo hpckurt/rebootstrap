@@ -2814,23 +2814,8 @@ mark_built libprelude
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/audit_1"; then
-	echo "skipping stage1 rebuild of audit"
-else
-	cross_build_setup audit audit_1
-	assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pnopython ./
-	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnopython
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/audit_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf audit_1
-fi
-progress_mark "audit stage1 cross build"
+assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
+cross_build audit nopython audit_1
 mark_built audit
 # needed by libsemanage
 
