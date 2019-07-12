@@ -1806,7 +1806,7 @@ patch_readline() {
 +++ b/debian/control
 @@ -4,10 +4,10 @@
  Maintainer: Matthias Klose <doko@debian.org>
- Standards-Version: 3.9.8
+ Standards-Version: 4.3.0
  Build-Depends: debhelper (>= 9),
    libncurses-dev,
 -  lib32ncurses-dev [amd64 ppc64], lib64ncurses-dev [i386 powerpc sparc s390],
@@ -1815,7 +1815,7 @@ patch_readline() {
 -  gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc ppc64 s390 sparc]
 +  gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc ppc64 s390 sparc] <!nobiarch>
  
- Package: libreadline7
+ Package: libreadline8
  Architecture: any
 @@ -30,6 +30,7 @@
  Depends: readline-common, \${shlibs:Depends}, \${misc:Depends}
