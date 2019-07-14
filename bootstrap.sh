@@ -959,6 +959,8 @@ patch_gcc_8() {
 	patch_gcc_arm64ilp32
 	patch_gcc_default_pie_everywhere
 	patch_gcc_multilib_deps
+	echo "build common libraries again, not a bug"
+	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
 patch_gcc_9() {
