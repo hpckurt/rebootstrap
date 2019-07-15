@@ -1866,6 +1866,37 @@ patch_readline() {
  CPPFLAGS := \$(shell dpkg-buildflags --get CPPFLAGS)
  LDFLAGS := \$(shell dpkg-buildflags --get LDFLAGS)
 EOF
+	echo "fix misbuild #932023"
+	drop_privs patch -p1 <<'EOF'
+--- readline-8.0/debian/control
++++ readline-8.0/debian/control
+@@ -94,6 +94,7 @@
+ Section: utils
+ Priority: optional
+ Provides: readline-editor
++Build-Profiles: <!cross>
+ Description: Front-end using readline to "cook" input lines for other programs
+  This tool lets you use history and line-editing in any text oriented
+  tool. This is especially useful with third-party proprietary tools that
+--- readline-8.0/debian/rules
++++ readline-8.0/debian/rules
+@@ -395,7 +391,6 @@
+ 		examples/Inputrc
+ 	ln -sf $(p_rl) $(d_rld)/usr/share/doc/$(p_rld)
+
+-ifeq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
+ 	dh_installdocs -p$(p_rlfe) examples/rlfe/README
+ 	dh_installchangelogs -p$(p_rlfe) examples/rlfe/ChangeLog
+
+@@ -407,7 +402,6 @@
+ 	cp -p debian/libreadline.shlibs debian/shlibs.local
+ 	dh_shlibdeps -p$(p_rl) -p$(p_rld) -p$(p_rlfe) \
+ 		 -L $(p_rl) -l $(d_rl)/lib
+-endif
+
+ ifneq ($(build32),)
+ 	-ls -l $(d_rld)/usr/share/doc/$(p_rl)
+EOF
 }
 
 add_automatic readline5
