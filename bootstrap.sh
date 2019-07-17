@@ -1772,6 +1772,7 @@ add_automatic openssl
 add_automatic openssl1.0
 add_automatic p11-kit
 add_automatic patch
+add_automatic pcre2
 
 add_automatic pcre3
 patch_pcre3() {
@@ -2571,7 +2572,7 @@ add_need mpfr4 # by gcc-VER
 add_need nettle # by unbound
 add_need openssl # by cyrus-sasl2
 add_need patch # for dpkg-dev
-add_need pcre3 # by libselinux
+add_need pcre2 # by libselinux
 add_need popt # by newt
 add_need readline5 # by lvm2
 add_need slang2 # by cdebconf, newt
@@ -2693,7 +2694,7 @@ mark_built readline
 automatically_cross_build_packages
 
 if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-	assert_built "libsepol pcre3"
+	assert_built "libsepol pcre2"
 	cross_build libselinux "nopython noruby" libselinux_1
 	mark_built libselinux
 # needed by coreutils, dpkg, findutils, glibc, sed, tar, util-linux
