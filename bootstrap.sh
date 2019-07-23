@@ -975,12 +975,15 @@ buildenv_gdbm() {
 	fi
 }
 
-add_automatic glib2.0
 buildenv_glib2_0() {
 	export glib_cv_stack_grows=no
 	export glib_cv_uscore=no
 	export ac_cv_func_posix_getgrgid_r=yes
 	export ac_cv_func_posix_getpwuid_r=yes
+}
+patch_glib2_0() {
+	echo "allow building with any gcc"
+	sed -i -e '/\(gcc\|cpp\)-8/d' debian/control debian/rules
 }
 
 builddep_glibc() {
@@ -2845,6 +2848,12 @@ assert_built "gnutls28 libgcrypt20 libtool"
 cross_build libprelude "nolua noperl nopython noruby" libprelude_1
 mark_built libprelude
 # needed by audit, dbus
+
+automatically_cross_build_packages
+
+cross_build glib2.0
+mark_built glib2.0
+# needed by libverto, libxt
 
 automatically_cross_build_packages
 
