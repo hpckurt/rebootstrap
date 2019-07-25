@@ -983,7 +983,8 @@ buildenv_glib2_0() {
 }
 patch_glib2_0() {
 	echo "allow building with any gcc"
-	sed -i -e '/\(gcc\|cpp\)-8/d' debian/control debian/rules
+	sed -i -e '/\(gcc\|cpp\)-8/d' debian/rules
+	sed -i -e '/gcc-8/d' -e 's/^\(Build-Depends:\) cpp-8,/\1/' debian/control
 }
 
 builddep_glibc() {
@@ -2540,6 +2541,7 @@ add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
 add_need db-defaults # by perl, python2.7, python3.5
+add_need elfutils # by glib2.0
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
