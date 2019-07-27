@@ -1284,25 +1284,6 @@ builddep_gnu_efi() {
 }
 
 add_automatic gnupg2
-patch_gnupg2() {
-	if test "$GCC_VER" = 9; then
-		echo "working around gcc-9 incompatibility https://patchwork.openembedded.org/patch/157377/ fixed properly in gnupg2/2.2.15-1 #926984"
-		drop_privs patch -p1 <<'EOF'
---- a/dirmngr/dns.h
-+++ b/dirmngr/dns.h
-@@ -154,7 +154,7 @@ DNS_PUBLIC int *dns_debug_p(void);
-
- #define dns_quietinit(...) \
- 	DNS_PRAGMA_PUSH DNS_PRAGMA_QUIET __VA_ARGS__ DNS_PRAGMA_POP
--#elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || __GNUC__ > 4
-+#elif (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4 && __GNUC__ < 9)
- #define DNS_PRAGMA_PUSH _Pragma("GCC diagnostic push")
- #define DNS_PRAGMA_QUIET _Pragma("GCC diagnostic ignored \"-Woverride-init\"")
- #define DNS_PRAGMA_POP _Pragma("GCC diagnostic pop")
-EOF
-	fi
-}
-
 add_automatic gnutls28
 
 add_automatic gpm
