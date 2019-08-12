@@ -2929,23 +2929,8 @@ mark_built audit
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/libsemanage_1"; then
-	echo "skipping stage1 rebuild of libsemanage"
-else
-	cross_build_setup libsemanage libsemanage_1
-	assert_built "audit bzip2 libselinux libsepol"
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pnocheck,nopython,noruby ./
-	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,nopython,noruby
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/libsemanage_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf libsemanage_1
-fi
-progress_mark "libsemanage stage1 cross build"
+assert_built "audit bzip2 libselinux libsepol"
+cross_build libsemanage "nocheck nopython noruby" libsemanage_1
 mark_built libsemanage
 # needed by shadow
 
