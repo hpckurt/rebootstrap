@@ -820,26 +820,7 @@ buildenv_diffutils() {
 }
 
 add_automatic dpkg
-
 add_automatic e2fsprogs
-patch_e2fsprogs() {
-	echo "fixing DEB_BUILD_OPTIONS=nocheck #933247"
-	patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -170,7 +170,9 @@
- 	dh_gencontrol --remaining-packages
-
- override_dh_auto_test:
-+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
- 	$(MAKE) -C ${stdbuilddir} V=1 check
-+endif
-
- test_printenv:
- 	printenv | sort
-EOF
-}
-
 add_automatic elfutils
 add_automatic expat
 add_automatic file
