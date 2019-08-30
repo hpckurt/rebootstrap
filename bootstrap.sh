@@ -17,7 +17,7 @@ APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o
 DEFAULT_PROFILES="cross nocheck noudeb"
 LIBC_NAME=glibc
 DROP_PRIVS=buildd
-GCC_NOLANG="ada asan brig d go itm java jit hppa64 lsan nvptx objc obj-c++ tsan ubsan"
+GCC_NOLANG="ada asan brig d go itm java jit hppa64 lsan m2 nvptx objc obj-c++ tsan ubsan"
 ENABLE_DIFFOSCOPE=no
 
 if df -t tmpfs /var/cache/apt/archives >/dev/null 2>&1; then
@@ -227,6 +227,24 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
  +-    if test -n "$with_cross_host" &&
  +-       test x"$with_cross_host" != x"no"; then
  +-      # Install a library built with a cross compiler in tooldir, not libdir.
+EOF
+	echo "fixing patch application for gcc-9 #936092"
+	patch /usr/share/cross-gcc/patches/gcc-9/*-multi-arch-specific-install-location-* <<'EOF'
+--- a
++++ b
+@@ -368,9 +388,9 @@
+ +  else
+ +    debian_patches += cross-install-location
+ +  endif
+- endif
+- 
+- ifeq ($(DEB_TARGET_ARCH_OS),hurd)
++   ifeq ($(with_m2),yes)
++     debian_patches += cross-install-location-gm2
++   endif
+ -- 
+ 2.17.1
+
 EOF
 	fi
 fi
