@@ -226,6 +226,7 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
  +-       test x"$with_cross_host" != x"no"; then
  +-      # Install a library built with a cross compiler in tooldir, not libdir.
 EOF
+	fi
 fi
 
 obtain_source_package() {
