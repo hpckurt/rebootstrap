@@ -974,79 +974,12 @@ buildenv_gdbm() {
 	fi
 }
 
+add_automatic glib2.0
 buildenv_glib2_0() {
 	export glib_cv_stack_grows=no
 	export glib_cv_uscore=no
 	export ac_cv_func_posix_getgrgid_r=yes
 	export ac_cv_func_posix_getpwuid_r=yes
-}
-patch_glib2_0() {
-	echo "allow building with any gcc"
-	sed -i -e '/\(gcc\|cpp\)-8/d' debian/rules
-	sed -i -e '/gcc-8/d' -e 's/^\(Build-Depends:\) cpp-8,/\1/' debian/control
-	echo "fix glib2.0's debcrossgen fork #933560"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/debcrossgen
-+++ b/debian/debcrossgen
-@@ -47,6 +50,36 @@
-             return f
-     raise ValueError("%s not found on $PATH" % program)
- 
-+def write_args_line(ofile, name, args):
-+    if len(args) == 0:
-+        return
-+    ostr = name + ' = ['
-+    ostr += ', '.join("'" + i + "'" for i in args)
-+    ostr += ']\n'
-+    ofile.write(ostr)
-+
-+def write_args_from_envvars(ofile):
-+    import shlex
-+    cppflags = shlex.split(os.environ.get('CPPFLAGS', ''))
-+    cflags = shlex.split(os.environ.get('CFLAGS', ''))
-+    cxxflags = shlex.split(os.environ.get('CXXFLAGS', ''))
-+    ldflags = shlex.split(os.environ.get('LDFLAGS', ''))
-+
-+    c_args = cppflags + cflags
-+    cpp_args = cppflags + cxxflags
-+    c_link_args = cflags + ldflags
-+    cpp_link_args = cxxflags + ldflags
-+
-+    write_args_line(ofile, 'c_args', c_args)
-+    write_args_line(ofile, 'cpp_args', cpp_args)
-+    write_args_line(ofile, 'c_link_args', c_link_args)
-+    write_args_line(ofile, 'cpp_link_args', cpp_link_args)
-+
-+cpu_family_map = dict(mips64el="mips64",
-+                      i686='x86')
-+cpu_map = dict(armhf="arm7hlf",
-+               mips64el="mips64",)
-+
- def run(options):
-     if options.arch is None:
-         cmd = ['dpkg-architecture']
-@@ -62,8 +95,10 @@
-         data[k] = v
-     host_arch = data['DEB_HOST_GNU_TYPE']
-     host_os = data['DEB_HOST_ARCH_OS']
--    host_cpu_family = data['DEB_HOST_GNU_CPU']
--    host_cpu = data['DEB_HOST_ARCH'] # Not really correct, should be arm7hlf etc but it is not exposed.
-+    host_cpu_family = cpu_family_map.get(data['DEB_HOST_GNU_CPU'],
-+                                         data['DEB_HOST_GNU_CPU'])
-+    host_cpu = cpu_map.get(data['DEB_HOST_ARCH'],
-+                           data['DEB_HOST_ARCH'])
-     host_endian = data['DEB_HOST_ARCH_ENDIAN']
-     with open(options.outfile, "w") as ofile:
-         ofile.write('[binaries]\n')
-@@ -80,6 +115,7 @@
-         except ValueError:
-             pass # pkg-config is optional
-         ofile.write('\n[properties]\n')
-+        write_args_from_envvars(ofile)
-         for prop in options.set:
-             assert '=' in prop
-             key, value = prop.split('=', 1)
-EOF
 }
 
 builddep_glibc() {
@@ -2558,7 +2491,6 @@ add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
 add_need db-defaults # by perl, python2.7, python3.5
-add_need elfutils # by glib2.0
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
@@ -2867,12 +2799,6 @@ assert_built "gnutls28 libgcrypt20 libtool"
 cross_build libprelude "nolua noperl nopython noruby" libprelude_1
 mark_built libprelude
 # needed by audit, dbus
-
-automatically_cross_build_packages
-
-cross_build glib2.0
-mark_built glib2.0
-# needed by libverto, libxt
 
 automatically_cross_build_packages
 
