@@ -185,8 +185,6 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
 	echo "removing unused unstripped_exe patch"
 	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
 	if test "$GCC_VER" = 9; then
-		echo "fixing patch application for gcc-9 #928035"
-		sed -i -e 's/\(`TARGET\))/\1/' /usr/share/cross-gcc/patches/gcc-9/*-now-depend-on-cpp-*
 		echo "dropping libmpx from patch for gcc-9 #927230"
 	patch /usr/share/cross-gcc/patches/gcc-9/*-multi-arch-specific-install-location-* <<'EOF'
 --- a
@@ -228,25 +226,6 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
  +-       test x"$with_cross_host" != x"no"; then
  +-      # Install a library built with a cross compiler in tooldir, not libdir.
 EOF
-	echo "fixing patch application for gcc-9 #936092"
-	patch /usr/share/cross-gcc/patches/gcc-9/*-multi-arch-specific-install-location-* <<'EOF'
---- a
-+++ b
-@@ -368,9 +388,9 @@
- +  else
- +    debian_patches += cross-install-location
- +  endif
-- endif
-- 
-- ifeq ($(DEB_TARGET_ARCH_OS),hurd)
-+   ifeq ($(with_m2),yes)
-+     debian_patches += cross-install-location-gm2
-+   endif
- -- 
- 2.17.1
-
-EOF
-	fi
 fi
 
 obtain_source_package() {
