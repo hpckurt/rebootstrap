@@ -2828,25 +2828,7 @@ mark_built apt
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/gdbm_1"; then
-	echo "skipping rebuild of gdbm stage1"
-else
-	cross_build_setup gdbm gdbm_1
-	apt_get_build_dep --arch-only "-a$HOST_ARCH" -P pkg.gdbm.nodietlibc ./
-	check_binNMU
-	(
-		buildenv_gdbm "$HOST_ARCH"
-		drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Ppkg.gdbm.nodietlibc
-	)
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/gdbm_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf gdbm_1
-fi
-progress_mark "gdbm stage1 cross build"
+cross_build gdbm pkg.gdbm.nodietlibc gdbm_1
 mark_built gdbm
 # needed by man-db, perl, python2.7
 
