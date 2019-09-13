@@ -1647,11 +1647,6 @@ builddep_ncurses() {
 }
 
 add_automatic nettle
-buildenv_nettle() {
-	echo "working around #938959"
-	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
-}
-
 add_automatic nghttp2
 add_automatic npth
 
