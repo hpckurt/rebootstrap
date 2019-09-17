@@ -1753,14 +1753,7 @@ add_automatic openssl1.0
 add_automatic p11-kit
 add_automatic patch
 add_automatic pcre2
-
 add_automatic pcre3
-patch_pcre3() {
-	echo "work around FTBFS with gcc-8 #897834"
-	# ignore symbol changes
-	sed -i -e 's/\(dh_makeshlibs.*-- -c\)4$/\10/' debian/rules
-}
-
 add_automatic popt
 
 builddep_readline() {
