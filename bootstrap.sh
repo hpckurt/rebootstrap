@@ -787,6 +787,72 @@ buildenv_blt() {
 	unset CC
 }
 
+patch_brotli() {
+	echo "adding nopython profile #940619"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -6,13 +6,13 @@
+ Build-Depends: cmake,
+                debhelper (>= 12),
+                debhelper-compat (= 12),
+-               dh-python,
+-               python,
+-               python-dev,
+-               python-setuptools,
+-               python3,
+-               python3-all-dev,
+-               python3-setuptools
++               dh-python <!nopython>,
++               python <!nopython>,
++               python-dev <!nopython>,
++               python-setuptools <!nopython>,
++               python3 <!nopython>,
++               python3-all-dev <!nopython>,
++               python3-setuptools <!nopython>,
+ Standards-Version: 4.3.0
+ Vcs-Browser: https://salsa.debian.org/debian/brotli
+ Vcs-Git: https://salsa.debian.org/debian/brotli.git
+@@ -20,6 +20,7 @@
+
+ Package: python-brotli
+ Architecture: any
++Build-Profiles: <!nopython>
+ Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+ Description: lossless compression algorithm and format (Python 2 version)
+  Brotli is a generic-purpose lossless compression algorithm
+@@ -33,6 +34,7 @@
+
+ Package: python3-brotli
+ Architecture: any
++Build-Profiles: <!nopython>
+ Depends: ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+ Description: lossless compression algorithm and format (Python 3 version)
+  Brotli is a generic-purpose lossless compression algorithm
+--- a/debian/rules
++++ b/debian/rules
+@@ -6,6 +6,7 @@
+
+ export PYBUILD_NAME = brotli
+
++ifeq (,$(filter nopython,$(DEB_BUILD_PROFILES)))
+ %:
+ 	dh $@ --buildsystem=pybuild --with=python2,python3
+
+@@ -28,6 +29,10 @@
+ override_dh_auto_test:
+ 	dh_auto_test
+ 	dh_auto_test --buildsystem=cmake
++else
++%:
++	dh $@ --buildsystem=cmake
++endif
+
+ override_dh_install:
+ 	find debian/tmp -name '*.a' -print -delete
+EOF
+}
+
 add_automatic bsdmainutils
 
 builddep_build_essential() {
@@ -2807,6 +2873,12 @@ fi # $HOST_ARCH matches linux-any
 
 cross_build util-linux # stageless
 # essential
+
+automatically_cross_build_packages
+
+cross_build brotli nopython brotli_1
+mark_built brotli
+# needed by curl
 
 automatically_cross_build_packages
 
