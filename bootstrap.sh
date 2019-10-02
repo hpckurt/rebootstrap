@@ -1097,6 +1097,22 @@ buildenv_glib2_0() {
 	export ac_cv_func_posix_getgrgid_r=yes
 	export ac_cv_func_posix_getpwuid_r=yes
 }
+patch_glib2_0() {
+	echo "fix FTCBFS #941509"
+	drop_privs patch -p1 <<'EOF'
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -459,7 +459,7 @@
+ endif
+
+ # Don’t build the tests unless we can run them (either natively or in an exe wrapper)
+-build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper())
++build_tests = not meson.is_cross_build() or (meson.is_cross_build() and meson.has_exe_wrapper()) or installed_tests_enabled
+ if build_tests
+   subdir('tests')
+ endif
+EOF
+}
 
 builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
