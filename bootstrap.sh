@@ -675,57 +675,7 @@ builddep_apt() {
 }
 
 add_automatic attr
-
 add_automatic autogen
-patch_autogen() {
-	echo "fixing autogen FTCBFS #941025"
-	drop_privs patch -p1 <<'EOF'
---- a/config/ag_macros.m4
-+++ b/config/ag_macros.m4
-@@ -428,7 +428,7 @@
-    char zRej@<:@@:>@ = reject;
-    char zAcc@<:@@:>@ = "a-ok-eject";
-    return strcspn( zAcc, zRej ) - 5;
--}] )]
-+}] )],
-     [ag_cv_run_strcspn=yes],[ag_cv_run_strcspn=no],[ag_cv_run_strcspn=no]
-   ) # end of RUN_IFELSE
-   ]) # end of AC_CACHE_VAL for ag_cv_run_strcspn
---- a/build-aux/run-ag.sh
-+++ b/build-aux/run-ag.sh
-@@ -25,7 +25,6 @@
- # any containing directory must be created. The target is created with a
- # very old time stamp.
- #
--AGexe=/u/bkorb/tools/ag/autogen-bld/agen5/.libs/autogen
- find_exe() {
-   eval local exe=\${$1}
-   test -x "$exe" && return 0
---- a/getdefs/Makefile.am
-+++ b/getdefs/Makefile.am
-@@ -32,7 +32,7 @@
- SUBDIRS         = test
- EXTRA_DIST      = opts.def $(gdsrcs)
- AG_ENV          =  top_builddir="$(top_builddir)" top_srcdir="$(top_srcdir)" \
--	VERBOSE="$(V)"
-+	VERBOSE="$(V)" AGexe="$(AGexe)"
- RUN_AG          = $(AG_ENV) $(SHELL) "${top_srcdir}/build-aux/run-ag.sh"
-
- all : gen
---- a/xml2ag/Makefile.am
-+++ b/xml2ag/Makefile.am
-@@ -37,7 +37,7 @@
- AM_CPPFLAGS     = @INCLIST@ $(LIBXML2_CFLAGS)
- AM_CFLAGS       = @WARN_CFLAGS@
- AG_ENV          =  top_builddir="$(top_builddir)" top_srcdir="$(top_srcdir)" \
--	VERBOSE="$(V)"
-+	VERBOSE="$(V)" AGexe="$(AGexe)"
- RUN_AG       = $(AG_ENV) $(SHELL) "${top_srcdir}/build-aux/run-ag.sh"
- DOC_TIMEOUT     = -DLEVEL=section --timeout=`expr $(AG_TIMEOUT) '*' 3`
-
-EOF
-}
-
 add_automatic base-files
 add_automatic base-passwd
 add_automatic bash
