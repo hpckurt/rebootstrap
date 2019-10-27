@@ -1906,7 +1906,78 @@ buildenv_tcl8_6() {
 }
 
 add_automatic tcltk-defaults
+
 add_automatic tcp-wrappers
+patch_tcp_wrappers() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
+		echo "fixing build on musl #941839"
+		drop_privs patch -p1 <<'EOF'
+__BEGIN_DECLS/__END_DECLS are BSD specific and not defined in musl
+glibc and uclibc had sys/cdefs.h doing it.
+
+Upstream-Status: Pending
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+
+Index: tcp_wrappers_7.6/tcpd.h
+===================================================================
+--- tcp_wrappers_7.6.orig/tcpd.h
++++ tcp_wrappers_7.6/tcpd.h
+@@ -11,7 +11,9 @@
+ #include <netinet/in.h>
+ #include <stdio.h>
+
+-__BEGIN_DECLS
++#ifdef __cplusplus
++extern "C" {
++#endif
+
+ /* Structure to describe one communications endpoint. */
+
+@@ -252,6 +254,8 @@ extern char *fix_strtok();
+ extern char *my_strtok();
+ #endif
+
+-__END_DECLS
++#ifdef __cplusplus
++}
++#endif
+
+ #endif
+EOF
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -22,7 +22,11 @@
+ ifeq ($(filter-out hurd-%,$(DEB_BUILD_ARCH)),)
+   build_target := gnu
+ else
+-  build_target := linux
++  ifeq ($(DEB_HOST_ARCH_LIBC),musl)
++    build_target := musl
++  else
++    build_target := linux
++  endif
+ endif
+
+
+--- a/Makefile
++++ b/Makefile
+@@ -154,6 +154,12 @@
+ 	NETGROUP="-DNETGROUP" TLI= VSYSLOG= BUGS= \
+ 	EXTRA_CFLAGS="-DSYS_ERRLIST_DEFINED -DHAVE_STRERROR -DHAVE_WEAKSYMS -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len" all
+
++musl:
++	@make REAL_DAEMON_DIR=$(REAL_DAEMON_DIR) STYLE=$(STYLE) \
++	LIBS= RANLIB=ranlib ARFLAGS=rv AUX_OBJ=weak_symbols.o \
++	NETGROUP= TLI= VSYSLOG= BUGS= \
++	EXTRA_CFLAGS="-DSYS_ERRLIST_DEFINED -DHAVE_STRERROR -DHAVE_WEAKSYMS -DINET6=1 -Dss_family=__ss_family -Dss_len=__ss_len" all
++
+ gnu:
+ 	@make REAL_DAEMON_DIR=$(REAL_DAEMON_DIR) STYLE=$(STYLE) \
+ 	LIBS=-lnsl RANLIB=ranlib ARFLAGS=rv AUX_OBJ=weak_symbols.o \
+EOF
+	fi
+}
 
 add_automatic tk8.6
 buildenv_tk8_6() {
