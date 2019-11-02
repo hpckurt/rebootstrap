@@ -1279,7 +1279,6 @@ builddep_gnu_efi() {
 }
 
 add_automatic gnupg2
-add_automatic gnutls28
 
 add_automatic gpm
 patch_gpm() {
@@ -2592,8 +2591,8 @@ add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
 dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any && add_need freebsd-glue # by freebsd-libs
 add_need fribidi # by newt
+add_need gmp # by gnutls28
 add_need gnupg2 # for apt
-add_need gnutls28 # by libprelude, openldap
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need gpm # by ncurses
 add_need groff # for man-db
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need kmod # by systemd
@@ -2603,12 +2602,15 @@ add_need libatomic-ops # by gcc-VER
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
+add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any || dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
+add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
+add_need libunistring # by gnutls28
 add_need libx11 # by dbus
 add_need libxrender # by cairo
 add_need libzstd # by apt
@@ -2619,8 +2621,9 @@ add_need mawk # for base-files (alternatively: gawk)
 add_need mpclib3 # by gcc-VER
 add_need mpdecimal # by python3.X
 add_need mpfr4 # by gcc-VER
-add_need nettle # by unbound
+add_need nettle # by unbound, gnutls28
 add_need openssl # by cyrus-sasl2
+add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
 add_need popt # by newt
@@ -2832,6 +2835,13 @@ dpkg-architecture "-a$HOST_ARCH" -ilinux-any || assert_built libbsd
 cross_build unbound pkg.unbound.libonly unbound_1
 mark_built unbound
 # needed by gnutls28
+
+automatically_cross_build_packages
+
+assert_built "gmp libidn2 autogen p11-kit libtasn1-6 unbound libunistring nettle"
+cross_build gnutls28 noguile gnutls28_1
+mark_built gnutls28
+# needed by libprelude, openldap, curl
 
 automatically_cross_build_packages
 
