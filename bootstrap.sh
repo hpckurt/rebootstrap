@@ -1629,7 +1629,11 @@ EOF
 	fi
 }
 
-add_automatic lz4
+builddep_lz4() {
+	# work around FTCBFS due to python3 dependency #944559
+	apt_get_install debhelper
+}
+
 add_automatic make-dfsg
 add_automatic man-db
 add_automatic mawk
@@ -2621,7 +2625,6 @@ add_need libunistring # by gnutls28
 add_need libx11 # by dbus
 add_need libxrender # by cairo
 add_need libzstd # by apt
-add_need lz4 # by systemd
 add_need make-dfsg # for build-essential
 add_need man-db # for debhelper
 add_need mawk # for base-files (alternatively: gawk)
@@ -2875,6 +2878,12 @@ if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^
 
 	automatically_cross_build_packages
 fi
+
+cross_build lz4
+mark_built lz4
+# needed by systemd
+
+automatically_cross_build_packages
 
 if test -f "$REPODIR/stamps/systemd_1"; then
 	echo "skipping stage1 rebuild of systemd"
