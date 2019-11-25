@@ -1533,6 +1533,26 @@ buildenv_libprelude() {
 }
 
 add_automatic libpsl
+patch_libpsl()
+{
+	echo "fix FTBFS #945243"
+	drop_privs patch -p1 <<'EOF'
+--- a/docs/libpsl/libpsl-docs.sgml
++++ b/docs/libpsl/libpsl-docs.sgml
+@@ -22,10 +22,6 @@
+         </para>
+         <xi:include href="xml/libpsl.xml"/>
+   </chapter>
+-  <chapter id="object-tree">
+-    <title>Object Hierarchy</title>
+-     <xi:include href="xml/tree_index.sgml"/>
+-  </chapter>
+   <index id="api-index-full">
+     <title>API Index</title>
+     <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+EOF
+}
+
 add_automatic libpthread-stubs
 add_automatic libsepol
 add_automatic libsm
