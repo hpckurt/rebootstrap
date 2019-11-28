@@ -1943,24 +1943,7 @@ buildenv_tcl8_6() {
 }
 
 add_automatic tcltk-defaults
-
 add_automatic tcp-wrappers
-patch_tcp_wrappers() {
-	echo "fix FTCBFS #945483"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -24,7 +24,7 @@
- 	dh_clean shared/
-
- override_dh_auto_build:
--	$(MAKE) $(CROSS) COPTS="$(CFLAGS) $(CPPFLAGS)" LDOPTS="$(LDFLAGS)" $(build_target)
-+	dh_auto_build -- COPTS="$(CFLAGS) $(CPPFLAGS)" LDOPTS="$(LDFLAGS)" $(build_target)
-
- override_dh_installdocs:
- 	dh_installdocs --link-doc=libwrap0
-EOF
-}
 
 add_automatic tk8.6
 buildenv_tk8_6() {
