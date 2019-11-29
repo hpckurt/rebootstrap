@@ -1940,6 +1940,7 @@ buildenv_tar() {
 add_automatic tcl8.6
 buildenv_tcl8_6() {
 	export tcl_cv_strtod_buggy=ok
+	export tcl_cv_strtoul_unbroken=ok
 }
 
 add_automatic tcltk-defaults
