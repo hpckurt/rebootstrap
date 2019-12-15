@@ -974,6 +974,9 @@ patch_gcc_9() {
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 	patch_gcc_wdotap
 }
+patch_gcc_10() {
+	patch_gcc_wdotap
+}
 
 buildenv_gdbm() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
