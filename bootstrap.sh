@@ -2498,12 +2498,15 @@ apt_get_install "hurd-dev:$HOST_ARCH"
 progress_mark "hurd stage3 cross build"
 fi
 
-# libcrypt1-dev is defacto build-essential, because unstaged libc6-dev (and
-# later build-essential) depends on it.
-cross_build libxcrypt
-progress_mark "libxcrypt cross build"
-apt_get_install "libcrypt1-dev:$HOST_ARCH"
-# is defacto build-essential
+# Skip libxcrypt for musl until #947193 is resolved.
+if ! dpkg-architecture "-a$HOST_ARCH" -i musl-linux-any; then
+	# libcrypt1-dev is defacto build-essential, because unstaged libc6-dev (and
+	# later build-essential) depends on it.
+	cross_build libxcrypt
+	progress_mark "libxcrypt cross build"
+	apt_get_install "libcrypt1-dev:$HOST_ARCH"
+	# is defacto build-essential
+fi
 
 $APT_GET install dose-builddebcheck dctrl-tools
 
