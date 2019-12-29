@@ -184,9 +184,9 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
 	$APT_GET install cross-gcc-dev
 	echo "removing unused unstripped_exe patch"
 	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
-	if test "$GCC_VER" = 9; then
-		echo "dropping libmpx from patch for gcc-9 #927230"
-	patch /usr/share/cross-gcc/patches/gcc-9/*-multi-arch-specific-install-location-* <<'EOF'
+	if test "$GCC_VER" = 9 -o "$GCC_VER" = 10; then
+		echo "dropping libmpx from patch for gcc-$GCC_VER #927230"
+	patch /usr/share/cross-gcc/patches/gcc-$GCC_VER/*-multi-arch-specific-install-location-* <<'EOF'
 --- a
 +++ b
 @@ -16,7 +16,7 @@
