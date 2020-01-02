@@ -184,49 +184,6 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
 	$APT_GET install cross-gcc-dev
 	echo "removing unused unstripped_exe patch"
 	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
-	if test "$GCC_VER" = 9 -o "$GCC_VER" = 10; then
-		echo "dropping libmpx from patch for gcc-$GCC_VER #927230"
-	patch /usr/share/cross-gcc/patches/gcc-$GCC_VER/*-multi-arch-specific-install-location-* <<'EOF'
---- a
-+++ b
-@@ -16,7 +16,7 @@
- index 0000000..7dd01d0
- --- /dev/null
- +++ b/debian/patches/cross-ma-install-location.diff
--@@ -0,0 +1,357 @@
-+@@ -0,0 +1,337 @@
- +Index: b/src/libada/configure.ac
- +===================================================================
- +--- a/src/libada/configure.ac
-@@ -340,26 +340,6 @@
- +     toolexeclibdir='$(toolexecdir)/$(gcc_version)$(MULTISUBDIR)'
- +     ;;
- +   no)
--+-    if test -n "$with_cross_host" &&
--+-       test x"$with_cross_host" != x"no"; then
--+-      # Install a library built with a cross compiler in tooldir, not libdir.
--+-      toolexecdir='$(exec_prefix)/$(target_alias)'
--+-      toolexeclibdir='$(toolexecdir)/lib'
--+-    else
--+-      toolexecdir='$(libdir)/gcc-lib/$(target_alias)'
--+-      toolexeclibdir='$(libdir)'
--+-    fi
--++    toolexecdir='$(libdir)/gcc-lib/$(target_alias)'
--++    toolexeclibdir='$(libdir)'
--+     multi_os_directory=`$CC -print-multi-os-directory`
--+     case $multi_os_directory in
--+       .) ;; # Avoid trailing /.
--+--- a/src/libmpx/configure.ac
--++++ b/src/libmpx/configure.ac
--+@@ -70,15 +70,8 @@
--+     toolexeclibdir='$(toolexecdir)/$(gcc_version)$(MULTISUBDIR)'
--+     ;;
--+   no)
- +-    if test -n "$with_cross_host" &&
- +-       test x"$with_cross_host" != x"no"; then
- +-      # Install a library built with a cross compiler in tooldir, not libdir.
-EOF
-	fi
 fi
 
 obtain_source_package() {
