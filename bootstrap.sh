@@ -754,6 +754,13 @@ builddep_build_essential() {
 add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
+
+builddep_cracklib2() {
+	# explicitly disable zlib support #928436
+	apt_get_remove "zlib1g-dev:$(dpkg --print-architecture)" "zlib1g-dev:$1"
+	apt_get_build_dep "-a$1" --arch-only -Pcross,nopython ./
+}
+
 add_automatic curl
 
 builddep_cyrus_sasl2() {
@@ -2728,24 +2735,7 @@ mark_built libxml2
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/cracklib2_1"; then
-	echo "skipping stage1 rebuild of cracklib2"
-else
-	cross_build_setup cracklib2 cracklib2_1
-	# explicitly disable zlib support #928436
-	apt_get_remove "zlib1g-dev:$(dpkg --print-architecture)" "zlib1g-dev:$HOST_ARCH"
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pcross,nopython ./
-	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -Pcross,nopython -uc -us
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/cracklib2_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf cracklib2_1
-fi
-progress_mark "cracklib2 stage1 cross build"
+cross_build cracklib2 nopython cracklib2_1
 mark_built cracklib2
 # needed by pam
 
