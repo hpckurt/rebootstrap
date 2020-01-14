@@ -1610,7 +1610,7 @@ patch_linux() {
 	kernel_arch=
 	comment="just building headers yet"
 	case "$HOST_ARCH" in
-		arm|ia64|nios2)
+		ia64|nios2)
 			kernel_arch=$HOST_ARCH
 		;;
 		arm64ilp32) kernel_arch=arm64; ;;
