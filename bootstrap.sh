@@ -2323,8 +2323,6 @@ else
 	else
 		for pkg in libc[0-9]*.deb; do
 			# dpkg-cross cannot handle these
-			test "${pkg%%_*}" = "libc6-i686" && continue
-			test "${pkg%%_*}" = "libc6-loongson2f" && continue
 			test "${pkg%%_*}" = "libc6-xen" && continue
 			test "${pkg%%_*}" = "libc6.1-alphaev67" && continue
 			drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -X multiarch-support -b "$pkg"
