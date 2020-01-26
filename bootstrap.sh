@@ -2767,9 +2767,9 @@ else
 	if grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
 		assert_built libseccomp
 	fi
-	builddep_systemd "$HOST_ARCH" "nocheck,noudeb,stage1"
+	builddep_systemd "$HOST_ARCH" "nocheck,noudeb,stage1,noinsttest"
 	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,noudeb,stage1
+	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,noudeb,stage1,noinsttest
 	cd ..
 	ls -l
 	pickup_packages *.changes
