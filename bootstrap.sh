@@ -1847,13 +1847,6 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
-
-builddep_systemd() {
-	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
-	# work around #948611 aka https://github.com/mesonbuild/meson/issues/6431
-	sed -i -e '/ld=/d' /usr/share/meson/debcrossgen
-}
-
 add_automatic sysvinit
 
 add_automatic tar
@@ -2767,7 +2760,7 @@ else
 	if grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
 		assert_built libseccomp
 	fi
-	builddep_systemd "$HOST_ARCH" "nocheck,noudeb,stage1,noinsttest"
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P "nocheck,noudeb,stage1,noinsttest" ./
 	check_binNMU
 	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,noudeb,stage1,noinsttest
 	cd ..
