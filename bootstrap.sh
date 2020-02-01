@@ -14,7 +14,7 @@ ENABLE_MULTILIB=no
 ENABLE_MULTIARCH_GCC=yes
 REPODIR=/tmp/repo
 APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o Debug::pkgDepCache::Marker=1 -o Debug::pkgDepCache::AutoInstall=1 -o Acquire::Languages=none -o Debug::BuildDeps=1"
-DEFAULT_PROFILES="cross nocheck noudeb"
+DEFAULT_PROFILES="cross nocheck noinsttest noudeb"
 LIBC_NAME=glibc
 DROP_PRIVS=buildd
 GCC_NOLANG="ada asan brig d go itm java jit hppa64 lsan m2 nvptx objc obj-c++ tsan ubsan"
