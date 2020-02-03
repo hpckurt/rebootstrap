@@ -858,6 +858,8 @@ patch_gcc_9() {
 	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 	patch_gcc_default_pie_everywhere
+	echo "build common libraries again, not a bug"
+	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
 patch_gcc_10() {
