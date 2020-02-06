@@ -1918,7 +1918,7 @@ else
 	(
 		export gcc_cv_libc_provides_ssp=yes
 		nolang=$(set_add "${GCC_NOLANG:-}" biarch)
-		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nolang=$(join_words , $nolang)"
+		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nostrap nolang=$(join_words , $nolang)"
 		drop_privs_exec dpkg-buildpackage -B -uc -us
 	)
 	cd ..
