@@ -2731,7 +2731,7 @@ mark_built gnutls28
 automatically_cross_build_packages
 
 assert_built "gnutls28 cyrus-sasl2"
-cross_build openldap stage1 openldap_1
+cross_build openldap pkg.openldap.noslapd openldap_1
 mark_built openldap
 # needed by curl
 
