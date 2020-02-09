@@ -2699,8 +2699,8 @@ else
 	builddep_cyrus_sasl2 "$HOST_ARCH"
 	cross_build_setup cyrus-sasl2 cyrus-sasl2_1
 	check_binNMU
-	dpkg-checkbuilddeps -B "-a$HOST_ARCH" || : # tell unmet build depends
-	drop_privs DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS no-sql no-ldap no-gssapi" dpkg-buildpackage "-a$HOST_ARCH" -B -d -uc -us
+	dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Ppkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql || : # tell unmet build depends
+	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Ppkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql -B -d -uc -us
 	cd ..
 	ls -l
 	pickup_packages *.changes
