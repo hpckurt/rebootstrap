@@ -1875,13 +1875,6 @@ buildenv_libgcrypt20() {
 }
 
 add_automatic libgpg-error
-builddep_libgpg_error() {
-	echo "work around FTBFS with gawk #944511"
-	apt_get_install mawk
-	apt_get_purge gawk
-	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
-}
-
 add_automatic libice
 add_automatic libidn
 add_automatic libidn2
