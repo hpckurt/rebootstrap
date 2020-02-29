@@ -193,10 +193,6 @@ obtain_source_package() {
 		gcc-[0-9]*)
 			test -n "$(apt-cache showsrc "$1")" || use_experimental=yes
 		;;
-		libffi)
-			# pull riscv64 support #892217
-			test "$HOST_ARCH" = riscv64 && use_experimental=yes
-		;;
 	esac
 	if test "$use_experimental" = yes; then
 		echo "deb-src $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
