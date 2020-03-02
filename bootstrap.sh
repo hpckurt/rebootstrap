@@ -1514,25 +1514,6 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
-
-patch_libxcrypt() {
-	if test "$HOST_ARCH" = nios2; then
-		echo "update symbols for nios2 #952650"
-		drop_privs tee debian/libcrypt1.symbols.nios2 >/dev/null <<'EOF'
-libcrypt.so.1 libcrypt1 #MINVER#
-#include "libcrypt1.symbols.common"
- GLIBC_2.21@GLIBC_2.21 1:4.1.0
- crypt@GLIBC_2.21 1:4.1.0
- crypt_r@GLIBC_2.21 1:4.1.0
- encrypt@GLIBC_2.21 1:4.1.0
- encrypt_r@GLIBC_2.21 1:4.1.0
- fcrypt@GLIBC_2.21 1:4.1.0
- setkey@GLIBC_2.21 1:4.1.0
- setkey_r@GLIBC_2.21 1:4.1.0
-EOF
-	fi
-}
-
 add_automatic libxdmcp
 
 add_automatic libxext
