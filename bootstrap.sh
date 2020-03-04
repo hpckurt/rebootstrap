@@ -790,13 +790,6 @@ builddep_cyrus_sasl2() {
 add_automatic dash
 add_automatic datefudge
 add_automatic db-defaults
-
-builddep_dbus() {
-	# fix FTCBS with pkg.dbus.minimal #945201
-	apt_get_install pkg-config
-	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
-}
-
 add_automatic debianutils
 
 add_automatic diffutils
@@ -2526,7 +2519,6 @@ fi
 add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
 add_need libunistring # by gnutls28
-add_need libx11 # by dbus
 add_need libxrender # by cairo
 add_need libzstd # by apt
 add_need lz4 # by systemd
@@ -2795,21 +2787,14 @@ automatically_cross_build_packages
 assert_built attr
 cross_build libcap-ng nopython libcap-ng_1
 mark_built libcap-ng
-# needed by audit, dbus
+# needed by audit
 
 automatically_cross_build_packages
 
 assert_built "gnutls28 libgcrypt20 libtool"
 cross_build libprelude "nolua noperl nopython noruby" libprelude_1
 mark_built libprelude
-# needed by audit, dbus
-
-automatically_cross_build_packages
-
-assert_built expat
-cross_build dbus pkg.dbus.minimal dbus_1
-mark_built dbus
-# needed by glib2.0 until it gains noinsttest
+# needed by audit
 
 automatically_cross_build_packages
 
