@@ -620,13 +620,7 @@ add_automatic() { automatic_packages=$(set_add "$automatic_packages" "$1"); }
 
 add_automatic acl
 add_automatic adns
-
-builddep_apt() {
-	# g++ dependency needs toolchain translation
-	assert_built "bzip2 curl db-defaults db5.3 gnutls28 lz4 xz-utils zlib libzstd"
-	apt_get_install cmake debhelper dh-systemd docbook-xml docbook-xsl dpkg-dev gettext "libbz2-dev:$1" "libcurl4-gnutls-dev:$1" "libdb-dev:$1" "libgnutls28-dev:$1" "liblz4-dev:$1" "liblzma-dev:$1" pkg-config po4a xsltproc "zlib1g-dev:$1" "libzstd-dev:$1"
-}
-
+add_automatic apt
 add_automatic attr
 add_automatic autogen
 add_automatic base-files
@@ -2472,6 +2466,7 @@ for pkg in $(discover_essential); do
 	fi
 done
 add_need acl # by coreutils, systemd
+add_need apt # almost essential
 add_need attr # by coreutils, libcap-ng
 add_need autogen # by gcc-VER, gnutls28
 add_need blt # by pythonX.Y
@@ -2504,7 +2499,6 @@ add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
 add_need libunistring # by gnutls28
 add_need libxrender # by cairo
-add_need libzstd # by apt
 add_need lz4 # by systemd
 add_need make-dfsg # for build-essential
 add_need man-db # for debhelper
@@ -2805,12 +2799,6 @@ automatically_cross_build_packages
 cross_build brotli nopython brotli_1
 mark_built brotli
 # needed by curl
-
-automatically_cross_build_packages
-
-cross_build apt
-mark_built apt
-# almost essential
 
 automatically_cross_build_packages
 
