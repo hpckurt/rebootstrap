@@ -977,7 +977,7 @@ EOF
  
  ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
      libc_extra_config_options = $(extra_config_options) --disable-sanity-checks \
-@@ -218,13 +218,9 @@
+@@ -218,14 +218,10 @@
  	    echo "/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	    echo "/usr/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	  fi; \
@@ -988,12 +988,13 @@ EOF
 -	  mv debian/tmp-$(curpass)/usr/include/fpu_control.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
 -	  mv debian/tmp-$(curpass)/usr/include/a.out.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
 -	  mv debian/tmp-$(curpass)/usr/include/ieee754.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
+ 	  rm -rf debian/tmp-$(curpass)/usr/include/finclude ; \
 +	  mkdir -p debian/tmp-$(curpass)/usr/include.tmp; \
 +	  mv debian/tmp-$(curpass)/usr/include debian/tmp-$(curpass)/usr/include.tmp/$(DEB_HOST_MULTIARCH); \
 +	  mv debian/tmp-$(curpass)/usr/include.tmp debian/tmp-$(curpass)/usr/include; \
  	fi
  
- 	# For our biarch libc, add an ld.so.conf.d configuration; this
+ 	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
 --- a/debian/sysdeps/ppc64.mk
 +++ b/debian/sysdeps/ppc64.mk
 @@ -15,20 +15,12 @@
