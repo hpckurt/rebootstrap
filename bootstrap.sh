@@ -728,12 +728,6 @@ EOF
 }
 
 add_automatic blt
-buildenv_blt() {
-	# blt now knows which CC to use, but its configure misdetects tons of
-	# stuff when you tell it explicitly.
-	unset CC
-}
-
 add_automatic bsdmainutils
 
 builddep_build_essential() {
