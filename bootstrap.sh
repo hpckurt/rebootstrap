@@ -679,28 +679,6 @@ builddep_cracklib2() {
 	apt_get_remove "zlib1g-dev:$(dpkg --print-architecture)" "zlib1g-dev:$1"
 	apt_get_build_dep "-a$1" --arch-only -Pcross,nopython ./
 }
-patch_cracklib2() {
-	echo "fix FTBFS #951101"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -3,13 +3,13 @@
- DEB_BUILD_MAINT_OPTIONS = hardening=+all
- DPKG_EXPORT_BUILDFLAGS = 1
- include /usr/share/dpkg/buildflags.mk
--include /usr/share/python/python.mk
- # Uncomment this to turn on verbose mode.
- #export DH_VERBOSE=1
-
- include /usr/share/dpkg/architecture.mk
-
- ifeq ($(filter stage1,$(DEB_STAGE))$(filter nopython,$(DEB_BUILD_PROFILES)),)
-+include /usr/share/python3/python.mk
- PY3VERS := $(shell py3versions -vs)
- DH_WITH_PARAMETERS := python3
- else
-EOF
-}
 
 add_automatic curl
 
