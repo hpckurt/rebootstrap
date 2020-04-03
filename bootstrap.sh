@@ -820,8 +820,6 @@ builddep_glibc() {
 	esac
 }
 patch_glibc() {
-	echo "patching eglibc to avoid dependency on libc6 from libc6-dev in stage1"
-	drop_privs sed -i '/^Depends:/s/\(\(libc[0-9.]\+-[^d]\|@libc@\)[^,]*\)\(,\|$\)/\1 <!stage1>\3/g' debian/control.in/*
 	echo "patching glibc to pass -l to dh_shlibdeps for multilib"
 	drop_privs patch -p1 <<'EOF'
 diff -Nru glibc-2.19/debian/rules.d/debhelper.mk glibc-2.19/debian/rules.d/debhelper.mk
