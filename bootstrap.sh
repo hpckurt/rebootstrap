@@ -613,6 +613,58 @@ esac
 
 if test "$ENABLE_MULTIARCH_GCC" != yes; then
 	apt_get_install dpkg-cross
+	if test "$ENABLE_MULTILIB" = yes; then
+		echo "adding shlibs fixer to dpkg-cross #955631"
+		patch /usr/bin/dpkg-cross <<'EOF'
+--- a/dpkg-cross
++++ b/dpkg-cross
+@@ -744,6 +744,35 @@
+ 		close(TO);
+ 		return 1;
+ 	}
++	# Helper: fix shlibs file
++	# - arch-qualify dependencies
++	sub fix_shlibs($$) {
++		my ($from, $to) = @_;
++		ensure_dir($to) or return 0;
++		if (! open(FROM, $from)) {
++			$msg = sprintf(_g("%s: failed to open %s: %s\n"), $progname, $from, $!);
++			warn ($msg);
++			return 0;
++		}
++		if (! open(TO, ">$to")) {
++			$msg = sprintf(_g("%s: failed to open %s for writing: %s\n"), $progname, $to, $!);
++			warn ($msg);
++			close(FROM);
++			return 0;
++		}
++		while (<FROM>) {
++			if (m/^#/) {
++				print TO;
++			} elsif (m/((?:\S+:\s*)?\S+\s+\S+\s+)(.*)/) {
++				print TO ($1 . join(",", map { s/\S+/$&:$arch/; $_; } split(/,/, $2)) . "\n");
++			} else {
++				print TO;
++			}
++		}
++		close(FROM);
++		close(TO);
++		return 1;
++	}
+ 	my $config = &get_config;
+ 	$crosstype = `CC="" dpkg-architecture -f -a$arch -qDEB_HOST_GNU_TYPE 2> /dev/null`;
+ 	chomp ($crosstype);
+@@ -1089,7 +1118,7 @@
+ 	# Link the shlibs file
+ 	if (-f "$src/DEBIAN/shlibs") {
+ 		print "Installing shlibs file\n" if $verbose >= 2;
+-		link_file("$src/DEBIAN/shlibs", "$dst/DEBIAN/shlibs");
++		fix_shlibs("$src/DEBIAN/shlibs", "$dst/DEBIAN/shlibs");
+ 	}
+ 
+ 	# Create the control file.
+EOF
+	fi
 fi
 
 automatic_packages=
