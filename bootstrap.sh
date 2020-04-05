@@ -2002,6 +2002,7 @@ EOF
 }
 
 add_automatic libsm
+add_automatic libsodium
 add_automatic libssh2
 add_automatic libsystemd-dummy
 add_automatic libtasn1-6
@@ -3042,6 +3043,7 @@ add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
+add_need libsodium # by openldap
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any || dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
