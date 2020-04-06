@@ -2656,13 +2656,17 @@ else
 	else
 		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
 	fi
-	if test "$ENABLE_MULTILIB" = yes; then
-		dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage1 || : # tell unmet build depends
-		drop_privs DEB_GCC_VERSION="-$GCC_VER" dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d -Pstage1
-	else
-		dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage1,nobiarch || : # tell unmet build depends
-		drop_privs DEB_GCC_VERSION="-$GCC_VER" dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d -Pstage1,nobiarch
-	fi
+	(
+		case "$LIBC_NAME:$ENABLE_MULTILIB" in
+			glibc:yes) profiles=stage1 ;;
+			glibc:no) profiles=stage1,nobiarch ;;
+			*) profiles=cross,nocheck ;;
+		esac
+		# tell unmet build depends
+		drop_privs dpkg-checkbuilddeps -B "-a$HOST_ARCH" "-P$profiles" || :
+		export DEB_GCC_VERSION="-$GCC_VER"
+		drop_privs_exec dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d "-P$profiles" || buildpackage_failed "$?"
+	)
 	cd ..
 	ls -l
 	apt_get_remove libc6-dev-i386
@@ -2777,13 +2781,17 @@ else
 	else
 		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
 	fi
-	if test "$ENABLE_MULTILIB" = yes; then
-		dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage2 || : # tell unmet build depends
-		drop_privs DEB_GCC_VERSION=-$GCC_VER dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d -Pstage2
-	else
-		dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage2,nobiarch || : # tell unmet build depends
-		drop_privs DEB_GCC_VERSION=-$GCC_VER dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d -Pstage2,nobiarch
-	fi
+	(
+		case "$LIBC_NAME:$ENABLE_MULTILIB" in
+			glibc:yes) profiles=stage2 ;;
+			glibc:no) profiles=stage2,nobiarch ;;
+			*) profiles=cross,nocheck ;;
+		esac
+		# tell unmet build depends
+		drop_privs dpkg-checkbuilddeps -B "-a$HOST_ARCH" "-P$profiles" || :
+		export DEB_GCC_VERSION="-$GCC_VER"
+		drop_privs_exec dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d "-P$profiles" || buildpackage_failed "$?"
+	)
 	cd ..
 	ls -l
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
