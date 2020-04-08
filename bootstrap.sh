@@ -2247,6 +2247,22 @@ buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
 	export ac_cv_func_memcmp_working=yes
 }
+patch_openldap() {
+	echo "dropping libsodium dependency #955993"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -14,7 +14,7 @@
+                libltdl-dev <!pkg.openldap.noslapd>,
+                libperl-dev (>= 5.8.0) <!pkg.openldap.noslapd>,
+                libsasl2-dev,
+-               libsodium-dev,
++               libsodium-dev <!pkg.openldap.noslapd>,
+                libwrap0-dev <!pkg.openldap.noslapd>,
+                nettle-dev <!pkg.openldap.noslapd>,
+                perl:any,
+EOF
+}
 
 add_automatic openssl
 patch_openssl() {
@@ -3051,7 +3067,6 @@ add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
-add_need libsodium # by openldap
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any || dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
