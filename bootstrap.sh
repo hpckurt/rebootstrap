@@ -2663,6 +2663,8 @@ fi
 progress_mark "cross mig build"
 fi
 
+if test "$LIBC_NAME" != musl; then
+
 if test -f "$REPODIR/stamps/${LIBC_NAME}_1"; then
 	echo "skipping rebuild of $LIBC_NAME stage1"
 else
@@ -2714,8 +2716,6 @@ progress_mark "$LIBC_NAME stage1 cross build"
 
 # dpkg happily breaks depends when upgrading build arch multilibs to host arch multilibs
 apt_get_remove $(dpkg-query -W "lib*gcc*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
-
-if test "$LIBC_NAME" != musl; then
 
 if test -f "$REPODIR/stamps/gcc_2"; then
 	echo "skipping rebuild of gcc stage2"
@@ -2788,6 +2788,8 @@ fi
 # several undeclared file conflicts such as #745552 or #784015
 apt_get_remove $(dpkg-query -W "libc[0-9]*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
 
+fi # $LIBC_NAME != musl
+
 if test -f "$REPODIR/stamps/${LIBC_NAME}_2"; then
 	echo "skipping rebuild of $LIBC_NAME stage2"
 else
@@ -2810,17 +2812,24 @@ else
 	)
 	cd ..
 	ls -l
-	if test "$ENABLE_MULTIARCH_GCC" = yes; then
+	if test "$LIBC_NAME" = musl; then
 		pickup_packages *.changes
-		$APT_GET dist-upgrade
+		if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
+			apt_get_install "linux-libc-dev:$HOST_ARCH"
+		fi
+		dpkg -i musl*.deb
 	else
-		for pkg in libc[0-9]*.deb; do
-			# dpkg-cross cannot handle these
-			test "${pkg%%_*}" = "libc6-xen" && continue
-			test "${pkg%%_*}" = "libc6.1-alphaev67" && continue
-			drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -X multiarch-support -b "$pkg"
-		done
-		pickup_packages *.changes *-cross_*.deb
+		if test "$ENABLE_MULTIARCH_GCC" = yes; then
+			pickup_packages *.changes
+		else
+			for pkg in libc[0-9]*.deb; do
+				# dpkg-cross cannot handle these
+				test "${pkg%%_*}" = "libc6-xen" && continue
+				test "${pkg%%_*}" = "libc6.1-alphaev67" && continue
+				drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -X multiarch-support -b "$pkg"
+			done
+			pickup_packages *.changes ./*-cross_*.deb
+		fi
 		$APT_GET dist-upgrade
 	fi
 	touch "$REPODIR/stamps/${LIBC_NAME}_2"
@@ -2829,8 +2838,6 @@ else
 	drop_privs rm -Rf "${LIBC_NAME}_2"
 fi
 progress_mark "$LIBC_NAME stage2 cross build"
-
-fi # $LIBC_NAME != musl
 
 if test -f "$REPODIR/stamps/gcc_3"; then
 	echo "skipping rebuild of gcc stage3"
