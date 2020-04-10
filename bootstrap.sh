@@ -1375,6 +1375,12 @@ add_automatic libonig
 add_automatic libpipeline
 add_automatic libpng1.6
 
+buildenv_libprelude() {
+	if test "$GCC_VER" = 10; then
+		echo "work around FTBFS with gcc-10 #955194"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+	fi
+}
 patch_libprelude() {
 	echo "removing the unsatisfiable g++ build dependency"
 	drop_privs sed -i -e '/^\s\+g++/d' debian/control
