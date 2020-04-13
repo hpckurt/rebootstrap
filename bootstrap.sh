@@ -859,8 +859,9 @@ builddep_glibc() {
 			fi
 		;;
 		hurd)
+			# undeclared file conflict between libc6-dev-i386:amd64 and hurd-headers-dev:hurd-i386
+			apt_get_remove libc6-dev-i386
 			apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
-			test "$2" = stage1 || apt_get_install "libihash-dev:$1"
 		;;
 		kfreebsd)
 			apt_get_install "kfreebsd-kernel-headers:$1"
@@ -2669,133 +2670,6 @@ fi
 progress_mark "cross mig build"
 fi
 
-if test "$LIBC_NAME" != musl; then
-
-if test -f "$REPODIR/stamps/${LIBC_NAME}_1"; then
-	echo "skipping rebuild of $LIBC_NAME stage1"
-else
-	cross_build_setup "$LIBC_NAME" "${LIBC_NAME}_1"
-	if test "$LIBC_NAME" = glibc; then
-		"$(get_hook builddep glibc)" "$HOST_ARCH" stage1
-	else
-		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
-	fi
-	(
-		case "$LIBC_NAME:$ENABLE_MULTILIB" in
-			glibc:yes) profiles=stage1 ;;
-			glibc:no) profiles=stage1,nobiarch ;;
-			*) profiles=cross,nocheck ;;
-		esac
-		# tell unmet build depends
-		drop_privs dpkg-checkbuilddeps -B "-a$HOST_ARCH" "-P$profiles" || :
-		export DEB_GCC_VERSION="-$GCC_VER"
-		drop_privs_exec dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d "-P$profiles" || buildpackage_failed "$?"
-	)
-	cd ..
-	ls -l
-	apt_get_remove libc6-dev-i386
-	if test "$ENABLE_MULTIARCH_GCC" = yes; then
-		if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
-			$APT_GET install "linux-libc-dev:$HOST_ARCH"
-		fi
-		pickup_packages *.changes
-		if test "$LIBC_NAME" = musl; then
-			dpkg -i musl*.deb
-		else
-			dpkg -i libc*.deb
-		fi
-	else
-		if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
-			$APT_GET install "linux-libc-dev-$HOST_ARCH-cross"
-		fi
-		for pkg in *.deb; do
-			drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -b "$pkg"
-		done
-		pickup_packages *.changes *-cross_*.deb
-		dpkg -i libc*-cross_*.deb
-	fi
-	touch "$REPODIR/stamps/${LIBC_NAME}_1"
-	cd ..
-	drop_privs rm -Rf "${LIBC_NAME}_1"
-fi
-progress_mark "$LIBC_NAME stage1 cross build"
-
-# dpkg happily breaks depends when upgrading build arch multilibs to host arch multilibs
-apt_get_remove $(dpkg-query -W "lib*gcc*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
-
-if test -f "$REPODIR/stamps/gcc_2"; then
-	echo "skipping rebuild of gcc stage2"
-else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX"
-	if test "$ENABLE_MULTIARCH_GCC" = yes -o "$LIBC_NAME" != glibc; then
-		apt_get_install "libc-dev:$HOST_ARCH"
-	else
-		apt_get_install "libc6-dev-${HOST_ARCH}-cross"
-	fi
-	if test "$HOST_ARCH" = hppa; then
-		$APT_GET install binutils-hppa64-linux-gnu
-	fi
-	cross_build_setup "gcc-$GCC_VER" gcc2
-	dpkg-checkbuilddeps -a$HOST_ARCH || : # tell unmet build depends
-	echo "$HOST_ARCH" > debian/target
-	(
-		export DEB_STAGE=stage2
-		nolang=${GCC_NOLANG:-}
-		test "$ENABLE_MULTILIB" = yes || nolang=$(set_add "$nolang" biarch)
-		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS${nolang:+ nolang=$(join_words , $nolang)}"
-		if test "$ENABLE_MULTIARCH_GCC" = yes; then
-			export with_deps_on_target_arch_pkgs=yes
-		fi
-		export gcc_cv_libc_provides_ssp=yes
-		export gcc_cv_initfini_array=yes
-		drop_privs dpkg-buildpackage -d -T control
-		drop_privs dpkg-buildpackage -d -T clean
-		dpkg-checkbuilddeps || : # tell unmet build depends again after rewriting control
-		drop_privs_exec dpkg-buildpackage -d -b -uc -us
-	)
-	cd ..
-	ls -l
-	if test "$ENABLE_MULTIARCH_GCC" = yes; then
-		drop_privs changestool ./*.changes dumbremove "gcc-${GCC_VER}-base_"*"_$(dpkg --print-architecture).deb"
-		drop_privs rm "gcc-${GCC_VER}-base_"*"_$(dpkg --print-architecture).deb"
-	fi
-	pickup_packages *.changes
-	drop_privs rm -vf ./*multilib*.deb
-	dpkg -i *.deb
-	compiler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-gcc-$GCC_VER"
-	if ! which "$compiler"; then echo "$compiler missing in stage2 gcc package"; exit 1; fi
-	if ! drop_privs "$compiler" -x c -c /dev/null -o test.o; then echo "stage2 gcc fails to execute"; exit 1; fi
-	if ! test -f test.o; then echo "stage2 gcc fails to create binaries"; exit 1; fi
-	check_arch test.o "$HOST_ARCH"
-	touch "$REPODIR/stamps/gcc_2"
-	cd ..
-	drop_privs rm -Rf gcc2
-fi
-progress_mark "cross gcc stage2 build"
-
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
-if test -f "$REPODIR/stamps/hurd_2"; then
-	echo "skipping rebuild of hurd stage2"
-else
-	apt_get_install texinfo debhelper dh-exec autoconf dh-autoreconf gawk flex bison autotools-dev "libc-dev:$HOST_ARCH" perl
-	cross_build_setup hurd hurd_2
-	dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage2 || :
-	drop_privs dpkg-buildpackage -d -B "-a$HOST_ARCH" -Pstage2 -uc -us
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/hurd_2"
-	cd ..
-	drop_privs rm -Rf hurd_2
-fi
-progress_mark "hurd stage2 cross build"
-fi
-
-# several undeclared file conflicts such as #745552 or #784015
-apt_get_remove $(dpkg-query -W "libc[0-9]*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
-
-fi # $LIBC_NAME != musl
-
 if test -f "$REPODIR/stamps/${LIBC_NAME}_2"; then
 	echo "skipping rebuild of $LIBC_NAME stage2"
 else
@@ -2820,13 +2694,11 @@ else
 	ls -l
 	if test "$LIBC_NAME" = musl; then
 		pickup_packages *.changes
-		if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-			apt_get_install "linux-libc-dev:$HOST_ARCH"
-		fi
 		dpkg -i musl*.deb
 	else
 		if test "$ENABLE_MULTIARCH_GCC" = yes; then
 			pickup_packages *.changes
+			dpkg -i libc[0-9]*.deb
 		else
 			for pkg in libc[0-9]*.deb; do
 				# dpkg-cross cannot handle these
@@ -2835,8 +2707,8 @@ else
 				drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -X multiarch-support -b "$pkg"
 			done
 			pickup_packages *.changes ./*-cross_*.deb
+			dpkg -i libc[0-9]*-cross_*.deb
 		fi
-		$APT_GET dist-upgrade
 	fi
 	touch "$REPODIR/stamps/${LIBC_NAME}_2"
 	compare_native ./*.deb
