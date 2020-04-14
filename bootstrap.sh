@@ -2670,6 +2670,9 @@ fi
 progress_mark "cross mig build"
 fi
 
+# we'll have to remove build arch multilibs to be able to install host arch multilibs
+apt_get_remove $(dpkg-query -W "libc[0-9]*-*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
+
 if test -f "$REPODIR/stamps/${LIBC_NAME}_2"; then
 	echo "skipping rebuild of $LIBC_NAME stage2"
 else
