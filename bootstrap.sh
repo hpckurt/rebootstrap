@@ -2267,22 +2267,6 @@ buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
 	export ac_cv_func_memcmp_working=yes
 }
-patch_openldap() {
-	echo "dropping libsodium dependency #955993"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -14,7 +14,7 @@
-                libltdl-dev <!pkg.openldap.noslapd>,
-                libperl-dev (>= 5.8.0) <!pkg.openldap.noslapd>,
-                libsasl2-dev,
--               libsodium-dev,
-+               libsodium-dev <!pkg.openldap.noslapd>,
-                libwrap0-dev <!pkg.openldap.noslapd>,
-                nettle-dev <!pkg.openldap.noslapd>,
-                perl:any,
-EOF
-}
 
 add_automatic openssl
 patch_openssl() {
