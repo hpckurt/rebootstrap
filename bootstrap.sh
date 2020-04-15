@@ -2248,6 +2248,19 @@ patch_nss() {
 
 EOF
 	fi
+	echo "work around FTBFS #951644"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -110,6 +110,7 @@
+ 		NSPR_LIB_DIR=/usr/lib/$(DEB_HOST_MULTIARCH) \
+ 		BUILD_OPT=1 \
+ 		NS_USE_GCC=1 \
++		NSS_ENABLE_WERROR=0 \
+ 		OPTIMIZER="$(CFLAGS) $(CPPFLAGS)" \
+ 		LDFLAGS='$(LDFLAGS) $$(ARCHFLAG) $$(ZDEFS_FLAG)' \
+ 		DSO_LDOPTS='-shared $$(LDFLAGS)' \
+EOF
 }
 
 buildenv_openldap() {
