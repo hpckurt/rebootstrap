@@ -2030,6 +2030,33 @@ buildenv_libunistring() {
 		export gl_cv_pthread_rwlock_rdlock_prefer_writer=no
 	fi
 }
+patch_libunistring() {
+	if ! dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+		echo "fixing symbols for non-glibc #956635"
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/libunistring2.symbols
++++ b/debian/libunistring2.symbols
+@@ -144,7 +144,7 @@
+  libunistring_c_tolower@Base 0.9.7
+  libunistring_c_toupper@Base 0.9.7
+  libunistring_freea@Base 0.9.7
+- libunistring_fseterr@Base 0.9.7
++(arch=gnu-any-any)libunistring_fseterr@Base 0.9.7
+  libunistring_gl_locale_name@Base 0.9.7
+  libunistring_gl_locale_name_default@Base 0.9.7
+  libunistring_gl_locale_name_environ@Base 0.9.7
+@@ -158,7 +158,7 @@
+  libunistring_gl_uninorm_decompose_merge_sort_inplace@Base 0.9.7
+  libunistring_glthread_once_singlethreaded@Base 0.9.7
+  libunistring_glthread_recursive_lock_init_multithreaded@Base 0.9.7
+- libunistring_glthread_rwlock_init_for_glibc@Base 0.9.8
++(arch=gnu-any-any)libunistring_glthread_rwlock_init_for_glibc@Base 0.9.8
+  libunistring_hard_locale@Base 0.9.7
+  libunistring_iconveh_close@Base 0.9.7
+  libunistring_iconveh_open@Base 0.9.7
+EOF
+	fi
+}
 
 add_automatic libusb
 add_automatic libusb-1.0
