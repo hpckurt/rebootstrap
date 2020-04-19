@@ -1212,10 +1212,6 @@ patch_gpm() {
  #include <stdlib.h>
 EOF
 	fi
-	if test "$GCC_VER" -ge 10; then
-		echo "fix FTBFS with gcc-10 #953266"
-		drop_privs sed -i -e '/last_selection_time/s/^/extern /' src/headers/daemon.h
-	fi
 }
 
 add_automatic grep
