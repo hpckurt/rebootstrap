@@ -765,23 +765,6 @@ add_automatic freetype
 add_automatic fribidi
 add_automatic fuse
 
-patch_gcc_multilib_deps() {
-	test "$ENABLE_MULTIARCH_GCC" != yes || return 0
-	echo "fixing multilib libc dependencies #862756"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules.defs
-+++ b/debian/rules.defs
-@@ -1960,7 +1960,7 @@
- 	if [ -f debian/$(1).substvars ]; then \
- 	  sed -i \
- 	    -e 's/:$(DEB_TARGET_ARCH)/$(cross_lib_arch)/g' \
--	    -e 's/\(libc[.0-9]*-[^:]*\):\([a-z0-9-]*\)/\1-\2-cross/g' \
-+	    -e 's/\(libc[.0-9]*-[^: ]*\)\(:$(DEB_TARGET_ARCH)\)\?/\1$(cross_lib_arch)/g' \
- 	    $(if $(filter armel,$(DEB_TARGET_ARCH)),-e 's/:armhf/-armhf-cross/g') \
- 	    $(if $(filter armhf,$(DEB_TARGET_ARCH)),-e 's/:armel/-armel-cross/g') \
- 	    debian/$(1).substvars; \
-EOF
-}
 patch_gcc_default_pie_everywhere()
 {
 	echo "enabling pie everywhere #892281"
@@ -813,7 +796,6 @@ patch_gcc_8() {
 	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 	patch_gcc_default_pie_everywhere
-	patch_gcc_multilib_deps
 	echo "build common libraries again, not a bug"
 	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
