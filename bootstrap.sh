@@ -1106,8 +1106,6 @@ EOF
  		--without-selinux \
  		--enable-stackguard-randomization \
 EOF
-	echo "don't force a gcc version"
-	drop_privs sed -i -e '/^DEB_GCC_VERSION =/d' debian/sysdeps/armel.mk
 }
 
 add_automatic gmp
