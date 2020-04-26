@@ -1212,6 +1212,7 @@ patch_guile_2_0() {
 }
 
 add_automatic guile-2.2
+add_automatic guile-3.0
 
 add_automatic gzip
 buildenv_gzip() {
