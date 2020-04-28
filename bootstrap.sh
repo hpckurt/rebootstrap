@@ -665,6 +665,43 @@ if test "$ENABLE_MULTIARCH_GCC" != yes; then
  	# Create the control file.
 EOF
 	fi
+	if test "$ENABLE_MULTILIB" = yes; then
+		echo "fixing ld.so symlinks #881687"
+		patch /usr/bin/dpkg-cross <<'EOF'
+--- a/dpkg-cross
++++ b/dpkg-cross
+@@ -631,6 +631,15 @@
+ 			return 0;
+ 		}
+ 		while (<FROM>) {
++			if ($multiarch =~ m/mips(isa)?64.*-linux.*-gnuabi64.*/) {
++				s:(^|[^-\w/])(/usr)?/lib/${multiarch}ld\.so\.1:$1$crosslib64/ld.so.1:g;
++			} elsif ($multiarch =~ m/^mips(isa)?64.*-linux.*-gnuabin32.*/) {
++				s:(^|[^-\w/])(/usr)?/lib/${multiarch}ld\.so\.1:$1$crosslibn32/ld.so.1:g;
++			} elsif ($multiarch =~ m/^mips(isa32)?.*-linux.*-gnu.*/) {
++				s:(^|[^-\w/])(/usr)?/lib/${multiarch}ld\.so\.1:$1$crosslib/ld.so.1:g;
++			} elsif ($multiarchtriplet eq "sparc64-linux-gnu") {
++				s:(^|[^-\w/])(/usr)?/lib/${multiarch}ld-linux\.so\.2:$1$crosslib64/ld-linux.so.2:g;
++			}
+ 			s:(^|[^-\w/])(/usr)?/lib/$multiarch:$1$crosslib/:g;
+ 			unless ($multiarch) {
+ 				s:(^|[^-\w/])(/usr)?/lib32/:$1$crosslib32/:g;
+@@ -1018,7 +1025,12 @@
+ 
+ 		# Skip links that are going to point to themselves
+ 		next if ($lv eq $_);
+-
++		
++		# skip /usr/$(multiarch)/lib/ld.so.1 for mips n32 and 64.
++ 		# their ld.so.1 should be in lib32 and lib64.
++		next if ($multiarch =~ m/^mips(isa)?64/ && $_ =~ m:lib/ld\.so\.1$:);
++		next if ($multiarchtriplet eq "sparc64-linux-gnu" && $_ =~ m:lib/ld-linux\.so\.2$:);
++		
+ 		# skip links to private modules and plugins that are not
+ 		# useful or packaged in the -cross package, basically anything
+ 		# in a directory beneath /usr/lib/. See #499292
+EOF
+	fi
 fi
 
 automatic_packages=
