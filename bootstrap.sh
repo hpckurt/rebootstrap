@@ -1313,6 +1313,12 @@ buildenv_krb5() {
 add_automatic libassuan
 add_automatic libatomic-ops
 add_automatic libbsd
+
+patch_libcap_ng() {
+	echo "fixing ftbfs #959225"
+	drop_privs sed -i -e 's/linux-kernel-headers/linux-libc-dev/' debian/control
+}
+
 add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
