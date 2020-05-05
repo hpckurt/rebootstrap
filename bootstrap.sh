@@ -925,27 +925,29 @@ EOF
 	drop_privs patch -p1 <<'EOF'
 --- a/debian/rules.d/build.mk
 +++ b/debian/rules.d/build.mk
-@@ -2,6 +2,20 @@
- # PASS_VAR, we need to call all variables as $(call xx,VAR)
- # This little bit of magic makes it possible:
+@@ -4,12 +4,16 @@
  xx=$(if $($(curpass)_$(1)),$($(curpass)_$(1)),$($(1)))
-+define generic_multilib_extra_pkg_install
-+set -e; \
+ define generic_multilib_extra_pkg_install
+ set -e; \
+-mkdir -p debian/$(1)/usr/include/sys; \
+-ln -sf $(DEB_HOST_MULTIARCH)/bits debian/$(1)/usr/include/; \
+-ln -sf $(DEB_HOST_MULTIARCH)/gnu debian/$(1)/usr/include/; \
+-ln -sf $(DEB_HOST_MULTIARCH)/fpu_control.h debian/$(1)/usr/include/; \
+-for i in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/sys`; do \
+-	ln -sf ../$(DEB_HOST_MULTIARCH)/sys/$$i debian/$(1)/usr/include/sys/$$i; \
 +mkdir -p debian/$(1)/usr/include; \
 +for i in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)`; do \
-+	if test -d debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/$$i && ! test $$i = bits -o $$i = gnu; then \
-+		mkdir -p debian/$(1)/usr/include/$$i; \
++	if test -d "debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/$$i" && ! test "$$i" = bits -o "$$i" = gnu; then \
++		mkdir -p "debian/$(1)/usr/include/$$i"; \
 +		for j in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/$$i`; do \
-+			ln -sf ../$(DEB_HOST_MULTIARCH)/$$i/$$j debian/$(1)/usr/include/$$i/$$j; \
++			ln -sf "../$(DEB_HOST_MULTIARCH)/$$i/$$j" "debian/$(1)/usr/include/$$i/$$j"; \
 +		done; \
 +	else \
-+		ln -sf $(DEB_HOST_MULTIARCH)/$$i debian/$(1)/usr/include/$$i; \
++		ln -sf "$(DEB_HOST_MULTIARCH)/$$i" "debian/$(1)/usr/include/$$i"; \
 +	fi; \
-+done
-+endef
+ done
+ endef
  
- ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
-     libc_extra_config_options = $(extra_config_options) --disable-sanity-checks \
 @@ -218,14 +218,10 @@
  	    echo "/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	    echo "/usr/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
@@ -964,149 +966,6 @@ EOF
  	fi
  
  	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
---- a/debian/sysdeps/ppc64.mk
-+++ b/debian/sysdeps/ppc64.mk
-@@ -15,20 +15,12 @@
-
- define libc6-dev-powerpc_extra_pkg_install
-
--mkdir -p debian/libc6-dev-powerpc/usr/include
--ln -s powerpc64-linux-gnu/bits debian/libc6-dev-powerpc/usr/include/
--ln -s powerpc64-linux-gnu/gnu debian/libc6-dev-powerpc/usr/include/
--ln -s powerpc64-linux-gnu/fpu_control.h debian/libc6-dev-powerpc/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-powerpc)
-
- mkdir -p debian/libc6-dev-powerpc/usr/include/powerpc64-linux-gnu/gnu
- cp -a debian/tmp-powerpc/usr/include/gnu/lib-names-32.h \
- 	debian/tmp-powerpc/usr/include/gnu/stubs-32.h \
- 	debian/libc6-dev-powerpc/usr/include/powerpc64-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-powerpc/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/powerpc64-linux-gnu/sys` ; do \
--	ln -s ../powerpc64-linux-gnu/sys/$$i debian/libc6-dev-powerpc/usr/include/sys/$$i ; \
--done
-
- endef
-
---- a/debian/sysdeps/mips.mk
-+++ b/debian/sysdeps/mips.mk
-@@ -31,20 +31,12 @@
-
- define libc6-dev-mips64_extra_pkg_install
- 
--mkdir -p debian/libc6-dev-mips64/usr/include
--ln -sf mips-linux-gnu/bits debian/libc6-dev-mips64/usr/include/
--ln -sf mips-linux-gnu/gnu debian/libc6-dev-mips64/usr/include/
--ln -sf mips-linux-gnu/fpu_control.h debian/libc6-dev-mips64/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-mips64)
- 
- mkdir -p debian/libc6-dev-mips64/usr/include/mips-linux-gnu/gnu
- cp -a debian/tmp-mips64/usr/include/gnu/lib-names-n64_hard.h \
- 	debian/tmp-mips64/usr/include/gnu/stubs-n64_hard.h \
- 	debian/libc6-dev-mips64/usr/include/mips-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-mips64/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/mips-linux-gnu/sys` ; do \
--	ln -sf ../mips-linux-gnu/sys/$$i debian/libc6-dev-mips64/usr/include/sys/$$i ; \
--done
- 
- endef
- 
---- a/debian/sysdeps/mipsel.mk
-+++ b/debian/sysdeps/mipsel.mk
-@@ -31,20 +31,12 @@
-
- define libc6-dev-mips64_extra_pkg_install
-
--mkdir -p debian/libc6-dev-mips64/usr/include
--ln -sf mipsel-linux-gnu/bits debian/libc6-dev-mips64/usr/include/
--ln -sf mipsel-linux-gnu/gnu debian/libc6-dev-mips64/usr/include/
--ln -sf mipsel-linux-gnu/fpu_control.h debian/libc6-dev-mips64/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-mips64)
-
- mkdir -p debian/libc6-dev-mips64/usr/include/mipsel-linux-gnu/gnu
- cp -a debian/tmp-mips64/usr/include/gnu/lib-names-n64_hard.h \
- 	debian/tmp-mips64/usr/include/gnu/stubs-n64_hard.h \
- 	debian/libc6-dev-mips64/usr/include/mipsel-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-mips64/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/mipsel-linux-gnu/sys` ; do \
--	ln -sf ../mipsel-linux-gnu/sys/$$i debian/libc6-dev-mips64/usr/include/sys/$$i ; \
--done
-
- endef
-
---- a/debian/sysdeps/powerpc.mk
-+++ b/debian/sysdeps/powerpc.mk
-@@ -15,20 +15,12 @@
-
- define libc6-dev-ppc64_extra_pkg_install
-
--mkdir -p debian/libc6-dev-ppc64/usr/include
--ln -s powerpc-linux-gnu/bits debian/libc6-dev-ppc64/usr/include/
--ln -s powerpc-linux-gnu/gnu debian/libc6-dev-ppc64/usr/include/
--ln -s powerpc-linux-gnu/fpu_control.h debian/libc6-dev-ppc64/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-ppc64)
-
- mkdir -p debian/libc6-dev-ppc64/usr/include/powerpc-linux-gnu/gnu
- cp -a debian/tmp-ppc64/usr/include/gnu/lib-names-64-v1.h \
- 	debian/tmp-ppc64/usr/include/gnu/stubs-64-v1.h \
- 	debian/libc6-dev-ppc64/usr/include/powerpc-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-ppc64/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/powerpc-linux-gnu/sys` ; do \
--	ln -s ../powerpc-linux-gnu/sys/$$i debian/libc6-dev-ppc64/usr/include/sys/$$i ; \
--done
-
- endef
-
---- a/debian/sysdeps/s390x.mk
-+++ b/debian/sysdeps/s390x.mk
-@@ -14,20 +14,12 @@
-
- define libc6-dev-s390_extra_pkg_install
-
--mkdir -p debian/libc6-dev-s390/usr/include
--ln -s s390x-linux-gnu/bits debian/libc6-dev-s390/usr/include/
--ln -s s390x-linux-gnu/gnu debian/libc6-dev-s390/usr/include/
--ln -s s390x-linux-gnu/fpu_control.h debian/libc6-dev-s390/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-s390)
-
- mkdir -p debian/libc6-dev-s390/usr/include/s390x-linux-gnu/gnu
- cp -a debian/tmp-s390/usr/include/gnu/lib-names-32.h \
- 	debian/tmp-s390/usr/include/gnu/stubs-32.h \
- 	debian/libc6-dev-s390/usr/include/s390x-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-s390/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/s390x-linux-gnu/sys` ; do \
--	ln -s ../s390x-linux-gnu/sys/$$i debian/libc6-dev-s390/usr/include/sys/$$i ; \
--done
-
- endef
-
---- a/debian/sysdeps/sparc.mk
-+++ b/debian/sysdeps/sparc.mk
-@@ -15,19 +15,11 @@
-
- define libc6-dev-sparc64_extra_pkg_install
-
--mkdir -p debian/libc6-dev-sparc64/usr/include
--ln -s sparc-linux-gnu/bits debian/libc6-dev-sparc64/usr/include/
--ln -s sparc-linux-gnu/gnu debian/libc6-dev-sparc64/usr/include/
--ln -s sparc-linux-gnu/fpu_control.h debian/libc6-dev-sparc64/usr/include/
-+$(call generic_multilib_extra_pkg_install,libc6-dev-sparc64)
-
- mkdir -p debian/libc6-dev-sparc64/usr/include/sparc-linux-gnu/gnu
- cp -a debian/tmp-sparc64/usr/include/gnu/lib-names-64.h \
- 	debian/tmp-sparc64/usr/include/gnu/stubs-64.h \
- 	debian/libc6-dev-sparc64/usr/include/sparc-linux-gnu/gnu
--
--mkdir -p debian/libc6-dev-sparc64/usr/include/sys
--for i in `ls debian/tmp-libc/usr/include/sparc-linux-gnu/sys` ; do \
--	ln -s ../sparc-linux-gnu/sys/$$i debian/libc6-dev-sparc64/usr/include/sys/$$i ; \
--done
-
- endef
 EOF
 	echo "patching glibc to work with regular kfreebsd-kernel-headers"
 	drop_privs patch -p1 <<'EOF'
