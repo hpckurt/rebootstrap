@@ -1084,21 +1084,6 @@ EOF
 
 add_automatic grep
 add_automatic groff
-add_automatic guile-2.0
-builddep_guile_2_0() {
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P cross ./
-	if test "$HOST_ARCH" = sh3; then
-		echo "adding sh3 support to guile-2.0 http://git.savannah.gnu.org/cgit/guile.git/commit/?id=92222727f81b2a03cde124b88d7e6224ecb29199"
-		sed -i -e 's/"sh4"/"sh3" &/' /usr/share/guile/2.0/system/base/target.scm
-	fi
-}
-patch_guile_2_0() {
-	if test "$HOST_ARCH" = sh3; then
-		echo "adding sh3 support to guile-2.0 http://git.savannah.gnu.org/cgit/guile.git/commit/?id=92222727f81b2a03cde124b88d7e6224ecb29199"
-		sed -i -e 's/"sh4"/"sh3" &/' module/system/base/target.scm
-	fi
-}
-
 add_automatic guile-2.2
 add_automatic guile-3.0
 
@@ -2967,19 +2952,19 @@ automatically_cross_build_packages
 
 cross_build libtool
 mark_built libtool
-# needed by guile-2.0, libffi
+# needed by guile-X.Y, libffi
 
 automatically_cross_build_packages
 
 cross_build ncurses
 mark_built ncurses
-# needed by bash, bsdmainutils, dpkg, guile-2.0, readline, slang2
+# needed by bash, bsdmainutils, dpkg, guile-X.Y, readline, slang2
 
 automatically_cross_build_packages
 
 cross_build readline
 mark_built readline
-# needed by gnupg2, guile-2.0, libxml2
+# needed by gnupg2, guile-X.Y, libxml2
 
 automatically_cross_build_packages
 
