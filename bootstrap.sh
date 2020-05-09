@@ -2322,7 +2322,27 @@ buildenv_util_linux() {
 }
 
 add_automatic xft
+
 add_automatic xz-utils
+patch_xz_utils() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
+		echo "bump up gettext version #959999"
+		drop_privs patch -p1 <<'EOF'
+--- a/configure.ac
++++ b/configure.ac
+@@ -609,7 +609,8 @@
+
+ echo
+ echo "Initializing gettext:"
+-AM_GNU_GETTEXT_VERSION([0.19])
++AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.8])
++AM_GNU_GETTEXT_VERSION([0.19.6])
+ AM_GNU_GETTEXT([external])
+
+
+EOF
+	fi
+}
 
 builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
