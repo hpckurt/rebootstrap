@@ -1224,6 +1224,62 @@ buildenv_libgcrypt20() {
 }
 
 add_automatic libgpg-error
+patch_libgpg_error() {
+	if test "$HOST_ARCH" = mips64; then
+		echo "add mips64 support to libgpg-error #960168"
+		drop_privs patch -p1 <<'EOF'
+--- /dev/null
++++ a/src/syscfg/lock-obj-pub.mips64-unknown-linux-gnuabi64.h
+@@ -0,0 +1,25 @@
++## lock-obj-pub.mips64-unknown-linux-gnuabi64.h
++## File created by gen-posix-lock-obj - DO NOT EDIT
++## To be included by mkheader into gpg-error.h
++
++typedef struct
++{
++  long _vers;
++  union {
++    volatile char _priv[40];
++    long _x_align;
++    long *_xp_align;
++  } u;
++} gpgrt_lock_t;
++
++#define GPGRT_LOCK_INITIALIZER {1,{{0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0, \
++                                    0,0,0,0,0,0,0,0}}}
++##
++## Local Variables:
++## mode: c
++## buffer-read-only: t
++## End:
++##
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -59,6 +59,7 @@
+         syscfg/lock-obj-pub.m68k-unknown-linux-gnu.h        \
+         syscfg/lock-obj-pub.mips-unknown-linux-gnu.h        \
+         syscfg/lock-obj-pub.mips64el-unknown-linux-gnuabi64.h \
++        syscfg/lock-obj-pub.mips64-unknown-linux-gnuabi64.h \
+         syscfg/lock-obj-pub.mipsel-unknown-linux-gnu.h      \
+ 	syscfg/lock-obj-pub.nios2-unknown-linux-gnu.h       \
+         syscfg/lock-obj-pub.or1k-unknown-linux-gnu.h        \
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -537,6 +537,7 @@
+         syscfg/lock-obj-pub.m68k-unknown-linux-gnu.h        \
+         syscfg/lock-obj-pub.mips-unknown-linux-gnu.h        \
+         syscfg/lock-obj-pub.mips64el-unknown-linux-gnuabi64.h \
++        syscfg/lock-obj-pub.mips64-unknown-linux-gnuabi64.h \
+         syscfg/lock-obj-pub.mipsel-unknown-linux-gnu.h      \
+ 	syscfg/lock-obj-pub.nios2-unknown-linux-gnu.h       \
+         syscfg/lock-obj-pub.or1k-unknown-linux-gnu.h        \
+EOF
+	fi
+}
+
 add_automatic libice
 add_automatic libidn
 add_automatic libidn2
