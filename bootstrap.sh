@@ -2331,41 +2331,6 @@ buildenv_openldap() {
 }
 
 add_automatic openssl
-patch_openssl() {
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
-		echo "adding musl configuration to openssl #941765"
-		drop_privs patch -p1 <<'EOF'
---- a/Configurations/20-debian.conf
-+++ b/Configurations/20-debian.conf
-@@ -132,6 +130,24 @@
- 		cflags => add("-DL_ENDIAN"),
- 	},
-
-+	"debian-musl-linux-arm64" => {
-+		inherit_from => [ "linux-aarch64", "debian" ],
-+	},
-+	"debian-musl-linux-armhf" => {
-+		inherit_from => [ "linux-armv4", "debian" ],
-+	},
-+	"debian-musl-linux-i386" => {
-+		inherit_from => [ "linux-elf", "debian" ],
-+	},
-+	"debian-musl-linux-mips" => {
-+		inherit_from => [ "linux-mips32", "debian" ],
-+		cflags => add("-DB_ENDIAN"),
-+	},
-+	"debian-musl-linux-mipsel" => {
-+		inherit_from => [ "linux-mips32", "debian" ],
-+		cflags => add("-DL_ENDIAN"),
-+	},
-+
- 	"debian-nios2" => {
- 		inherit_from => [ "linux-generic32", "debian" ],
- 	},
-EOF
-	fi
-}
-
 add_automatic openssl1.0
 add_automatic p11-kit
 add_automatic patch
