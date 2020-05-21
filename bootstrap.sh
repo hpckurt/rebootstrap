@@ -2878,10 +2878,9 @@ if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 if test -f "$REPODIR/stamps/hurd_2"; then
 	echo "skipping rebuild of hurd stage2"
 else
-	apt_get_install "gnumach-dev:$HOST_ARCH" "libc0.3-dev:$HOST_ARCH" texinfo debhelper dpkg-dev dh-exec autoconf dh-autoreconf gawk flex bison autotools-dev
 	cross_build_setup hurd hurd_2
-	dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage2 || : # gcc-N dependency unsatisfiable
-	drop_privs dpkg-buildpackage -d -B "-a$HOST_ARCH" -Pstage2 -uc -us
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P stage2 ./
+	drop_privs dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage2 -uc -us
 	cd ..
 	ls -l
 	pickup_packages *.changes
