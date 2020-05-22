@@ -1213,7 +1213,13 @@ EOF
 
 add_automatic grep
 add_automatic groff
+
 add_automatic guile-2.2
+patch_guile_2_2() {
+	echo "work around FTBFS with make-dfsg/4.3-1 #961230"
+	drop_privs sed -i -e '/\$(error ERROR: alternatives/d' debian/rules
+}
+
 add_automatic guile-3.0
 
 add_automatic gzip
