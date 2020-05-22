@@ -1221,6 +1221,10 @@ patch_guile_2_2() {
 }
 
 add_automatic guile-3.0
+patch_guile_3_0() {
+	echo "work around FTBFS with make-dfsg/4.3-1 #961280"
+	drop_privs sed -i -e '/\$(error ERROR: alternatives/d' debian/rules
+}
 
 add_automatic gzip
 buildenv_gzip() {
