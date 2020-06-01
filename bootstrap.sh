@@ -1007,6 +1007,18 @@ EOF
  	fi
  
  	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
+--- a/debian/sysdeps/hurd-i386.mk
++++ b/debian/sysdeps/hurd-i386.mk
+@@ -18,9 +18,6 @@ endif
+ define libc_extra_install
+ mkdir -p debian/tmp-$(curpass)/lib
+ ln -s ld.so.1 debian/tmp-$(curpass)/lib/ld.so
+-mkdir -p debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/mach
+-mv debian/tmp-$(curpass)/usr/include/mach/i386 debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/mach/
+-ln -s ../$(DEB_HOST_MULTIARCH)/mach/i386 debian/tmp-$(curpass)/usr/include/mach/i386
+ endef
+ 
+ # FIXME: We are having runtime issues with ifunc...
 EOF
 	echo "patching glibc to avoid -Werror"
 	drop_privs patch -p1 <<'EOF'
