@@ -289,13 +289,6 @@ Pin-Priority: -1
 EOF
 $APT_GET update
 
-# Work around libglib2.0-0 bug #814668. Running kfreebsd-i386 binaries on linux
-# can result in clock jumps.
-cat >/etc/dpkg/dpkg.cfg.d/bug-814668 <<EOF
-path-exclude=/usr/lib/$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)/glib-2.0/glib-compile-schemas
-path-exclude=/usr/lib/$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)/glib-2.0/gio-querymodules
-EOF
-
 # Since most libraries (e.g. libgcc_s) do not include ABI-tags,
 # glibc may be confused and try to use them. A typical symptom is:
 # apt-get: error while loading shared libraries: /lib/x86_64-kfreebsd-gnu/libgcc_s.so.1: ELF file OS ABI invalid
@@ -829,7 +822,6 @@ add_automatic file
 add_automatic findutils
 add_automatic flex
 add_automatic fontconfig
-add_automatic freebsd-glue
 add_automatic freetype
 add_automatic fribidi
 add_automatic fuse
@@ -926,9 +918,6 @@ builddep_glibc() {
 			apt_get_remove libc6-dev-i386
 			apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
 		;;
-		kfreebsd)
-			apt_get_install "kfreebsd-kernel-headers:$1"
-		;;
 		*)
 			echo "rebootstrap-error: unsupported kernel"
 			exit 1
@@ -1018,20 +1007,6 @@ EOF
  	fi
  
  	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
-EOF
-	echo "patching glibc to work with regular kfreebsd-kernel-headers"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/sysdeps/kfreebsd.mk
-+++ b/debian/sysdeps/kfreebsd.mk
-@@ -13,7 +13,7 @@
- libc_extra_config_options = $(extra_config_options)
-
- ifndef KFREEBSD_SOURCE
--  ifeq ($(DEB_HOST_GNU_TYPE),$(DEB_BUILD_GNU_TYPE))
-+  ifeq ($(shell dpkg-query --status kfreebsd-kernel-headers-$(DEB_HOST_ARCH)-cross 2>/dev/null),)
-     KFREEBSD_HEADERS := /usr/include
-   else
-     KFREEBSD_HEADERS := /usr/$(DEB_HOST_GNU_TYPE)/include
 EOF
 	echo "patching glibc to avoid -Werror"
 	drop_privs patch -p1 <<'EOF'
@@ -2651,10 +2626,6 @@ fi
 progress_mark "gnumach stage1 cross build"
 fi
 
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = kfreebsd; then
-cross_build kfreebsd-kernel-headers
-fi
-
 if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
@@ -3010,7 +2981,6 @@ add_need db-defaults # by perl, python2.7, python3.5
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
-dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any && add_need freebsd-glue # by freebsd-libs
 add_need fribidi # by newt
 add_need gmp # by gnutls28
 add_need gnupg2 # for apt
@@ -3026,7 +2996,7 @@ add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
-if dpkg-architecture "-a$HOST_ARCH" -ihurd-any || dpkg-architecture "-a$HOST_ARCH" -ikfreebsd-any; then
+if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
 add_need libtasn1-6 # by gnutls28
@@ -3182,7 +3152,7 @@ automatically_cross_build_packages
 
 cross_build db5.3 "pkg.db5.3.notcl nojava" db5.3_1
 mark_built db5.3
-# needed by perl, python2.7, needed for db-defaults and thus by freebsd-glue
+# needed by perl, python2.7, needed for db-defaults
 
 automatically_cross_build_packages
 
