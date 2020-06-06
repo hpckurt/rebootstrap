@@ -1135,28 +1135,6 @@ builddep_gnu_efi() {
 
 add_automatic gnupg2
 
-patch_gnutls28() {
-	echo "fix FTBFS with nocheck profile #962199"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -102,11 +102,13 @@
- 	dh_compress $(BDIR) -X.pdf
- 
- override_dh_auto_test:
-+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
- 	@echo DEBUG info about network setup starts ...
- 	if test -x /sbin/ifconfig ; then /sbin/ifconfig ; else true ; fi
- 	netstat -tln
- 	@echo ... DEBUG info about network setup ends.
- 	dh_auto_test $(BDIR) --verbose -- VERBOSE=1
-+endif
- 
- override_dh_clean:
- 	dh_clean $(BDIR) -X.bak
-EOF
-}
-
 add_automatic gpm
 patch_gpm() {
 	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
