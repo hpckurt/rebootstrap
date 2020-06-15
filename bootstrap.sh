@@ -1130,6 +1130,7 @@ EOF
 	fi
 }
 
+add_automatic gmp
 patch_gmp() {
 	if test "$LIBC_NAME" = musl; then
 		echo "patching gmp symbols for musl arch #788411"
@@ -1137,74 +1138,6 @@ patch_gmp() {
 		# musl does not implement GNU obstack
 		sed -i -r 's/^ (.*_obstack_)/ (arch=!musl-linux-any !musleabihf-linux-any)\1/' debian/libgmp10.symbols
 	fi
-	case "$HOST_ARCH" in i386|x32|powerpc|mips|mipsel|mipsn32|mipsn32el|mipsr6|mipsr6el|mipsn32r6|mipsn32r6el)
-		echo "adding nobiarch support to gmp #962642"
-		patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -3,7 +3,21 @@
- Uploaders: Steve M. Robbins <smr@debian.org>
- Section: libs
- Priority: optional
--Build-Depends: m4, debhelper (>= 9), g++-multilib [i386 x32 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el]
-+Build-Depends:
-+ m4,
-+ debhelper (>= 9),
-+ g++-multilib [i386 x32 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el] <!cross !nobiarch>,
-+ g++-multilib-i686-linux-gnu:native [i386] <cross !nobiarch>,
-+ g++-multilib-x86-64-linux-gnux32 [x32] <cross !nobiarch>,
-+ g++-multilib-powerpc-linux-gnu [powerpc] <cross !nobiarch>,
-+ g++-multilib-mips-linux-gnu [mips] <cross !nobiarch>,
-+ g++-multilib-mipsel-linux-gnu [mipsel] <cross !nobiarch>,
-+ g++-multilib-mips64-linux-gnuabin32 [mipsn32] <cross !nobiarch>,
-+ g++-multilib-mips64el-linux-gnuabin32 [mipsn32el] <cross !nobiarch>,
-+ g++-multilib-mipsisa32r6-linux-gnu [mipsr6] <cross !nobiarch>,
-+ g++-multilib-mipsisa32r6el-linux-gnu [mipsr6el] <cross !nobiarch>,
-+ g++-multilib-mipsisa64r6-linux-gnuabin32 [mipsn32r6] <cross !nobiarch>,
-+ g++-multilib-mipsisa64r6el-linux-gnuabin32 [mipsn32r6el] <cross !nobiarch>,
- Standards-Version: 4.1.3
- Vcs-Browser: https://salsa.debian.org/science-team/gmp
- Vcs-Git: https://salsa.debian.org/science-team/gmp.git
-@@ -28,6 +42,7 @@
-
- Package: lib64gmp10
- Architecture: i386 x32 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el
-+Build-Profiles: <!nobiarch>
- Multi-Arch: no
- Section: libs
- Priority: optional
-@@ -60,6 +75,7 @@
-
- Package: lib64gmpxx4ldbl
- Architecture: i386 x32 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el
-+Build-Profiles: <!nobiarch>
- Multi-Arch: no
- Section: libs
- Priority: optional
-@@ -99,6 +115,7 @@
-
- Package: lib64gmp-dev
- Architecture: i386 x32 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el
-+Build-Profiles: <!nobiarch>
- Multi-Arch: no
- Section: libdevel
- Priority: optional
---- a/debian/rules
-+++ b/debian/rules
-@@ -46,7 +46,11 @@
-   confflags += --enable-fat
- endif
-
-+ifeq (,$(filter nobiarch,$(DEB_BUILD_PROFILES)))
- lib64_archs = i386 x32 powerpc mips mipsn32 mipsel mipsn32el mipsr6 mipsr6n32 mipsr6el mipsn32r6el
-+else
-+lib64_archs =
-+endif
- ifneq (,$(filter $(DEB_HOST_ARCH), i386 x32))
-   host64_gnu_type = x86_64-linux-gnu
-   CFLAGS_64 = -m64
-EOF
-	;; esac
 }
 
 builddep_gnu_efi() {
@@ -3207,12 +3140,6 @@ automatically_cross_build_packages
 cross_build zlib "$(if test "$ENABLE_MULTILIB" != yes; then echo stage1; fi)"
 mark_built zlib
 # needed by dpkg, file, gnutls28, libpng1.6, libtool, libxml2, perl, slang2, tcl8.6, util-linux
-
-automatically_cross_build_packages
-
-cross_build gmp
-mark_built gmp
-# needed by gnutls28
 
 automatically_cross_build_packages
 
