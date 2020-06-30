@@ -1247,12 +1247,6 @@ buildenv_gzip() {
 }
 
 add_automatic hostname
-
-patch_hurd() {
-	echo "working around #818618"
-	sed -i -e '/^#.*818618/d;s/^#//' debian/control
-}
-
 add_automatic icu
 add_automatic isl
 add_automatic isl-0.18
