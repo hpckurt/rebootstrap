@@ -2401,11 +2401,15 @@ add_automatic ustr
 
 builddep_util_linux() {
 	dpkg-architecture "-a$1" -ilinux-any && assert_built libselinux
-	assert_built "ncurses slang2 zlib"
-	$APT_GET build-dep "-a$1" --arch-only -P "$2" util-linux
+	assert_built "ncurses zlib"
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
 }
 buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
+}
+patch_util_linux() {
+	echo "cherry-pick cryptsetup reversion #964089"
+	drop_privs sed -i -e '/libcryptsetup-dev/d' debian/control
 }
 
 add_automatic xft
