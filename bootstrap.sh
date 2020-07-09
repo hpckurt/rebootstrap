@@ -688,7 +688,11 @@ EOF
 }
 
 add_automatic blt
-add_automatic bsdmainutils
+
+patch_bsdmainutils() {
+	echo "fix FTBFS #964309"
+	drop_privs sed -i -e '/^Build-Depends:/s/$/, libncurses-dev/' debian/control
+}
 
 builddep_build_essential() {
 	# g++ dependency needs cross translation
@@ -2824,7 +2828,6 @@ add_need apt # almost essential
 add_need attr # by coreutils, libcap-ng
 add_need autogen # by gcc-VER, gnutls28
 add_need blt # by pythonX.Y
-add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
 add_need db-defaults # by perl, python2.7, python3.5
 add_need expat # by unbound
@@ -2975,6 +2978,12 @@ automatically_cross_build_packages
 cross_build ncurses
 mark_built ncurses
 # needed by bash, bsdmainutils, dpkg, guile-X.Y, readline, slang2
+
+automatically_cross_build_packages
+
+cross_build bsdmainutils
+mark_built bsdmainutils
+# needed for man-db
 
 automatically_cross_build_packages
 
