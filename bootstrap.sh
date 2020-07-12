@@ -1271,23 +1271,6 @@ buildenv_libgcrypt20() {
 }
 
 add_automatic libgpg-error
-patch_libgpg_error() {
-	echo "fix FTCBFS #962546"
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -583,7 +583,7 @@
- #
- # Special defines for certain platforms
- #
--force_use_syscfg=no
-+force_use_syscfg=yes
- if test "$have_w32_system" = yes; then
-     AC_DEFINE(HAVE_W32_SYSTEM,1,[Defined if we run on a W32 API based system])
-     if test "$have_w64_system" = yes; then
-EOF
-}
-
 add_automatic libice
 add_automatic libidn
 add_automatic libidn2
