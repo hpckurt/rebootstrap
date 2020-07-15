@@ -2168,6 +2168,12 @@ buildenv_openldap() {
 add_automatic openssl
 add_automatic openssl1.0
 add_automatic p11-kit
+
+patch_pam() {
+	echo "work around ftbfs #956355"
+	drop_privs sed -i -e '1aCONFIGURE_OPTS+=--disable-selinux' debian/rules
+}
+
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
