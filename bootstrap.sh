@@ -783,6 +783,29 @@ patch_gcc_10() {
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 	patch_gcc_default_pie_everywhere
 	patch_gcc_wdotap
+	echo "fix symbol issue #965246"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/libasan.symbols.common
++++ b/debian/libasan.symbols.common
+@@ -600,7 +600,7 @@
+  __interceptor_ttyname_r@Base 7
+  __interceptor_valloc@Base 4.8
+  __interceptor_vasprintf@Base 5
+- __interceptor_vfork@Base 10
++ (arch=any-armel any-armhf any-arm64 any-i386 any-amd64)__interceptor_vfork@Base 10
+  __interceptor_vfprintf@Base 5
+  __interceptor_vfscanf@Base 4.8
+  __interceptor_vprintf@Base 5
+@@ -1764,7 +1764,7 @@
+  ttyname_r@Base 7
+  valloc@Base 4.8
+  vasprintf@Base 5
+- vfork@Base 10
++ (arch=any-armel any-armhf any-arm64 any-i386 any-amd64)vfork@Base 10
+  vfprintf@Base 5
+  vfscanf@Base 4.8
+  vprintf@Base 5
+EOF
 }
 
 buildenv_gdbm() {
