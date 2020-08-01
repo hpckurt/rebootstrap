@@ -1282,6 +1282,31 @@ patch_libgc() {
      && !defined(NO_GETCONTEXT)
 EOF
 	fi
+	if test "$HOST_ARCH" = m68k -o "$HOST_ARCH" = sh4 -o "$HOST_ARCH" = sparc64; then
+		echo "fixing missing dep libatomic-ops-dev #966651"
+		drop_privs patch -p1 <<'EOF'
+--- libgc-8.0.4/debian/control
++++ libgc-8.0.4/debian/control
+@@ -35,7 +35,7 @@
+ Package: libgc-dev
+ Architecture: any
+ Section: libdevel
+-Depends: ${misc:Depends}, libgc1 (= ${binary:Version}), libc-dev
++Depends: ${misc:Depends}, libgc1 (= ${binary:Version}), libc-dev, ${atomic:Depends}
+ Multi-Arch: same
+ Description: conservative garbage collector for C (development)
+  Boehm-Demers-Weiser's GC is a garbage collecting storage allocator that is
+--- libgc-8.0.4/debian/rules
++++ libgc-8.0.4/debian/rules
+@@ -45,3 +45,6 @@
+ 
+ override_dh_installchangelogs:
+ 	dh_installchangelogs ChangeLog
++
++override_dh_gencontrol:
++	dh_gencontrol -- -Vatomic:Depends=$$(grep -q '[-]latomic_ops' debian/libgc-dev/usr/lib/*/pkgconfig/*.pc && echo libatomic-ops-dev)
+EOF
+	fi
 }
 
 add_automatic libgcrypt20
