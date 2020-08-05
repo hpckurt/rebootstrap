@@ -900,7 +900,7 @@ EOF
  done
  endef
  
-@@ -218,14 +218,10 @@
+@@ -218,15 +218,11 @@
  	    echo "/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	    echo "/usr/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	  fi; \
@@ -911,10 +911,12 @@ EOF
 -	  mv debian/tmp-$(curpass)/usr/include/fpu_control.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
 -	  mv debian/tmp-$(curpass)/usr/include/a.out.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
 -	  mv debian/tmp-$(curpass)/usr/include/ieee754.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
- 	  rm -rf debian/tmp-$(curpass)/usr/include/finclude ; \
 +	  mkdir -p debian/tmp-$(curpass)/usr/include.tmp; \
 +	  mv debian/tmp-$(curpass)/usr/include debian/tmp-$(curpass)/usr/include.tmp/$(DEB_HOST_MULTIARCH); \
 +	  mv debian/tmp-$(curpass)/usr/include.tmp debian/tmp-$(curpass)/usr/include; \
+ 	  mkdir -p debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
+-	  mv debian/tmp-$(curpass)/usr/include/finclude/math-vector-fortran.h debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
++	  mv debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/finclude/math-vector-fortran.h debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
  	fi
  
  	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
