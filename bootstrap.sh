@@ -2184,6 +2184,7 @@ add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
 add_need libunistring # by gnutls28
 add_need libxrender # by cairo
+add_need libzstd # by systemd
 add_need lz4 # by systemd
 add_need make-dfsg # for build-essential
 add_need man-db # for debhelper
@@ -2426,7 +2427,7 @@ if test -f "$REPODIR/stamps/systemd_1"; then
 	echo "skipping stage1 rebuild of systemd"
 else
 	cross_build_setup systemd systemd_1
-	assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux"
+	assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
 	if grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
 		assert_built libseccomp
 	fi
