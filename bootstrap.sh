@@ -888,8 +888,6 @@ builddep_glibc() {
 			fi
 		;;
 		hurd)
-			# undeclared file conflict between libc6-dev-i386:amd64 and hurd-headers-dev:hurd-i386
-			apt_get_remove libc6-dev-i386
 			apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
 		;;
 		*)
