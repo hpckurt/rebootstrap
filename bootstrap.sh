@@ -1284,27 +1284,6 @@ buildenv_libprelude() {
 
 add_automatic libpsl
 add_automatic libpthread-stubs
-
-patch_libselinux() {
-	echo "fix FTBFS with nopython profile #946811"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -46,6 +46,11 @@
- debian/rules:
- 	@touch $@
-
-+ifneq (,$(filter nopython,$(DEB_BUILD_PROFILES)))
-+override_dh_auto_clean:
-+	dh_auto_clean -- PYTHON=true
-+endif
-+
- ## Set up some variables to be passed to the upstream Makefile
- extra_make_args = ARCH=$(DEB_HOST_GNU_CPU)
- extra_make_args += CC=$(DEB_HOST_GNU_TYPE)-gcc
-EOF
-}
-
 add_automatic libsepol
 add_automatic libsm
 add_automatic libsodium
