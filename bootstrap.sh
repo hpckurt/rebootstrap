@@ -849,24 +849,6 @@ buildenv_gdbm() {
 		export ac_cv_func_mmap_fixed_mapped=yes
 	fi
 }
-patch_gdbm() {
-	if test "$GCC_VER" = 10; then
-		echo "fix FTBFS with gcc-10 #957259"
-		drop_privs patch -p1 <<'EOF'
---- a/src/parseopt.c
-+++ b/src/parseopt.c
-@@ -255,8 +255,6 @@
- }
- 
- char *parseopt_program_name;
--char *parseopt_program_doc;
--char *parseopt_program_args;
- const char *program_bug_address = "<" PACKAGE_BUGREPORT ">";
- void (*parseopt_help_hook) (FILE *stream);
- 
-EOF
-	fi
-}
 
 add_automatic glib2.0
 buildenv_glib2_0() {
