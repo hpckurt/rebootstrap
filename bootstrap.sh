@@ -705,7 +705,24 @@ builddep_cracklib2() {
 	apt_get_build_dep "-a$1" --arch-only -Pcross,nopython ./
 }
 
-add_automatic curl
+patch_curl() {
+	echo "fix missing <!nocheck> #969004"
+	patch -p1 <<'EOF'
+--- curl-7.72.0/debian/control
++++ curl-7.72.0/debian/control
+@@ -22,8 +22,8 @@
+  libssl-dev (>= 1.1),
+  libtool,
+  openssh-server <!nocheck>,
+- python3:native,
+- python3-impacket,
++ python3:native <!nocheck>,
++ python3-impacket <!nocheck>,
+  quilt,
+  stunnel4 <!nocheck>,
+  zlib1g-dev
+EOF
+}
 
 builddep_cyrus_sasl2() {
 	assert_built "db-defaults db5.3 openssl pam"
@@ -2534,6 +2551,12 @@ automatically_cross_build_packages
 cross_build cdebconf pkg.cdebconf.nogtk cdebconf_1
 mark_built cdebconf
 # needed by base-passwd
+
+automatically_cross_build_packages
+
+cross_build curl
+mark_built curl
+# needed by gnupg2
 
 automatically_cross_build_packages
 
