@@ -2215,7 +2215,9 @@ add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
+add_need libpsl # by curl
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
+add_need libssh2 # by curl
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
@@ -2232,12 +2234,15 @@ add_need mpclib3 # by gcc-VER
 add_need mpdecimal # by python3.X
 add_need mpfr4 # by gcc-VER
 add_need nettle # by unbound, gnutls28
+add_need nghttp2 # by curl
+add_need nss # by curl
 add_need openssl # by cyrus-sasl2
 add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
 add_need popt # by newt
 add_need readline5 # by lvm2
+add_need rtmpdump # by curl
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
