@@ -1830,8 +1830,8 @@ if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
 if test -f "$REPODIR/stamps/gnumach_1"; then
 	echo "skipping rebuild of gnumach stage1"
 else
-	$APT_GET install debhelper sharutils autoconf automake texinfo
 	cross_build_setup gnumach gnumach_1
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pstage1 ./
 	drop_privs dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage1 -uc -us
 	cd ..
 	pickup_packages ./*.deb
