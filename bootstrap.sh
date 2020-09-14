@@ -1680,10 +1680,6 @@ builddep_util_linux() {
 buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
 }
-patch_util_linux() {
-	echo "cherry-pick cryptsetup reversion #964089"
-	drop_privs sed -i -e '/libcryptsetup-dev/d' debian/control
-}
 
 add_automatic xft
 
