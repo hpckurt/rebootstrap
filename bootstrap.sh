@@ -787,12 +787,12 @@ patch_elfutils() {
  Depends: libdebuginfod1 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 --- elfutils-0.180/debian/rules
 +++ elfutils-0.180/debian/rules
-@@ -37,14 +37,15 @@
+@@ -37,14 +37,16 @@
  	dh_testdir
  	dh_autoreconf
  ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 -	./configure --enable-maintainer-mode
-+	./configure --enable-maintainer-mode --disable-debuginfod
++	./configure --enable-maintainer-mode --disable-debuginfod --disable-libdebuginfod
  	$(MAKE) $(MAKEFLAGS)
  	$(MAKE) clean
  endif
@@ -801,7 +801,8 @@ patch_elfutils() {
  		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
 -		--program-prefix=eu- --disable-silent-rules
 +		--program-prefix=eu- --disable-silent-rules \
-+		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-debuginfod
++		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-debuginfod \
++		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-libdebuginfod
 
  build: build-stamp
  build-stamp:  config.status
