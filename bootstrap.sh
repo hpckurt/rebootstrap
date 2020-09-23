@@ -2462,8 +2462,6 @@ else
 	if grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
 		assert_built libseccomp
 	fi
-	# work around #965033
-	apt_get_install python3-pkg-resources
 	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P "nocheck,noudeb,stage1,noinsttest" ./
 	check_binNMU
 	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,noudeb,stage1,noinsttest
