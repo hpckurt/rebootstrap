@@ -1890,10 +1890,9 @@ if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
 if test -f "$REPODIR/stamps/hurd_1"; then
 	echo "skipping rebuild of hurd stage1"
 else
-	apt_get_install texinfo debhelper dh-exec autoconf dh-autoreconf gawk flex bison autotools-dev perl
 	cross_build_setup hurd hurd_1
-	dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Pstage1 || :
-	drop_privs dpkg-buildpackage -d -B "-a$HOST_ARCH" -Pstage1 -uc -us
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P stage1 ./
+	drop_privs dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage1 -uc -us
 	cd ..
 	ls -l
 	pickup_packages *.changes
