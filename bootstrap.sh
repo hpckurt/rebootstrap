@@ -1673,11 +1673,6 @@ buildenv_tk8_6() {
 add_automatic uchardet
 add_automatic ustr
 
-builddep_util_linux() {
-	dpkg-architecture "-a$1" -ilinux-any && assert_built libselinux
-	assert_built "ncurses zlib"
-	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
-}
 buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
 }
@@ -2356,6 +2351,8 @@ if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
+dpkg-architecture "-a$1" -ilinux-any && assert_built libselinux
+assert_built "ncurses zlib"
 cross_build util-linux stage1 util-linux_1
 mark_built util-linux
 # essential, needed by e2fsprogs
@@ -2514,6 +2511,8 @@ mark_built libsemanage
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
+dpkg-architecture "-a$1" -ilinux-any && assert_built "audit libcap-ng libselinux systemd"
+assert_built "ncurses zlib"
 cross_build util-linux # stageless
 # essential
 
