@@ -1120,29 +1120,7 @@ add_automatic icu
 add_automatic isl
 add_automatic isl-0.18
 add_automatic jansson
-
 add_automatic jemalloc
-buildenv_jemalloc() {
-	case "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_CPU)" in
-		amd64|arm|arm64|hppa|i386|m68k|mips|s390x|sh3|sh4)
-			echo "setting je_cv_static_page_shift=12"
-			export je_cv_static_page_shift=12
-		;;
-		alpha|sparc|sparc64)
-			echo "setting je_cv_static_page_shift=13"
-			export je_cv_static_page_shift=13
-		;;
-		mips64el|mipsel|nios2)
-			echo "setting je_cv_static_page_shift=14"
-			export je_cv_static_page_shift=14
-		;;
-		powerpc|ppc64|ppc64el)
-			echo "setting je_cv_static_page_shift=16"
-			export je_cv_static_page_shift=16
-		;;
-	esac
-}
-
 add_automatic keyutils
 add_automatic kmod
 
