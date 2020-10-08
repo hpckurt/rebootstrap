@@ -845,16 +845,6 @@ patch_gcc_wdotap() {
 		drop_privs rm -Rf .pc
 	fi
 }
-patch_gcc_9() {
-	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
-	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
-	patch_gcc_default_pie_everywhere
-	echo "build common libraries again, not a bug"
-	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
-	echo "revert libgcc-s1, not a bug"
-	drop_privs sed -i -e 's/gcc-s1/gcc1/g' debian/rules.conf debian/control.m4
-	patch_gcc_wdotap
-}
 patch_gcc_10() {
 	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
