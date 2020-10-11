@@ -2418,26 +2418,12 @@ if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^
 	automatically_cross_build_packages
 fi
 
-if test -f "$REPODIR/stamps/systemd_1"; then
-	echo "skipping stage1 rebuild of systemd"
-else
-	cross_build_setup systemd systemd_1
-	assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
-	if grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
-		assert_built libseccomp
-	fi
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P "nocheck,noudeb,stage1,noinsttest" ./
-	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -B -uc -us -Pnocheck,noudeb,stage1,noinsttest
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/systemd_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf systemd_1
+
+assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
+if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
+	assert_built libseccomp
 fi
-progress_mark "systemd stage1 cross build"
+cross_build systemd stage1 systemd_1
 mark_built systemd
 # needed by util-linux
 
