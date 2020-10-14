@@ -2170,6 +2170,7 @@ add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
+add_need libnsl # by tcp-wrappers
 add_need libpsl # by curl
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 add_need libssh2 # by curl
