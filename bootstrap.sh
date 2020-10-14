@@ -1225,6 +1225,7 @@ add_automatic libice
 add_automatic libidn
 add_automatic libidn2
 add_automatic libksba
+add_automatic libnsl
 add_automatic libonig
 add_automatic libpipeline
 add_automatic libpng1.6
@@ -1249,6 +1250,7 @@ add_automatic libssh2
 add_automatic libsystemd-dummy
 add_automatic libtasn1-6
 add_automatic libtextwrap
+add_automatic libtirpc
 
 builddep_libtool() {
 	assert_built "zlib"
@@ -1631,7 +1633,11 @@ buildenv_tcl8_6() {
 }
 
 add_automatic tcltk-defaults
-add_automatic tcp-wrappers
+
+patch_tcp_wrappers() {
+	# missing libnsl-dev dependency #972188
+	drop_privs sed -i -e '/^Build-Depends:/s/$/, libnsl-dev/' debian/control
+}
 
 add_automatic tk8.6
 buildenv_tk8_6() {
@@ -2447,6 +2453,13 @@ assert_built "zlib bzip2 xz-utils"
 cross_build elfutils pkg.elfutils.nodebuginfod
 mark_built elfutils
 # needed by glib2.0
+
+automatically_cross_build_packages
+
+assert_built libnsl
+cross_build tcp-wrappers
+mark_built tcp-wrappers
+# needed by audit
 
 automatically_cross_build_packages
 
