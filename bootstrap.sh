@@ -2203,7 +2203,6 @@ add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
 add_need tcltk-defaults # by python2.7
-dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need tcp-wrappers # by audit
 add_need xz-utils # by libxml2
 
 automatically_cross_build_packages() {
@@ -2457,12 +2456,14 @@ mark_built elfutils
 
 automatically_cross_build_packages
 
-assert_built libnsl
-cross_build tcp-wrappers
-mark_built tcp-wrappers
-# needed by audit
+if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
+	assert_built libnsl
+	cross_build tcp-wrappers
+	mark_built tcp-wrappers
+	# needed by audit
 
-automatically_cross_build_packages
+	automatically_cross_build_packages
+fi
 
 assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
 cross_build audit nopython audit_1
