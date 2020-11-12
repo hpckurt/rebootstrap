@@ -1508,50 +1508,49 @@ builddep_readline() {
 }
 patch_readline() {
 	echo "patching readline to support nobiarch profile #737955"
-	drop_privs patch -p1 <<EOF
+	drop_privs patch -p1 <<'EOF'
 --- a/debian/control
 +++ b/debian/control
-@@ -4,10 +4,10 @@
- Maintainer: Matthias Klose <doko@debian.org>
- Standards-Version: 4.3.0
- Build-Depends: debhelper (>= 9),
+@@ -5,9 +5,9 @@
+ Standards-Version: 4.5.0
+ Build-Depends: debhelper (>= 11),
    libncurses-dev,
 -  lib32ncurses-dev [amd64 ppc64], lib64ncurses-dev [i386 powerpc sparc s390],
 +  lib32ncurses-dev [amd64 ppc64] <!nobiarch>, lib64ncurses-dev [i386 powerpc sparc s390] <!nobiarch>,
-   mawk | awk, texinfo, autotools-dev,
+   mawk | awk, texinfo,
 -  gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc ppc64 s390 sparc]
 +  gcc-multilib [amd64 i386 kfreebsd-amd64 powerpc ppc64 s390 sparc] <!nobiarch>
- 
+
  Package: libreadline8
  Architecture: any
-@@ -30,6 +30,7 @@
- Depends: readline-common, \${shlibs:Depends}, \${misc:Depends}
+@@ -27,6 +27,7 @@
+ Architecture: i386 powerpc s390 sparc
+ Depends: readline-common, ${shlibs:Depends}, ${misc:Depends}
  Section: libs
- Priority: optional
 +Build-Profiles: <!nobiarch>
  Description: GNU readline and history libraries, run-time libraries (64-bit)
   The GNU readline library aids in the consistency of user interface
   across discrete programs that need to provide a command line
-@@ -96,6 +97,7 @@
- Conflicts: lib64readline-dev, lib64readline-gplv2-dev
+@@ -75,6 +76,7 @@
+ Conflicts: lib64readline6-dev, lib64readline-gplv2-dev
+ Provides: lib64readline6-dev
  Section: libdevel
- Priority: optional
 +Build-Profiles: <!nobiarch>
  Description: GNU readline and history libraries, development files (64-bit)
   The GNU readline library aids in the consistency of user interface
   across discrete programs that need to provide a command line
-@@ -139,6 +141,7 @@
- Depends: readline-common, \${shlibs:Depends}, \${misc:Depends}
+@@ -101,6 +103,7 @@
+ Architecture: amd64 ppc64
+ Depends: readline-common, ${shlibs:Depends}, ${misc:Depends}
  Section: libs
- Priority: optional
 +Build-Profiles: <!nobiarch>
  Description: GNU readline and history libraries, run-time libraries (32-bit)
   The GNU readline library aids in the consistency of user interface
   across discrete programs that need to provide a command line
-@@ -154,6 +157,7 @@
- Conflicts: lib32readline-dev, lib32readline-gplv2-dev
+@@ -115,6 +118,7 @@
+ Conflicts: lib32readline6-dev, lib32readline-gplv2-dev
+ Provides: lib32readline6-dev
  Section: libdevel
- Priority: optional
 +Build-Profiles: <!nobiarch>
  Description: GNU readline and history libraries, development files (32-bit)
   The GNU readline library aids in the consistency of user interface
@@ -1561,15 +1560,15 @@ patch_readline() {
 @@ -57,6 +57,11 @@
    endif
  endif
- 
-+ifneq (\$(filter nobiarch,\$(DEB_BUILD_PROFILES)),)
+
++ifneq (,$(filter nobiarch,$(DEB_BUILD_PROFILES)))
 +build32 =
 +build64 =
 +endif
 +
- CFLAGS := \$(shell dpkg-buildflags --get CFLAGS)
- CPPFLAGS := \$(shell dpkg-buildflags --get CPPFLAGS)
- LDFLAGS := \$(shell dpkg-buildflags --get LDFLAGS)
+ unexport CPPFLAGS CFLAGS LDFLAGS
+
+ CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
 EOF
 }
 
