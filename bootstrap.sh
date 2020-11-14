@@ -24,6 +24,11 @@ if df -t tmpfs /var/cache/apt/archives >/dev/null 2>&1; then
 	APT_GET="$APT_GET -o APT::Keep-Downloaded-Packages=false"
 fi
 
+if test "$(hostname -f)" = ionos9-amd64.debian.net; then
+	# jenkin's proxy fails very often
+	echo 'APT::Acquire::Retries "10";' > /etc/apt/apt.conf.d/80-retries
+fi
+
 # evaluate command line parameters of the form KEY=VALUE
 for param in "$@"; do
 	echo "bootstrap-configuration: $param"
