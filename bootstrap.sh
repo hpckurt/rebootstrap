@@ -717,6 +717,25 @@ buildenv_diffutils() {
 
 add_automatic dpkg
 add_automatic e2fsprogs
+
+patch_elfutils() {
+	echo "fix FTCBFS #973981"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -38,7 +38,8 @@
+ 	dh_autoreconf
+ ifneq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+ 	./configure --enable-maintainer-mode \
+-		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-debuginfod
++		--enable-libdebuginfod=dummy \
++		--disable-debuginfod
+ 	$(MAKE) $(MAKEFLAGS)
+ 	$(MAKE) clean
+ endif
+EOF
+}
+
 add_automatic expat
 add_automatic file
 add_automatic findutils
