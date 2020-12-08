@@ -734,6 +734,19 @@ patch_elfutils() {
  	$(MAKE) clean
  endif
 EOF
+	echo "fix nodebuginfod profile to cover the library #976875"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -46,6 +46,7 @@
+ 	./configure $(confflags) --prefix=/usr \
+ 		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+ 		--program-prefix=eu- --disable-silent-rules \
++		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-libdebuginfod \
+ 		--$(if $(filter pkg.elfutils.nodebuginfod,$(DEB_BUILD_PROFILES)),dis,en)able-debuginfod
+
+ build: build-stamp
+EOF
 }
 
 add_automatic expat
