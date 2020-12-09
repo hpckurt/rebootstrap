@@ -1125,34 +1125,6 @@ patch_libgc() {
      && !defined(NO_GETCONTEXT)
 EOF
 	fi
-	if ! test "$HOST_ARCH" = m68k -o "$HOST_ARCH" = sh4 -o "$HOST_ARCH" = sparc64; then
-		echo "fixing unintended use of -latomic_ops #966820"
-		drop_privs patch -p1 <<'EOF'
---- libgc-8.0.4/debian/rules
-+++ libgc-8.0.4/debian/rules
-@@ -7,6 +7,10 @@
- 
- LDFLAGS += -pthread
-
-+ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
-+ATOMIC_BUILTIN_ARCHS = alpha amd64 arm64 armel armhf hppa hurd-i386 i386 ia64 kfreebsd-amd64 kfreebsd-i386 mips64el mipsel powerpc ppc64 ppc64el riscv64 s390x x32
-+endif
-+
- %:
- 	dh $@ --with pkgkde_symbolshelper,autoreconf
-
-@@ -26,7 +30,8 @@
- 		--datadir=\$${prefix}/share/doc \
- 		--host=$(DEB_HOST_GNU_TYPE) \
- 		--build=$(DEB_BUILD_GNU_TYPE) \
--		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
-+		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH) \
-+		$(if $(filter $(DEB_HOST_ARCH),$(ATOMIC_BUILTIN_ARCHS)),--with-libatomic-ops=none)
-
- ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
- override_dh_auto_test:
-EOF
-	fi
 }
 
 add_automatic libgcrypt20
