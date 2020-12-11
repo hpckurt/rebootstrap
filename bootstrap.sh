@@ -1788,7 +1788,7 @@ if test -f "$REPODIR/stamps/mig_1"; then
 	echo "skipping rebuild of mig cross"
 else
 	cross_build_setup mig mig_1
-	apt_get_install dpkg-dev debhelper "gnumach-dev:$HOST_ARCH" flex libfl-dev bison dh-autoreconf
+	apt_get_install dpkg-dev debhelper dh-exec dh-autoreconf "gnumach-dev:$HOST_ARCH" flex libfl-dev bison
 	drop_privs dpkg-buildpackage -d -B "--target-arch=$HOST_ARCH" -uc -us
 	cd ..
 	ls -l
