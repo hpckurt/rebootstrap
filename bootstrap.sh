@@ -1544,11 +1544,7 @@ buildenv_tcl8_6() {
 }
 
 add_automatic tcltk-defaults
-
-patch_tcp_wrappers() {
-	# missing libnsl-dev dependency #972188
-	drop_privs sed -i -e '/^Build-Depends:/s/$/, libnsl-dev/' debian/control
-}
+add_automatic tcp-wrappers
 
 add_automatic tk8.6
 buildenv_tk8_6() {
@@ -2081,7 +2077,6 @@ add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
-add_need libnsl # by tcp-wrappers
 add_need libpsl # by curl
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 add_need libssh2 # by curl
@@ -2366,15 +2361,6 @@ mark_built elfutils
 # needed by glib2.0
 
 automatically_cross_build_packages
-
-if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-	assert_built libnsl
-	cross_build tcp-wrappers
-	mark_built tcp-wrappers
-	# needed by audit
-
-	automatically_cross_build_packages
-fi
 
 assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
 cross_build audit nopython audit_1
