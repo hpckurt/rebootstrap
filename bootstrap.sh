@@ -2109,6 +2109,7 @@ add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
 add_need tcltk-defaults # by python2.7
+add_need tcp-wrappers # by audit
 add_need xz-utils # by libxml2
 
 automatically_cross_build_packages() {
