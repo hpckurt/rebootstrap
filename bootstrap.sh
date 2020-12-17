@@ -777,6 +777,10 @@ patch_gcc_default_pie_everywhere()
  endif
 EOF
 }
+patch_gcc_limits_h_test() {
+	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
+	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -786,10 +790,12 @@ patch_gcc_wdotap() {
 	fi
 }
 patch_gcc_10() {
-	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
-	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 	patch_gcc_default_pie_everywhere
+	patch_gcc_limits_h_test
 	patch_gcc_wdotap
+}
+patch_gcc_11() {
+	patch_gcc_limits_h_test
 }
 
 buildenv_gdbm() {
