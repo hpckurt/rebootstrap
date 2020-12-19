@@ -1565,6 +1565,7 @@ buildenv_util_linux() {
 }
 
 add_automatic xft
+add_automatic xxhash
 
 add_automatic xz-utils
 patch_xz_utils() {
