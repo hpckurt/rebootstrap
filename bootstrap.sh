@@ -672,12 +672,6 @@ add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
 
-builddep_cracklib2() {
-	# explicitly disable zlib support #928436
-	apt_get_remove "zlib1g-dev:$(dpkg --print-architecture)" "zlib1g-dev:$1"
-	apt_get_build_dep "-a$1" --arch-only -Pcross,nopython ./
-}
-
 patch_curl() {
 	echo "fix missing <!nocheck> #969004"
 	patch -p1 <<'EOF'
