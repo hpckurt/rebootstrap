@@ -671,25 +671,7 @@ builddep_build_essential() {
 add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
-
-patch_curl() {
-	echo "fix missing <!nocheck> #969004"
-	patch -p1 <<'EOF'
---- curl-7.72.0/debian/control
-+++ curl-7.72.0/debian/control
-@@ -22,8 +22,8 @@
-  libssl-dev (>= 1.1),
-  libtool,
-  openssh-server <!nocheck>,
-- python3:native,
-- python3-impacket,
-+ python3:native <!nocheck>,
-+ python3-impacket <!nocheck>,
-  quilt,
-  stunnel4 <!nocheck>,
-  zlib1g-dev
-EOF
-}
+add_automatic curl
 
 builddep_cyrus_sasl2() {
 	assert_built "db-defaults db5.3 openssl pam"
@@ -2122,9 +2104,7 @@ add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
 add_need libidn2 # by gnutls28
 add_need libgcrypt20 # by libprelude, cryptsetup
-add_need libpsl # by curl
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
-add_need libssh2 # by curl
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
@@ -2141,15 +2121,12 @@ add_need mpclib3 # by gcc-VER
 add_need mpdecimal # by python3.X
 add_need mpfr4 # by gcc-VER
 add_need nettle # by unbound, gnutls28
-add_need nghttp2 # by curl
-add_need nss # by curl
 add_need openssl # by cyrus-sasl2
 add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
 add_need popt # by newt
 add_need readline5 # by lvm2
-add_need rtmpdump # by curl
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
@@ -2451,12 +2428,6 @@ automatically_cross_build_packages
 cross_build cdebconf pkg.cdebconf.nogtk cdebconf_1
 mark_built cdebconf
 # needed by base-passwd
-
-automatically_cross_build_packages
-
-cross_build curl
-mark_built curl
-# needed by gnupg2
 
 automatically_cross_build_packages
 
