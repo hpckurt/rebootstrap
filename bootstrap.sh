@@ -1740,7 +1740,7 @@ fi
 if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX"
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
 	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
 		if test "$ENABLE_MULTIARCH_GCC" = yes; then
 			apt_get_install "linux-libc-dev:$HOST_ARCH"
@@ -1876,7 +1876,7 @@ progress_mark "$LIBC_NAME stage2 cross build"
 if test -f "$REPODIR/stamps/gcc_3"; then
 	echo "skipping rebuild of gcc stage3"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX"
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
 	if test "$HOST_ARCH" = hppa; then
 		$APT_GET install binutils-hppa64-linux-gnu
 	fi
@@ -1944,7 +1944,7 @@ if test "$ENABLE_MULTIARCH_GCC" != yes; then
 if test -f "$REPODIR/stamps/gcc_f1"; then
 	echo "skipping rebuild of gcc rtlibs"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH"
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool autoconf2.64 zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH" time
 	if test "$HOST_ARCH" = hppa; then
 		$APT_GET install binutils-hppa64-linux-gnu
 	fi
