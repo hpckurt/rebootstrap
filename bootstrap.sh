@@ -1181,22 +1181,6 @@ builddep_libtool() {
 	# gnulib dependency lacks M-A:foreign
 	apt_get_install debhelper file "gfortran-$GCC_VER$HOST_ARCH_SUFFIX" automake autoconf autotools-dev help2man texinfo "zlib1g-dev:$HOST_ARCH" gnulib
 }
-patch_libtool() {
-	echo "fix FTBFS with updated gnulib #979173"
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -24,7 +24,7 @@
- ####
-
-
--AC_PREREQ(2.63)
-+AC_PREREQ(2.64)
- dnl Oldest automake required for bootstrap is below in AM_INIT_AUTOMAKE.
-
-
-EOF
-}
 
 add_automatic libunistring
 buildenv_libunistring() {
