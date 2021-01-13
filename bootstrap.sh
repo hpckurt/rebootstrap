@@ -800,6 +800,7 @@ patch_gcc_10() {
 patch_gcc_11() {
 	patch_gcc_limits_h_test
 	patch_gcc_mapper_server
+	patch_gcc_wdotap
 }
 
 buildenv_gdbm() {
