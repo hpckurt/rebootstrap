@@ -2204,6 +2204,17 @@ assert_built() {
 	return 1
 }
 
+# guile-3.0 FTBFS #980498, build nocheck
+cross_build_setup guile-3.0 guile-3.0_native
+apt_get_build_dep ./
+drop_privs dpkg-buildpackage -B -uc -us
+cd ..
+ls -l
+pickup_packages *.changes
+cd ..
+rm -Rf guile-3.0_native
+progress_mark "guile-3.0 native build"
+
 automatically_cross_build_packages
 
 cross_build zlib "$(if test "$ENABLE_MULTILIB" != yes; then echo stage1; fi)"
