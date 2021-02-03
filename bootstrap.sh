@@ -1521,7 +1521,6 @@ patch_readline() {
 EOF
 }
 
-add_automatic readline5
 add_automatic rtmpdump
 add_automatic sed
 add_automatic shadow
@@ -2085,7 +2084,6 @@ add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
 add_need popt # by newt
-add_need readline5 # by lvm2
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
