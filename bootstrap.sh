@@ -1151,6 +1151,7 @@ add_automatic libice
 add_automatic libidn
 add_automatic libidn2
 add_automatic libksba
+add_automatic libmd
 add_automatic libnsl
 add_automatic libonig
 add_automatic libpipeline
