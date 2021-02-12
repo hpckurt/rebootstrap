@@ -771,22 +771,6 @@ patch_gcc_limits_h_test() {
 	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
 	drop_privs sed -i -e 's,^\(+LIMITS_H_TEST = \).*,\1:,' debian/patches/gcc-multiarch.diff
 }
-patch_gcc_mapper_server() {
-	echo "adding g++-mapper-server to cross-install-location.diff #977959"
-	drop_privs tee -a debian/patches/cross-install-location.diff >/dev/null <<'EOF'
---- a/src/c++tools/Makefile.in
-+++ b/src/c++tools/Makefile.in
-@@ -21,7 +21,7 @@
- libexecdir := @libexecdir@
- target_noncanonical := @target_noncanonical@
- gcc_version := $(shell @get_gcc_base_ver@ $(srcdir)/../gcc/BASE-VER)
--libexecsubdir := $(libexecdir)/gcc/$(target_noncanonical)/$(gcc_version)
-+libexecsubdir := $(libexecdir)/gcc-cross/$(target_noncanonical)/$(gcc_version)
- INSTALL_PROGRAM := @INSTALL_PROGRAM@
- INSTALL_STRIP_PROGRAM := $(srcdir)/../install-sh -c -s
- AUTOCONF := @AUTOCONF@
-EOF
-}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -802,7 +786,6 @@ patch_gcc_10() {
 }
 patch_gcc_11() {
 	patch_gcc_limits_h_test
-	patch_gcc_mapper_server
 	patch_gcc_wdotap
 }
 
