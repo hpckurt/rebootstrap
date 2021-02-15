@@ -1066,63 +1066,7 @@ add_automatic libdebian-installer
 add_automatic libev
 add_automatic libevent
 add_automatic libffi
-
 add_automatic libgc
-patch_libgc() {
-	if test "$HOST_ARCH" = nios2; then
-		echo "cherry-picking upstream commit https://github.com/ivmai/bdwgc/commit/2571df0e30b4976d7a12dbc6fbec4f1c4027924d"
-		drop_privs patch -p1 <<'EOF'
---- a/include/private/gcconfig.h
-+++ b/include/private/gcconfig.h
-@@ -188,6 +188,10 @@
- #    endif
- #    define mach_type_known
- # endif
-+# if defined(__NIOS2__) || defined(__NIOS2) || defined(__nios2__)
-+#   define NIOS2 /* Altera NIOS2 */
-+#   define mach_type_known
-+# endif
- # if defined(__NetBSD__) && defined(__vax__)
- #    define VAX
- #    define mach_type_known
-@@ -1729,6 +1733,24 @@
- #   endif
- # endif
- 
-+# ifdef NIOS2
-+#  define CPP_WORDSZ 32
-+#  define MACH_TYPE "NIOS2"
-+#  ifdef LINUX
-+#    define OS_TYPE "LINUX"
-+#    define DYNAMIC_LOADING
-+     extern int _end[];
-+     extern int __data_start[];
-+#    define DATASTART ((ptr_t)(__data_start))
-+#    define DATAEND ((ptr_t)(_end))
-+#    define ALIGNMENT 4
-+#    ifndef HBLKSIZE
-+#      define HBLKSIZE 4096
-+#    endif
-+#    define LINUX_STACKBOTTOM
-+#  endif /* Linux */
-+# endif
-+
- # ifdef SH4
- #   define MACH_TYPE "SH4"
- #   define OS_TYPE "MSWINCE"
-@@ -2800,7 +2822,8 @@
-
- #if ((defined(UNIX_LIKE) && (defined(DARWIN) || defined(HURD) \
-                              || defined(OPENBSD) || defined(ARM32) \
--                             || defined(MIPS) || defined(AVR32))) \
-+                             || defined(MIPS) || defined(AVR32) \
-+                             || defined(NIOS2))) \
-      || (defined(LINUX) && (defined(SPARC) || defined(M68K))) \
-      || ((defined(RTEMS) || defined(PLATFORM_ANDROID)) && defined(I386))) \
-     && !defined(NO_GETCONTEXT)
-EOF
-	fi
-}
 
 add_automatic libgcrypt20
 buildenv_libgcrypt20() {
