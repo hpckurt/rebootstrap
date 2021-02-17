@@ -1642,6 +1642,7 @@ else
 		$APT_GET install binutils-hppa64-linux-gnu
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc1
+	check_binNMU
 	dpkg-checkbuilddeps || : # tell unmet build depends
 	echo "$HOST_ARCH" > debian/target
 	(
@@ -1783,6 +1784,7 @@ else
 		esac
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc3
+	check_binNMU
 	dpkg-checkbuilddeps -a$HOST_ARCH || : # tell unmet build depends
 	echo "$HOST_ARCH" > debian/target
 	(
@@ -1842,6 +1844,7 @@ else
 		$APT_GET install $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross libc6-dev-\1:$HOST_ARCH/g")
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc_f1
+	check_binNMU
 	dpkg-checkbuilddeps || : # tell unmet build depends
 	echo "$HOST_ARCH" > debian/target
 	(
