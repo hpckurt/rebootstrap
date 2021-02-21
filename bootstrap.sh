@@ -1755,6 +1755,8 @@ if dpkg --compare-versions "$GCC_VER" gt "$BUILD_GCC_MULTIARCH_VER"; then
 	echo "deb [ arch=$(dpkg --print-architecture) ] $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
 	$APT_GET update
 	$APT_GET -t experimental install g++ g++-$GCC_VER
+	# work around #983220
+	test "$GCC_VER" = 11 && $APT_GET -t experimental install libctf-nobfd0
 	rm -f /etc/apt/sources.list.d/tmp-experimental.list
 	$APT_GET update
 elif test -f "$REPODIR/stamps/gcc_0"; then
