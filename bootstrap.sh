@@ -700,49 +700,6 @@ buildenv_diffutils() {
 }
 
 add_automatic dpkg
-patch_dpkg() {
-	test "$GCC_VER" = 11 || return 0
-	echo "fix FTBFS with gcc-11"
-	# https://git.dpkg.org/cgit/dpkg/dpkg.git/patch/?id=7149af4125f76422e320c3d1f9d9308e9259bdf9
-	drop_privs patch -p1 <<'EOF'
-From 7149af4125f76422e320c3d1f9d9308e9259bdf9 Mon Sep 17 00:00:00 2001
-From: Guillem Jover <guillem@debian.org>
-Date: Wed, 23 Dec 2020 17:23:49 +0100
-Subject: libdpkg: Do not define the clamp macro when compiling C++ code
-
-Newer versions of the C++ standard define a clamp function in the STL,
-which gets messed up by our macro.
-
-Reported-by: Helmut Grohne <helmut@subdivi.de>
-Warned-by: g++ -std=gnu++17
-Changelog: internal
----
- lib/dpkg/macros.h | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/lib/dpkg/macros.h b/lib/dpkg/macros.h
-index 6eaedf844..a4776570a 100644
---- a/lib/dpkg/macros.h
-+++ b/lib/dpkg/macros.h
-@@ -153,9 +153,12 @@
-  * @param l The low limit.
-  * @param h The high limit.
-  */
-+/* For C++ use native implementations from STL or similar. */
-+#ifndef __cplusplus
- #ifndef clamp
- #define clamp(v, l, h) ((v) > (h) ? (h) : ((v) < (l) ? (l) : (v)))
- #endif
-+#endif
- 
- /** @} */
- 
--- 
-cgit v1.2.1
-
-EOF
-}
-
 add_automatic e2fsprogs
 add_automatic expat
 add_automatic file
