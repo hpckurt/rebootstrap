@@ -213,6 +213,11 @@ obtain_source_package() {
 	fi
 }
 
+# #980963
+cat <<EOF >> /usr/share/dpkg/cputable
+arc		arc		arc		32	little
+EOF
+
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
 	echo "architecture $HOST_ARCH unknown to dpkg"
 	exit 1
