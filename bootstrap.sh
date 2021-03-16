@@ -1345,6 +1345,12 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
+
+builddep_libxcrypt() {
+	# avoid pulling the host libltdl-dev #985311
+	apt_get_install debhelper autoconf automake libtool pkg-config libltdl-dev
+}
+
 add_automatic libxdmcp
 
 add_automatic libxext
