@@ -736,7 +736,49 @@ EOF
 }
 patch_gcc_limits_h_test() {
 	echo "fix LIMITS_H_TEST again https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80677"
-	drop_privs sed -i -e '/^+LIMITS_H_TEST = /s,-o -f \$(BUILD_SYSTEM_HEADER_DIR),-o -f /usr/include,' debian/patches/gcc-multiarch.diff
+	drop_privs tee debian/patches/limits-h-test.diff >/dev/null <<'EOF'
+--- a/src/gcc/limitx.h
++++ b/src/gcc/limitx.h
+@@ -29,7 +29,7 @@
+ #ifndef _GCC_LIMITS_H_  /* Terminated in limity.h.  */
+ #define _GCC_LIMITS_H_
+
+-#ifndef _LIBC_LIMITS_H_
++#if !defined(_LIBC_LIMITS_H_) && __has_include_next(<limits.h>)
+ /* Use "..." so that we find syslimits.h only in this same directory.  */
+ #include "syslimits.h"
+ #endif
+--- a/src/gcc/limity.h
++++ b/src/gcc/limity.h
+@@ -3,7 +3,7 @@
+
+ #else /* not _GCC_LIMITS_H_ */
+
+-#ifdef _GCC_NEXT_LIMITS_H
++#if defined(_GCC_NEXT_LIMITS_H) && __has_include_next(<limits.h>)
+ #include_next <limits.h>		/* recurse down to the real one */
+ #endif
+
+--- a/src/gcc/Makefile.in
++++ b/src/gcc/Makefile.in
+@@ -3139,11 +3139,7 @@
+ 	  sysroot_headers_suffix=`echo $${ml} | sed -e 's/;.*$$//'`; \
+ 	  multi_dir=`echo $${ml} | sed -e 's/^[^;]*;//'`; \
+ 	  fix_dir=include-fixed$${multi_dir}; \
+-	  if $(LIMITS_H_TEST) ; then \
+-	    cat $(srcdir)/limitx.h $(T_GLIMITS_H) $(srcdir)/limity.h > tmp-xlimits.h; \
+-	  else \
+-	    cat $(T_GLIMITS_H) > tmp-xlimits.h; \
+-	  fi; \
++	  cat $(srcdir)/limitx.h $(T_GLIMITS_H) $(srcdir)/limity.h > tmp-xlimits.h; \
+ 	  $(mkinstalldirs) $${fix_dir}; \
+ 	  chmod a+rx $${fix_dir} || true; \
+ 	  $(SHELL) $(srcdir)/../move-if-change \
+EOF
+	if test "$GCC_VER = 10"; then
+		drop_privs sed -i -e 's,\$(T_GLIMITS_H),$(srcdir)/glimits.h,' debian/patches/limits-h-test.diff
+	fi
+	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
 }
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
