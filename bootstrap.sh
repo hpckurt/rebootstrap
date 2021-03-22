@@ -775,7 +775,7 @@ patch_gcc_limits_h_test() {
  	  chmod a+rx $${fix_dir} || true; \
  	  $(SHELL) $(srcdir)/../move-if-change \
 EOF
-	if test "$GCC_VER = 10"; then
+	if test "$GCC_VER" = 10; then
 		drop_privs sed -i -e 's,\$(T_GLIMITS_H),$(srcdir)/glimits.h,' debian/patches/limits-h-test.diff
 	fi
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
