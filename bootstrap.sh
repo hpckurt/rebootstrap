@@ -126,6 +126,11 @@ check_arch() {
 	if elf-arch -a "$2" "$1"; then
 		return 0
 	else
+		case "$2:$(file -b "$1")" in
+			"arc:ELF 32-bit LSB relocatable, ARC Cores Tangent-A5, version 1 (SYSV)"*)
+				return 0
+			;;
+		esac
 		echo "expected $2, but found $(file -b "$1")"
 		return 1
 	fi
