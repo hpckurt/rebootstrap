@@ -1392,29 +1392,6 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
-
-builddep_libxcrypt() {
-	# avoid pulling the host libltdl-dev #985311
-	apt_get_install debhelper autoconf automake libtool pkg-config libltdl-dev
-}
-patch_libxcrypt() {
-	if test "$HOST_ARCH" = x32; then
-		echo "fixing glibc detection #985372"
-		drop_privs patch -p1 <<'EOF'
---- libxcrypt-4.4.18.orig/configure.ac
-+++ libxcrypt-4.4.18/configure.ac
-@@ -427,6 +427,7 @@
- if test $enable_obsolete_api = 1; then
-   AC_MSG_CHECKING([minimum symbol version to use for compatibility symbols])
-   SYMVER_FLOOR=$(
-+    export CC;
-     $PERL ${srcdir}/build-aux/compute-symver-floor \
-       ${srcdir}/lib/libcrypt.minver $host_os $host_cpu \
-     2>&AS_MESSAGE_LOG_FD
-EOF
-	fi
-}
-
 add_automatic libxdmcp
 
 add_automatic libxext
