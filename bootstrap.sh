@@ -1507,7 +1507,7 @@ patch_nss() {
 
 EOF
 	fi
-	echo "work around FTBFS #951644"
+	echo "work around FTBFS #984258"
 	drop_privs patch -p1 <<'EOF'
 --- a/debian/rules
 +++ b/debian/rules
