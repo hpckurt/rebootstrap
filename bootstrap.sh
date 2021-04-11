@@ -1736,8 +1736,8 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	cross_build_setup binutils binutils-hppa64
 	check_binNMU
 	apt_get_build_dep --arch-only -Pnocheck ./
-	drop_privs TARGET=hppa64-linux-gnu dpkg-buildpackage -B -Pnocheck --target=stamps/control
-	drop_privs TARGET=hppa64-linux-gnu dpkg-buildpackage -B -uc -us -Pnocheck
+	drop_privs with_hppa64=yes DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult nopgo" dpkg-buildpackage -B -Pnocheck --target=stamps/control
+	drop_privs with_hppa64=yes DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult nopgo" dpkg-buildpackage -B -uc -us -Pnocheck
 	cd ..
 	ls -l
 	pickup_additional_packages binutils-hppa64-linux-gnu_*.deb
