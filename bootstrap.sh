@@ -641,7 +641,13 @@ add_automatic attr
 add_automatic autogen
 add_automatic base-files
 add_automatic base-passwd
+
 add_automatic bash
+builddep_bash() {
+	echo "working around libncurses-dev conflict #986764"
+	apt_get_remove libncurses-dev
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
 
 patch_binutils() {
 	echo "patching binutils to discard ldscripts"
