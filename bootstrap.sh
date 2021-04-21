@@ -582,7 +582,7 @@ cross_build() {
 	if test "$ENABLE_MULTILIB" = "no"; then
 		profiles="$profiles nobiarch"
 	fi
-	profiles=`echo "$profiles" | sed 's/ /,/g;s/,,*/,/g;s/^,//;s/,$//'`
+	profiles=$(join_words , $profiles)
 	if test -f "$REPODIR/stamps/$stamp"; then
 		echo "skipping rebuild of $pkg with profiles $profiles"
 	else
@@ -2202,17 +2202,15 @@ add_need tcp-wrappers # by audit
 add_need xz-utils # by libxml2
 
 automatically_cross_build_packages() {
-	local need_packages_comma_sep dosetmp profiles buildable new_needed line pkg missing source
+	local dosetmp profiles buildable new_needed line pkg missing source
 	while test -n "$need_packages"; do
 		echo "checking packages with dose-builddebcheck: $need_packages"
-		need_packages_comma_sep=`echo $need_packages | sed 's/ /,/g'`
 		dosetmp=`mktemp -t doseoutput.XXXXXXXXXX`
 		profiles="$DEFAULT_PROFILES"
 		if test "$ENABLE_MULTILIB" = no; then
 			profiles=$(set_add "$profiles" nobiarch)
 		fi
-		profiles=$(echo "$profiles" | tr ' ' ,)
-		call_dose_builddebcheck --successes --failures --explain --latest=1 --deb-drop-b-d-indep "--deb-profiles=$profiles" "--checkonly=$need_packages_comma_sep" >"$dosetmp"
+		call_dose_builddebcheck --successes --failures --explain --latest=1 --deb-drop-b-d-indep "--deb-profiles=$(join_words , $profiles)" "--checkonly=$(join_words , $need_packages)" >"$dosetmp"
 		buildable=
 		new_needed=
 		while IFS= read -r line; do
@@ -2271,18 +2269,16 @@ automatically_cross_build_packages() {
 }
 
 assert_built() {
-	local missing_pkgs missing_pkgs_comma_sep profiles
+	local missing_pkgs profiles
 	missing_pkgs=`set_difference "$1" "$built_packages"`
 	test -z "$missing_pkgs" && return 0
 	echo "rebootstrap-error: missing asserted packages: $missing_pkgs"
 	missing_pkgs=`set_union "$missing_pkgs" "$need_packages"`
-	missing_pkgs_comma_sep=`echo $missing_pkgs | sed 's/ /,/g'`
 	profiles="$DEFAULT_PROFILES"
 	if test "$ENABLE_MULTILIB" = no; then
 		profiles=$(set_add "$profiles" nobiarch)
 	fi
-	profiles=$(echo "$profiles" | tr ' ' ,)
-	call_dose_builddebcheck --failures --explain --latest=1 --deb-drop-b-d-indep "--deb-profiles=$profiles" "--checkonly=$missing_pkgs_comma_sep"
+	call_dose_builddebcheck --failures --explain --latest=1 --deb-drop-b-d-indep "--deb-profiles=$(join_words , $profiles)" "--checkonly=$(join_words , $missing_pkgs)"
 	return 1
 }
 
