@@ -791,6 +791,25 @@ EOF
 	fi
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_musl_ssp() {
+	test "$LIBC_NAME" = musl || return 0
+	echo "adding -lssp_nonshared via default specs"
+	drop_privs tee debian/patches/musl-ssp.diff >/dev/null <<'EOF'
+--- a/src/gcc/gcc.c
++++ b/src/gcc/gcc.c
+@@ -1084,7 +1084,8 @@
+ #ifndef LINK_SSP_SPEC
+ #ifdef TARGET_LIBC_PROVIDES_SSP
+ #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
+-		       "|fstack-protector-strong|fstack-protector-explicit:}"
++		       "|fstack-protector-strong|fstack-protector-explicit" \
++		       ":-lssp_nonshared}"
+ #else
+ #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
+ 		       "|fstack-protector-strong|fstack-protector-explicit" \
+EOF
+	echo "debian_patches += musl-ssp" | drop_privs tee -a debian/rules.patch >/dev/null
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -802,10 +821,12 @@ patch_gcc_wdotap() {
 patch_gcc_10() {
 	patch_gcc_default_pie_everywhere
 	patch_gcc_limits_h_test
+	patch_gcc_musl_ssp
 	patch_gcc_wdotap
 }
 patch_gcc_11() {
 	patch_gcc_limits_h_test
+	patch_gcc_musl_ssp
 	patch_gcc_wdotap
 }
 
