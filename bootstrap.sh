@@ -1406,6 +1406,23 @@ buildenv_libunistring() {
 		export gl_cv_pthread_rwlock_rdlock_prefer_writer=no
 	fi
 }
+patch_libunistring() {
+	dpkg-architecture "-a$HOST_ARCH" -i musl-linux-any || return 0
+	echo "fixing generation of charset.alias for musl #987609"
+	drop_privs patch -p1 <<'EOF'
+--- a/lib/Makefile.gnulib
++++ b/lib/Makefile.gnulib
+@@ -461,7 +461,7 @@
+ 	  case '$(host_os)' in \
+ 	    darwin[56]*) \
+ 	      need_charset_alias=true ;; \
+-	    darwin* | cygwin* | mingw* | pw32* | cegcc*) \
++	    darwin* | cygwin* | mingw* | pw32* | cegcc* | linux-musl*) \
+ 	      need_charset_alias=false ;; \
+ 	    *) \
+ 	      need_charset_alias=true ;; \
+EOF
+}
 
 add_automatic libusb
 add_automatic libusb-1.0
