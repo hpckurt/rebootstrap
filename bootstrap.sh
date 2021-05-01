@@ -1707,7 +1707,14 @@ buildenv_util_linux() {
 
 add_automatic xft
 add_automatic xxhash
+
 add_automatic xz-utils
+buildenv_xz_utils() {
+	if dpkg-architecture "-a$1" -imusl-linux-any; then
+		echo "ignoring symbol differences for musl for now"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+	fi
+}
 
 builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
