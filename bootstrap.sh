@@ -1508,7 +1508,13 @@ add_automatic man-db
 add_automatic mawk
 add_automatic mpclib3
 add_automatic mpdecimal
+
 add_automatic mpfr4
+patch_mpfr4() {
+	test "$HOST_ARCH" = musl-linux-arm64 || return 0
+	echo "fixing symbols for musl-linux-arm64 #988008"
+	drop_privs sed -i -e '/^ /s/arm64/any-&/' debian/libmpfr6.symbols
+}
 
 builddep_ncurses() {
 	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
