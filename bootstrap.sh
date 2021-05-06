@@ -1479,6 +1479,11 @@ buildenv_libxt() {
 }
 
 add_automatic libzstd
+builddep_libzstd() {
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+	echo "fixing d-shlibs for musl #987950"
+	sed -i -e '/libc\>/a\		-e '"'"'s/libclibc\.so-dev//'"'"' \\' /usr/bin/d-devlibdeps
+}
 
 patch_linux() {
 	local kernel_arch comment
