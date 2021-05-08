@@ -178,7 +178,7 @@ if test -z "$DROP_PRIVS"; then
 		exec env -- "$@"
 	}
 else
-	$APT_GET install adduser fakeroot
+	apt_get_install adduser fakeroot
 	if ! getent passwd "$DROP_PRIVS" >/dev/null; then
 		adduser --system --group --home /tmp/buildd --no-create-home --shell /bin/false "$DROP_PRIVS"
 	fi
@@ -191,7 +191,7 @@ drop_privs() {
 }
 
 if test "$ENABLE_MULTIARCH_GCC" = yes; then
-	$APT_GET install cross-gcc-dev
+	apt_get_install cross-gcc-dev
 	echo "removing unused unstripped_exe patch"
 	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
 fi
@@ -360,7 +360,7 @@ chdist_native() {
 }
 
 if test "$ENABLE_DIFFOSCOPE" = yes; then
-	$APT_GET install devscripts
+	apt_get_install devscripts
 	chdist_native create "$MIRROR" sid main
 	if ! chdist_native apt-get update; then
 		echo "rebootstrap-warning: not comparing packages to native builds"
@@ -706,7 +706,7 @@ add_automatic bsdmainutils
 
 builddep_build_essential() {
 	# g++ dependency needs cross translation
-	$APT_GET install debhelper python3
+	apt_get_install debhelper python3
 }
 
 add_automatic bzip2
@@ -717,7 +717,7 @@ add_automatic curl
 builddep_cyrus_sasl2() {
 	assert_built "db-defaults db5.3 openssl pam"
 	# many packages droppable in stage1
-	$APT_GET install debhelper quilt automake autotools-dev "libdb-dev:$1" "libpam0g-dev:$1" "libssl-dev:$1" chrpath groff-base po-debconf docbook-to-man dh-autoreconf
+	apt_get_install debhelper quilt automake autotools-dev "libdb-dev:$1" "libpam0g-dev:$1" "libssl-dev:$1" chrpath groff-base po-debconf docbook-to-man dh-autoreconf
 }
 
 add_automatic dash
@@ -1250,7 +1250,7 @@ patch_gmp() {
 
 builddep_gnu_efi() {
 	# binutils dependency needs cross translation
-	$APT_GET install debhelper
+	apt_get_install debhelper
 }
 
 add_automatic gnupg2
@@ -1541,14 +1541,14 @@ patch_mpfr4() {
 builddep_ncurses() {
 	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
 		assert_built gpm
-		$APT_GET install "libgpm-dev:$1"
+		apt_get_install "libgpm-dev:$1"
 	fi
 	# g++-multilib dependency unsatisfiable
 	apt_get_install debhelper pkg-config autoconf-dickey
 	case "$ENABLE_MULTILIB:$HOST_ARCH" in
 		yes:amd64|yes:i386|yes:powerpc|yes:ppc64|yes:s390|yes:sparc)
 			test "$1" = "$HOST_ARCH"
-			$APT_GET install "g++-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
+			apt_get_install "g++-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
 			ln -sf "`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
 		;;
@@ -1610,17 +1610,17 @@ add_automatic popt
 builddep_readline() {
 	assert_built "ncurses"
 	# gcc-multilib dependency unsatisfiable
-	$APT_GET install debhelper "libtinfo-dev:$1" "libncursesw5-dev:$1" mawk texinfo autotools-dev
+	apt_get_install debhelper "libtinfo-dev:$1" "libncursesw5-dev:$1" mawk texinfo autotools-dev
 	case "$ENABLE_MULTILIB:$HOST_ARCH" in
 		yes:amd64|yes:ppc64)
 			test "$1" = "$HOST_ARCH"
-			$APT_GET install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib32tinfo-dev:$1" "lib32ncursesw5-dev:$1"
+			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib32tinfo-dev:$1" "lib32ncursesw5-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
 			ln -sf "`dpkg-architecture -a$1 -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
 		;;
 		yes:i386|yes:powerpc|yes:sparc|yes:s390)
 			test "$1" = "$HOST_ARCH"
-			$APT_GET install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib64ncurses5-dev:$1"
+			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib64ncurses5-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
 			ln -sf "`dpkg-architecture -a$1 -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
 		;;
@@ -1746,7 +1746,7 @@ buildenv_xz_utils() {
 
 builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
-	$APT_GET install debhelper binutils dpkg-dev
+	apt_get_install debhelper binutils dpkg-dev
 }
 
 # choosing libatomic1 arbitrarily here, cause it never bumped soname
@@ -1764,10 +1764,10 @@ elif test -f "$REPODIR/stamps/gcc_0"; then
 	echo "skipping rebuild of build gcc"
 	$APT_GET --force-yes dist-upgrade # downgrade!
 else
-	$APT_GET build-dep --arch-only gcc-$GCC_VER
-	# dependencies for common libs no longer declared
-	$APT_GET install doxygen graphviz ghostscript texlive-latex-base xsltproc docbook-xsl-ns
 	cross_build_setup "gcc-$GCC_VER" gcc0
+	apt_get_build_dep --arch-only ./
+	# dependencies for common libs no longer declared
+	apt_get_install doxygen graphviz ghostscript texlive-latex-base xsltproc docbook-xsl-ns
 	(
 		export gcc_cv_libc_provides_ssp=yes
 		nolang=$(set_add "${GCC_NOLANG:-}" biarch)
@@ -1799,7 +1799,7 @@ else
 	cd ..
 	ls -l
 	pickup_packages *.changes
-	$APT_GET install binutils$HOST_ARCH_SUFFIX
+	apt_get_install "binutils$HOST_ARCH_SUFFIX"
 	assembler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-as"
 	if ! which "$assembler"; then echo "$assembler missing in binutils package"; exit 1; fi
 	if ! drop_privs "$assembler" -o test.o /dev/null; then echo "binutils fail to execute"; exit 1; fi
@@ -1820,7 +1820,7 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	cd ..
 	ls -l
 	pickup_additional_packages binutils-hppa64-linux-gnu_*.deb
-	$APT_GET install binutils-hppa64-linux-gnu
+	apt_get_install binutils-hppa64-linux-gnu
 	if ! which hppa64-linux-gnu-as; then echo "hppa64-linux-gnu-as missing in binutils package"; exit 1; fi
 	if ! drop_privs hppa64-linux-gnu-as -o test.o /dev/null; then echo "binutils-hppa64 fail to execute"; exit 1; fi
 	if ! test -f test.o; then echo "binutils-hppa64 fail to create object"; exit 1; fi
@@ -1887,7 +1887,7 @@ else
 		fi
 	fi
 	if test "$HOST_ARCH" = hppa; then
-		$APT_GET install binutils-hppa64-linux-gnu
+		apt_get_install binutils-hppa64-linux-gnu
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc1
 	check_binNMU
@@ -1907,10 +1907,10 @@ else
 	pickup_packages *.changes
 	apt_get_remove gcc-multilib
 	if test "$ENABLE_MULTILIB" = yes && ls | grep -q multilib; then
-		$APT_GET install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
+		apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
 	else
 		rm -vf ./*multilib*.deb
-		$APT_GET install "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
+		apt_get_install "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
 	fi
 	compiler="`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-gcc-$GCC_VER"
 	if ! which "$compiler"; then echo "$compiler missing in stage1 gcc package"; exit 1; fi
@@ -2017,7 +2017,7 @@ if test -f "$REPODIR/stamps/gcc_3"; then
 else
 	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
 	if test "$HOST_ARCH" = hppa; then
-		$APT_GET install binutils-hppa64-linux-gnu
+		apt_get_install binutils-hppa64-linux-gnu
 	fi
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		apt_get_install "libc-dev:$HOST_ARCH" $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1:$HOST_ARCH/g")
@@ -2086,10 +2086,10 @@ if test -f "$REPODIR/stamps/gcc_f1"; then
 else
 	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH" time
 	if test "$HOST_ARCH" = hppa; then
-		$APT_GET install binutils-hppa64-linux-gnu
+		apt_get_install binutils-hppa64-linux-gnu
 	fi
 	if test "$ENABLE_MULTILIB" = yes -a -n "$MULTILIB_NAMES"; then
-		$APT_GET install $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross libc6-dev-\1:$HOST_ARCH/g")
+		apt_get_install $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross libc6-dev-\1:$HOST_ARCH/g")
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc_f1
 	check_binNMU
@@ -2151,7 +2151,7 @@ if ! dpkg-architecture "-a$HOST_ARCH" -i musl-linux-any; then
 	# is defacto build-essential
 fi
 
-$APT_GET install dose-builddebcheck dctrl-tools
+apt_get_install dose-builddebcheck dctrl-tools
 
 call_dose_builddebcheck() {
 	local package_list source_list errcode
