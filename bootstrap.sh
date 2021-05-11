@@ -629,23 +629,6 @@ esac
 
 if test "$ENABLE_MULTIARCH_GCC" != yes; then
 	apt_get_install dpkg-cross
-	echo "fixing dpkg-cross ld script fixer #988052"
-	patch /usr/bin/dpkg-cross <<'EOF'
---- a/dpkg-cross
-+++ b/dpkg-cross
-@@ -650,6 +650,11 @@
- 				s:(^|[^-\w/])(/usr)?/libsf/:$1$crosslibsf/:g;
- 				s:(^|[^-\w/])(/usr)?/libx32/:$1$crosslibx32/:g;
- 			}
-+			# Even though libc is multiarch, it ships non-multiarch loaders.
-+			s:(^|[^-\w/])/lib(/ld[^/ ]*\.so):$1$crosslib$2:g;
-+			s:(^|[^-\w/])/lib32(/ld[^/ ]*\.so):$1$crosslib32$2:g;
-+			s:(^|[^-\w/])/lib64(/ld[^/ ]*\.so):$1$crosslib64$2:g;
-+			s:(^|[^-\w/])/libx32(/ld[^/ ]*\.so):$1$crosslibx32$2:g;
- 			print TO;
- 		}
- 		close(FROM);
-EOF
 fi
 
 automatic_packages=
