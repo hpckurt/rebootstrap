@@ -1516,9 +1516,14 @@ add_automatic mpdecimal
 
 add_automatic mpfr4
 patch_mpfr4() {
-	test "$HOST_ARCH" = musl-linux-arm64 || return 0
-	echo "fixing symbols for musl-linux-arm64 #988008"
-	drop_privs sed -i -e '/^ /s/arm64/any-&/' debian/libmpfr6.symbols
+	if test "$HOST_ARCH" = musl-linux-arm64; then
+		echo "fixing symbols for musl-linux-arm64 #988008"
+		drop_privs sed -i -e '/^ /s/arm64/any-&/' debian/libmpfr6.symbols
+	fi
+	if test "$HOST_ARCH" = musl-linux-armhf; then
+		echo "fixing symbols for musl-linux-armhf #988760"
+		drop_privs sed -i -e '/^ /s/armhf/eabihf-any-any-arm/' debian/libmpfr6.symbols
+	fi
 }
 
 builddep_ncurses() {
