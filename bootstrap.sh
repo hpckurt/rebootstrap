@@ -810,6 +810,24 @@ patch_gcc_musl_ssp() {
 EOF
 	echo "debian_patches += musl-ssp" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_asan_symbols() {
+	test "$HOST_ARCH" = riscv64 || return 0
+	echo "fixing asan symbols on riscv64 #989205"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/libasan6.symbols
++++ b/debian/libasan6.symbols
+@@ -1,7 +1,7 @@
+ libasan.so.6 libasan6 #MINVER#
+ #include "libasan.symbols.common"
+-(arch=!arm64 !alpha !amd64 !ia64 !mips64el !ppc64 !ppc64el !s390x !sparc64 !kfreebsd-amd64)#include "libasan.symbols.32"
+-(arch=arm64 alpha amd64 ia64 mips64el ppc64 ppc64el s390x sparc64 kfreebsd-amd64)#include "libasan.symbols.64"
++(arch-bits=32)#include "libasan.symbols.32"
++(arch-bits=64)#include "libasan.symbols.64"
+ (arch=armel armhf sparc64 x32)#include "libasan.symbols.16"
+ # these are missing on some archs ...
+  (arch=!s390x)__interceptor___tls_get_addr@Base 5
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -827,6 +845,7 @@ patch_gcc_10() {
 patch_gcc_11() {
 	patch_gcc_limits_h_test
 	patch_gcc_musl_ssp
+	patch_gcc_asan_symbols
 	patch_gcc_wdotap
 }
 
