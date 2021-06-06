@@ -793,20 +793,49 @@ EOF
 }
 patch_gcc_musl_ssp() {
 	test "$LIBC_NAME" = musl || return 0
-	echo "adding -lssp_nonshared via default specs"
-	drop_privs tee debian/patches/musl-ssp.diff >/dev/null <<'EOF'
---- a/src/gcc/gcc.c
-+++ b/src/gcc/gcc.c
-@@ -1084,7 +1084,8 @@
- #ifndef LINK_SSP_SPEC
- #ifdef TARGET_LIBC_PROVIDES_SSP
- #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
--		       "|fstack-protector-strong|fstack-protector-explicit:}"
-+		       "|fstack-protector-strong|fstack-protector-explicit" \
-+		       ":-lssp_nonshared}"
- #else
- #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
- 		       "|fstack-protector-strong|fstack-protector-explicit" \
+	echo "adding -lssp_nonshared via default specs #989521"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/patches/musl-ssp.diff
++++ b/debian/patches/musl-ssp.diff
+@@ -0,0 +1,21 @@
++See https://git.alpinelinux.org/aports/commit/?id=d307f133de1f8a9993ab0d6fd51176b9373df4c3
++and https://www.openwall.com/lists/musl/2014/11/05/3
++
++--- gcc-11-11.1.0.orig/src/gcc/gcc.c
+++++ gcc-11-11.1.0/src/gcc/gcc.c
++@@ -1087,8 +1087,15 @@
++ 
++ #ifndef LINK_SSP_SPEC
++ #ifdef TARGET_LIBC_PROVIDES_SSP
+++#if DEFAULT_LIBC == LIBC_MUSL
+++/* When linking without -fstack-protector-something but including objects that
+++   were built with -fstack-protector-something, calls to __stack_chk_fail_local
+++   can be emitted. Thus -lssp_nonshared must be linked unconditionally.  */
+++#define LINK_SSP_SPEC "-lssp_nonshared"
+++#else
++ #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
++ 		       "|fstack-protector-strong|fstack-protector-explicit:}"
+++#endif
++ #else
++ #define LINK_SSP_SPEC "%{fstack-protector|fstack-protector-all" \
++ 		       "|fstack-protector-strong|fstack-protector-explicit" \
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -1191,6 +1191,14 @@
+ 	rm -rf $(builddir)
+ 	mkdir $(builddir)
+ 
++ifneq (,$(filter musl-%,$(DEB_TARGET_ARCH)))
++	# We have to unconditionally link -lssp_nonshared on musl (see
++	# musl-ssp.diff). While gcc provides it, it comes a little late in the
++	# build for bootstrapping so we provide an empty one.
++	mkdir $(builddir)/gcc
++	ar rcs $(builddir)/gcc/libssp_nonshared.a
++endif
++
+ 	: # some tools like gettext are built with a newer libstdc++
+ 	mkdir -p bin
+ 	for i in msgfmt; do \
 EOF
 	echo "debian_patches += musl-ssp" | drop_privs tee -a debian/rules.patch >/dev/null
 }
