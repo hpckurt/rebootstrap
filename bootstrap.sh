@@ -130,6 +130,9 @@ check_arch() {
 			"arc:ELF 32-bit LSB relocatable, ARC Cores Tangent-A5, version 1 (SYSV)"*)
 				return 0
 			;;
+			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*)
+				return 0
+			;;
 		esac
 		echo "expected $2, but found $(file -b "$1")"
 		return 1
