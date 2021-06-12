@@ -689,7 +689,13 @@ EOF
 }
 
 add_automatic blt
+
 add_automatic bsdmainutils
+patch_bsdmainutils() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
+	echo "fixing FTBFS on musl-linux-any #989688"
+	drop_privs sed -i -e '/__unused/d' freebsd.h
+}
 
 builddep_build_essential() {
 	# g++ dependency needs cross translation
