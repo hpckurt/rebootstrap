@@ -1419,6 +1419,12 @@ patch_libffi() {
 }
 
 add_automatic libgc
+buildenv_libgc() {
+	if dpkg-architecture "-a$1" -imusl-linux-any; then
+		echo "ignoring symbol differences for musl for now"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+	fi
+}
 
 add_automatic libgcrypt20
 buildenv_libgcrypt20() {
