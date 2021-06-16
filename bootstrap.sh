@@ -922,6 +922,10 @@ builddep_glibc() {
 			exit 1
 		;;
 	esac
+	if test "$1" = csky; then
+		echo "adding csky support to config.sub #989944"
+		sed -i -e 's/\(| cydra-\* \)\\/\1| csky-* \\/;s/\(| clipper \)\\/\1| csky \\/' /usr/share/misc/config.sub
+	fi
 }
 patch_glibc() {
 	echo "patching glibc to pass -l to dh_shlibdeps for multilib"
