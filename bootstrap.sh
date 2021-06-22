@@ -707,10 +707,27 @@ add_automatic c-ares
 add_automatic coreutils
 add_automatic curl
 
-builddep_cyrus_sasl2() {
-	assert_built "db-defaults db5.3 openssl pam"
-	# many packages droppable in stage1
-	apt_get_install debhelper quilt automake autotools-dev "libdb-dev:$1" "libpam0g-dev:$1" "libssl-dev:$1" chrpath groff-base po-debconf docbook-to-man dh-autoreconf
+patch_cyrus_sasl2() {
+	echo "fix build-depends #928512"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -18,12 +18,12 @@
+                libkrb5-dev <!pkg.cyrus-sasl2.nogssapi>,
+                libldap2-dev <!pkg.cyrus-sasl2.noldap>,
+                libpam0g-dev,
+-               libpod-pom-view-restructured-perl,
++               libpod-pom-view-restructured-perl:native,
+                libpq-dev <!pkg.cyrus-sasl2.nosql>,
+                libsqlite3-dev,
+                libssl-dev,
+                po-debconf,
+-               python3-sphinx,
++               python3-sphinx:native,
+                quilt
+ Build-Conflicts: heimdal-dev
+ Vcs-Browser: https://salsa.debian.org/debian/cyrus-sasl2
+EOF
 }
 
 add_automatic dash
@@ -2487,23 +2504,7 @@ mark_built pam
 
 automatically_cross_build_packages
 
-if test -f "$REPODIR/stamps/cyrus-sasl2_1"; then
-	echo "skipping stage1 rebuild of cyrus-sasl2"
-else
-	builddep_cyrus_sasl2 "$HOST_ARCH"
-	cross_build_setup cyrus-sasl2 cyrus-sasl2_1
-	check_binNMU
-	dpkg-checkbuilddeps -B "-a$HOST_ARCH" -Ppkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql || : # tell unmet build depends
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Ppkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql -B -d -uc -us
-	cd ..
-	ls -l
-	pickup_packages *.changes
-	touch "$REPODIR/stamps/cyrus-sasl2_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf cyrus-sasl2_1
-fi
-progress_mark "cyrus-sasl2 stage1 cross build"
+cross_build cyrus-sasl2 pkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql cyrus-sask2_1
 mark_built cyrus-sasl2
 # needed by openldap
 
