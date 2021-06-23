@@ -1370,7 +1370,27 @@ EOF
 
 add_automatic grep
 add_automatic groff
+
 add_automatic guile-2.2
+patch_guile_2_2() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
+		echo "fixing generation of charset.alias for musl #990250"
+		drop_privs patch -p1 <<'EOF'
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -1043,7 +1043,7 @@ install-exec-localcharset: all-local
+ 	  case '$(host_os)' in \
+ 	    darwin[56]*) \
+ 	      need_charset_alias=true ;; \
+-	    darwin* | cygwin* | mingw* | pw32* | cegcc*) \
++	    darwin* | cygwin* | mingw* | pw32* | cegcc* | linux-musl*) \
+ 	      need_charset_alias=false ;; \
+ 	    *) \
+ 	      need_charset_alias=true ;; \
+EOF
+	fi
+}
+
 add_automatic guile-3.0
 
 add_automatic gzip
