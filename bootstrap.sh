@@ -639,7 +639,6 @@ automatic_packages=
 add_automatic() { automatic_packages=$(set_add "$automatic_packages" "$1"); }
 
 add_automatic acl
-add_automatic adns
 add_automatic apt
 add_automatic attr
 add_automatic autogen
