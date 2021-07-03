@@ -2668,6 +2668,28 @@ mark_built cdebconf
 
 automatically_cross_build_packages
 
+if test -f "$REPODIR/stamps/binutils_2"; then
+	echo "skipping cross rebuild of binutils"
+else
+	cross_build_setup binutils binutils_2
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck ./
+	check_binNMU
+	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck -B -uc -us
+	cd ..
+	ls -l
+	drop_privs sed -i -e '/^ .* binutils-for-host_.*deb$/d' ./*.changes
+	pickup_additional_packages *.changes
+	touch "$REPODIR/stamps/binutils_2"
+	compare_native ./*.deb
+	cd ..
+	drop_privs rm -Rf binutils_2
+fi
+progress_mark "cross build binutils"
+mark_built binutils
+# needed for build-essential
+
+automatically_cross_build_packages
+
 assert_built "$need_packages"
 
 echo "checking installability of build-essential with dose"
