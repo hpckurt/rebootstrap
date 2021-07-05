@@ -1462,6 +1462,12 @@ patch_libffi() {
 }
 
 add_automatic libgc
+patch_libgc() {
+	if test "$HOST_ARCH" = mips64; then
+		echo "updating libgc1 symbols for mips64 #990701"
+		drop_privs sed -i -e 's/!mips64el/!mips64 &/' debian/libgc1.symbols
+	fi
+}
 buildenv_libgc() {
 	if dpkg-architecture "-a$1" -imusl-linux-any; then
 		echo "ignoring symbol differences for musl for now"
