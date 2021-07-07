@@ -1726,7 +1726,15 @@ EOF
 }
 
 add_automatic patch
+
 add_automatic pcre2
+patch_pcre2() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
+		echo "fixing libc dependency #989729"
+		drop_privs sed -i -e s/libc6-dev/libc-dev/ debian/control
+	fi
+}
+
 add_automatic pcre3
 add_automatic popt
 
