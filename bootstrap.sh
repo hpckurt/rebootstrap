@@ -685,6 +685,8 @@ EOF
  	rm -rf $(d_hppa64)/$(PF)/include
 EOF
 	fi
+	echo "fix honouring of nocheck option #990794"
+	drop_privs sed -i -e 's/ifeq (\(,$(filter $(DEB_HOST_ARCH),\)/ifneq ($(DEB_BUILD_ARCH)\1/' debian/rules
 }
 
 add_automatic blt
