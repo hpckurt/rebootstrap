@@ -738,7 +738,6 @@ EOF
 }
 
 add_automatic dash
-add_automatic datefudge
 add_automatic db-defaults
 add_automatic debianutils
 
