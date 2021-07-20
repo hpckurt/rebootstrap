@@ -889,7 +889,6 @@ patch_gcc_10() {
 patch_gcc_11() {
 	patch_gcc_limits_h_test
 	patch_gcc_default_pie_everywhere
-	patch_gcc_musl_ssp
 	patch_gcc_wdotap
 }
 
