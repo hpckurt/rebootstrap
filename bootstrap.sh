@@ -899,12 +899,6 @@ buildenv_gdbm() {
 }
 
 add_automatic glib2.0
-buildenv_glib2_0() {
-	export glib_cv_stack_grows=no
-	export glib_cv_uscore=no
-	export ac_cv_func_posix_getgrgid_r=yes
-	export ac_cv_func_posix_getpwuid_r=yes
-}
 
 builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
