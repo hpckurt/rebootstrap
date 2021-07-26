@@ -687,12 +687,12 @@ EOF
 	fi
 	echo "fix honouring of nocheck option #990794"
 	drop_privs sed -i -e 's/ifeq (\(,$(filter $(DEB_HOST_ARCH),\)/ifneq ($(DEB_BUILD_ARCH)\1/' debian/rules
-	if test "$HOST_ARCH" = sparc; then
+	case "$HOST_ARCH" in nios2|sparc)
 		echo "enabling uncommon architectures in debian/control"
 		drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
-	fi
+	;; esac
 }
 
 add_automatic blt
