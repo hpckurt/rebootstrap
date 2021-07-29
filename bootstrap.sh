@@ -1651,7 +1651,7 @@ add_automatic libpipeline
 add_automatic libpng1.6
 
 patch_libprelude() {
-	echo "removing the unsatisfiable g++ build dependency"
+	echo "removing the unsatisfiable g++ build dependency #991100"
 	drop_privs sed -i -e '/^\s\+g++/d' debian/control
 }
 buildenv_libprelude() {
