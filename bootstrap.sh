@@ -693,6 +693,8 @@ EOF
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
 	;; esac
+	echo "fix undefined symbol ldlex_defsym #992318"
+	rm -f ld/ldlex.c
 }
 
 add_automatic blt
