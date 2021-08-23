@@ -1740,26 +1740,6 @@ buildenv_libunistring() {
 		export gl_cv_pthread_rwlock_rdlock_prefer_writer=no
 	fi
 }
-patch_libunistring() {
-	  echo "work around libunistring autoconf vs gnulib FTBFS #992281"
-	  drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -17,11 +17,9 @@
- dnl Process this file with autoconf to produce a configure script.
-
- AC_PREREQ([2.63])
--AC_INIT
-+AC_INIT([libunistring],[0])
- AC_CONFIG_SRCDIR([lib/unistring/version.in.h])
- AC_CONFIG_AUX_DIR([build-aux])
--. $srcdir/version.sh
--gl_INIT_PACKAGE([libunistring], [$VERSION_NUMBER])
- AM_INIT_AUTOMAKE([silent-rules dist-xz])
- AM_CONFIG_HEADER([config.h])
-
-EOF
-}
 
 add_automatic libusb
 add_automatic libusb-1.0
