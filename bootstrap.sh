@@ -2200,7 +2200,8 @@ fi
 progress_mark "gnumach stage1 cross build"
 fi
 
-test "$GCC_VER" = 10 && GCC_AUTOCONF=autoconf2.64 || GCC_AUTOCONF=autoconf2.69
+GCC_AUTOCONF=autoconf2.69
+
 if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
