@@ -1721,7 +1721,14 @@ add_automatic libsm
 add_automatic libsodium
 add_automatic libssh2
 add_automatic libsystemd-dummy
+
 add_automatic libtasn1-6
+builddep_libtasn1_6() {
+	echo "working around FTBFS #992928"
+	apt_get_install gtk-doc-tools
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
+
 add_automatic libtextwrap
 add_automatic libtirpc
 
