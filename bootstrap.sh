@@ -892,6 +892,7 @@ patch_gcc_10() {
 	patch_gcc_default_pie_everywhere
 	patch_gcc_limits_h_test
 	patch_gcc_musl_ssp
+	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
 patch_gcc_11() {
