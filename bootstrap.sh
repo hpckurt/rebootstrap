@@ -1663,6 +1663,11 @@ patch_libprelude() {
 	echo "removing the unsatisfiable g++ build dependency #991100"
 	drop_privs sed -i -e '/^\s\+g++/d' debian/control
 }
+builddep_libprelude() {
+	echo "working around FTBFS #993099"
+	apt_get_install gtk-doc-tools
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
 buildenv_libprelude() {
 	case $(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_SYSTEM) in *gnu*)
 		echo "glibc does not return NULL for malloc(0)"
