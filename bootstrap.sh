@@ -1911,32 +1911,6 @@ buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
 	export ac_cv_func_memcmp_working=yes
 }
-patch_openldap() {
-	echo "work around FTBFS #993032"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -6,6 +6,7 @@
-  Torsten Landschoff <torsten@debian.org>,
-  Ryan Tandy <ryan@nardis.ca>
- Build-Depends: debhelper (>= 10),
-+               autoconf2.69,
-                dpkg-dev (>= 1.17.14),
-                groff-base,
-                heimdal-multidev (>= 7.4.0.dfsg.1-1~) <!pkg.openldap.noslapd>,
---- a/debian/rules
-+++ b/debian/rules
-@@ -89,7 +89,7 @@
- # Only contrib/ldapc++ uses Automake, so special care is needed to update
- # config.guess and config.sub at the top level.
- autoreconf:
--	autoreconf -f -i . contrib/ldapc++
-+	autoreconf2.69 -f -i . contrib/ldapc++
- 	cp -f /usr/share/misc/config.guess /usr/share/misc/config.sub build/
-
- override_dh_autoreconf:
-EOF
-}
 
 add_automatic openssl
 add_automatic openssl1.0
