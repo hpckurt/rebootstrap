@@ -1725,7 +1725,14 @@ EOF
 add_automatic libsepol
 add_automatic libsm
 add_automatic libsodium
+
 add_automatic libssh2
+add_automatic libssh2
+patch_libssh2() {
+	echo "fix FTBFS #993176"
+	drop_privs sed -i -e '/m4_undefine..backend/d' configure.ac
+}
+
 add_automatic libsystemd-dummy
 
 add_automatic libtasn1-6
