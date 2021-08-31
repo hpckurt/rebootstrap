@@ -203,9 +203,6 @@ obtain_source_package() {
 	local use_experimental
 	use_experimental=
 	case "$1" in
-		binutils)
-			test "$GCC_VER" = 11 && use_experimental=yes
-		;;
 		gcc-[0-9]*)
 			test -n "$(apt-cache showsrc "$1")" || use_experimental=yes
 		;;
