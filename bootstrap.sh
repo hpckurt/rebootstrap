@@ -1753,7 +1753,7 @@ patch_linux() {
 	kernel_arch=
 	comment="just building headers yet"
 	case "$HOST_ARCH" in
-		csky|ia64|nios2)
+		arc|csky|ia64|nios2)
 			kernel_arch=$HOST_ARCH
 		;;
 		mipsr6|mipsr6el|mipsn32r6|mipsn32r6el|mips64r6|mips64r6el)
