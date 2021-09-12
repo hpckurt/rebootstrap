@@ -2848,7 +2848,7 @@ mark_built gdbm
 
 automatically_cross_build_packages
 
-cross_build newt stage1 newt_1
+cross_build newt nopython newt_1
 mark_built newt
 # needed by cdebconf
 
