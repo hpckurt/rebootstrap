@@ -1249,18 +1249,6 @@ EOF
 }
 
 add_automatic gmp
-patch_gmp() {
-	if test "$LIBC_NAME" = musl; then
-		echo "patching gmp symbols for musl arch #788411"
-		sed -i -r "s/([= ])(\!)?\<(${HOST_ARCH#musl-linux-})\>/\1\2\3 \2musl-linux-\3/" debian/libgmp10.symbols
-		# musl does not implement GNU obstack
-		sed -i -r 's/^ (.*_obstack_)/ (arch=!musl-linux-any !musleabihf-linux-any)\1/' debian/libgmp10.symbols
-	fi
-	if test "$HOST_ARCH" = mips64r6el; then
-		echo "updating gmp symbols for mips64r6el #984744"
-		drop_privs sed -i -e 's/!mips64el/& !mips64r6el/' debian/libgmp10.symbols
-	fi
-}
 
 builddep_gnu_efi() {
 	# binutils dependency needs cross translation
