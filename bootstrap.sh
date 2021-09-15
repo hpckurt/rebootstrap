@@ -345,20 +345,6 @@ else
 	mv -nv x/usr/include x/usr/include.orig
 	mkdir x/usr/include
 	mv -nv x/usr/include.orig "x/usr/include/$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
-	echo "work around getcwd -Wnonnull #993973"
-	patch "x/usr/include/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/unistd.h" <<'EOF'
---- a/unistd.h
-+++ b/unistd.h
-@@ -518,7 +518,7 @@
-    bytes long, unless SIZE == 0, in which case it is as
-    big as necessary.  */
- extern char *getcwd (char *__buf, size_t __size) __THROW __wur
--    __attr_access ((__write_only__, 1, 2));
-+    ;
-
- #ifdef	__USE_GNU
- /* Return a malloc'd string containing the current directory name.
-EOF
 	dpkg-deb -b x "./$LIBC_DEV_PKG"_*.deb
 	reprepro includedeb rebootstrap-native "./$LIBC_DEV_PKG"_*.deb
 	dpkg -i "./$LIBC_DEV_PKG"_*.deb
