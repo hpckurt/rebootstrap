@@ -2799,7 +2799,13 @@ else
 	cross_build_setup binutils binutils_2
 	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck ./
 	check_binNMU
-	drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck -B -uc -us
+	# work around #995195
+	mkdir /tmp/nodebugedit
+	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_ENDIAN)" != "$(dpkg-architecture -qDEB_HOST_ARCH_ENDIAN)"; then
+		ln -s /bin/true /tmp/nodebugedit/debugedit
+	fi
+	PATH="/tmp/nodebugedit:$PATH" drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck -B -uc -us
+	rm -Rf /tmp/nodebugedit
 	cd ..
 	ls -l
 	drop_privs sed -i -e '/^ .* binutils-for-host_.*deb$/d' ./*.changes
