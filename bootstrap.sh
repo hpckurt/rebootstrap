@@ -231,9 +231,6 @@ fi
 
 # ensure that the rebootstrap list comes first
 test -f /etc/apt/sources.list && mv -v /etc/apt/sources.list /etc/apt/sources.list.d/local.list
-for f in /etc/apt/sources.list.d/*.list; do
-	test -f "$f" && sed -i "s/^deb \(\[.*\] \)*/deb [ arch-=$HOST_ARCH ] /" $f
-done
 grep -q '^deb-src .*sid' /etc/apt/sources.list.d/*.list || echo "deb-src $MIRROR sid main" >> /etc/apt/sources.list.d/sid-source.list
 
 dpkg --add-architecture $HOST_ARCH
@@ -266,6 +263,9 @@ if test "$ENABLE_MULTILIB" != yes; then
 	MULTILIB_NAMES=""
 fi
 
+for f in /etc/apt/sources.list.d/*.list; do
+	test -f "$f" && sed -i "s/^deb \(\[.*\] \)*/deb [ arch-=$HOST_ARCH ] /" "$f"
+done
 mkdir -p "$REPODIR/conf" "$REPODIR/archive" "$REPODIR/stamps"
 cat > "$REPODIR/conf/distributions" <<EOF
 Codename: rebootstrap
