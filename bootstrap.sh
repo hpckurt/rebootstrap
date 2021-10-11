@@ -1354,18 +1354,7 @@ add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
 add_automatic libevent
-
 add_automatic libffi
-patch_libffi() {
-	if test "$HOST_ARCH" = musl-linux-mipsel; then
-		echo "fixing symbols #989158"
-		drop_privs sed -i -e 's/mipsel/any-mipsel/' debian/libffi7.symbols
-	fi
-	if test "$HOST_ARCH" = musl-linux-mips; then
-		echo "fixing symbols #990257"
-		drop_privs sed -i -e 's/ !\(mips \)/ !any-\1/' debian/libffi7.symbols
-	fi
-}
 
 add_automatic libgc
 patch_libgc() {
