@@ -1922,6 +1922,12 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
+patch_systemd() {
+	echo "fix FTCBFS #996501"
+	drop_privs sed -i -e 's/\(python3-jinja2\),/\1:native,/' debian/control
+}
+
 add_automatic sysvinit
 
 add_automatic tar
