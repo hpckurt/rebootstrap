@@ -734,43 +734,6 @@ patch_cyrus_sasl2() {
  Build-Conflicts: heimdal-dev
  Vcs-Browser: https://salsa.debian.org/debian/cyrus-sasl2
 EOF
-	echo "fix FTBFS #995123"
-	drop_privs patch -p1 <<'EOF'
-From 7570e73df1dbf6eea0f1ef07ff76bc2cd01eae6e Mon Sep 17 00:00:00 2001
-From: Vagrant Cascadian <vagrant@reproducible-builds.org>
-Date: Mon, 27 Sep 2021 01:21:20 +0000
-Subject: [PATCH 1/3] Fix build with sphinx 4+ (Closes: #995123).
-
-The positional arguments changed order in newer sphinx versions.
----
- docsrc/exts/sphinxlocal/writers/manpage.py | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/docsrc/exts/sphinxlocal/writers/manpage.py b/docsrc/exts/sphinxlocal/writers/manpage.py
-index e8e9c3a..c33ba61 100644
---- a/docsrc/exts/sphinxlocal/writers/manpage.py
-+++ b/docsrc/exts/sphinxlocal/writers/manpage.py
-@@ -34,7 +34,7 @@ class CyrusManualPageWriter(ManualPageWriter):
-         self.builder = builder
-
-     def translate(self):
--        visitor = CyrusManualPageTranslator(self.builder, self.document)
-+        visitor = CyrusManualPageTranslator(self.document, self.builder)
-         self.visitor = visitor
-         self.document.walkabout(visitor)
-         self.output = visitor.astext()
-@@ -45,8 +45,8 @@ class CyrusManualPageTranslator(BaseTranslator):
-     Custom translator.
-     """
-
--    def __init__(self, builder, *args, **kwds):
--        BaseTranslator.__init__(self, builder, *args, **kwds)
-+    def __init__(self, document, builder, *args, **kwds):
-+        BaseTranslator.__init__(self, document, builder, *args, **kwds)
-         self.builder = builder
-
-         self.in_productionlist = 0
-EOF
 }
 
 add_automatic dash
