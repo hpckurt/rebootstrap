@@ -1873,7 +1873,12 @@ EOF
 
 add_automatic rtmpdump
 add_automatic sed
-add_automatic shadow
+
+patch_shadow() {
+	echo "fix FTBFS #998067"
+	drop_privs sed -i -e 's/\(libse[a-z]*\)1-dev/\1-dev/' debian/control
+}
+
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
@@ -2699,6 +2704,14 @@ mark_built libsemanage
 
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
+
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "libselinux libsemanage audit"
+assert_built "pam libxml2"
+cross_build shadow
+mark_built shadow
+# essential
+
+automatically_cross_build_packages
 
 dpkg-architecture "-a$1" -ilinux-any && assert_built "audit libcap-ng libselinux systemd"
 assert_built "ncurses zlib"
