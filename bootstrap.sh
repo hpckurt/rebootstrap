@@ -1501,7 +1501,27 @@ buildenv_libgcrypt20() {
 add_automatic libgpg-error
 add_automatic libice
 add_automatic libidn
+
 add_automatic libidn2
+patch_libidn2() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
+	echo "patching gettext version for musl support #999510"
+	drop_privs patch -p1 <<'EOF'
+--- a/configure.ac
++++ b/configure.ac
+@@ -90,7 +90,8 @@
+ ])
+
+ AM_GNU_GETTEXT([external])
+-AM_GNU_GETTEXT_VERSION([0.19.3])
++AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.8])
++AM_GNU_GETTEXT_VERSION([0.19.6])
+
+ AX_CODE_COVERAGE
+
+EOF
+}
+
 add_automatic libksba
 add_automatic libmd
 add_automatic libnsl
