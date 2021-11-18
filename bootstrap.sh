@@ -713,29 +713,6 @@ builddep_curl() {
 	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
 }
 
-patch_cyrus_sasl2() {
-	echo "fix build-depends #928512"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -18,12 +18,12 @@
-                libkrb5-dev <!pkg.cyrus-sasl2.nogssapi>,
-                libldap2-dev <!pkg.cyrus-sasl2.noldap>,
-                libpam0g-dev,
--               libpod-pom-view-restructured-perl,
-+               libpod-pom-view-restructured-perl:native,
-                libpq-dev <!pkg.cyrus-sasl2.nosql>,
-                libsqlite3-dev,
-                libssl-dev,
-                po-debconf,
--               python3-sphinx,
-+               python3-sphinx:native,
-                quilt
- Build-Conflicts: heimdal-dev
- Vcs-Browser: https://salsa.debian.org/debian/cyrus-sasl2
-EOF
-}
-
 add_automatic dash
 add_automatic db-defaults
 add_automatic debianutils
