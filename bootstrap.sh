@@ -1499,6 +1499,8 @@ patch_libidn2() {
  AX_CODE_COVERAGE
 
 EOF
+	# must be newer than configure.ac
+	drop_privs touch doc/idn2.1
 }
 
 add_automatic libksba
