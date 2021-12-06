@@ -821,6 +821,9 @@ patch_gcc_11() {
 	patch_gcc_default_pie_everywhere
 	patch_gcc_wdotap
 }
+patch_gcc_12() {
+	patch_gcc_wdotap
+}
 
 buildenv_gdbm() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
