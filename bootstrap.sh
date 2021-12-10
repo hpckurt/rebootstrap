@@ -797,9 +797,6 @@ patch_gcc_limits_h_test() {
  	  chmod a+rx $${fix_dir} || true; \
  	  $(SHELL) $(srcdir)/../move-if-change \
 EOF
-	if test "$GCC_VER" = 10; then
-		drop_privs sed -i -e 's,\$(T_GLIMITS_H),$(srcdir)/glimits.h,' debian/patches/limits-h-test.diff
-	fi
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
 }
 patch_gcc_wdotap() {
@@ -809,12 +806,6 @@ patch_gcc_wdotap() {
 		drop_privs QUILT_PATCHES="/usr/share/cross-gcc/patches/gcc-$GCC_VER" quilt push -a
 		drop_privs rm -Rf .pc
 	fi
-}
-patch_gcc_10() {
-	patch_gcc_default_pie_everywhere
-	patch_gcc_limits_h_test
-	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
-	patch_gcc_wdotap
 }
 patch_gcc_11() {
 	patch_gcc_limits_h_test
