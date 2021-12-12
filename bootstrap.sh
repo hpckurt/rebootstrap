@@ -130,7 +130,7 @@ check_arch() {
 			"arc:ELF 32-bit LSB relocatable, *unknown arch 0xc3* version 1 (SYSV)"*)
 				return 0
 			;;
-			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*)
+			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*|"csky:ELF 32-bit LSB relocatable, C-SKY processor family, version 1 (SYSV)"*)
 				return 0
 			;;
 		esac
