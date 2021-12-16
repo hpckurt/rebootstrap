@@ -1975,7 +1975,7 @@ else
 	pickup_packages *.changes
 	apt_get_install "binutils$HOST_ARCH_SUFFIX"
 	assembler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-as"
-	if ! which "$assembler"; then echo "$assembler missing in binutils package"; exit 1; fi
+	if ! command -v "$assembler" >/dev/null; then echo "$assembler missing in binutils package"; exit 1; fi
 	if ! drop_privs "$assembler" -o test.o /dev/null; then echo "binutils fail to execute"; exit 1; fi
 	if ! test -f test.o; then echo "binutils fail to create object"; exit 1; fi
 	check_arch test.o "$HOST_ARCH"
@@ -1995,7 +1995,7 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	ls -l
 	pickup_additional_packages binutils-hppa64-linux-gnu_*.deb
 	apt_get_install binutils-hppa64-linux-gnu
-	if ! which hppa64-linux-gnu-as; then echo "hppa64-linux-gnu-as missing in binutils package"; exit 1; fi
+	if ! command -v hppa64-linux-gnu-as >/dev/null; then echo "hppa64-linux-gnu-as missing in binutils package"; exit 1; fi
 	if ! drop_privs hppa64-linux-gnu-as -o test.o /dev/null; then echo "binutils-hppa64 fail to execute"; exit 1; fi
 	if ! test -f test.o; then echo "binutils-hppa64 fail to create object"; exit 1; fi
 	check_arch test.o hppa64
@@ -2088,7 +2088,7 @@ else
 		apt_get_install "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
 	fi
 	compiler="`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-gcc-$GCC_VER"
-	if ! which "$compiler"; then echo "$compiler missing in stage1 gcc package"; exit 1; fi
+	if ! command -v "$compiler" >/dev/null; then echo "$compiler missing in stage1 gcc package"; exit 1; fi
 	if ! drop_privs "$compiler" -x c -c /dev/null -o test.o; then echo "stage1 gcc fails to execute"; exit 1; fi
 	if ! test -f test.o; then echo "stage1 gcc fails to create binaries"; exit 1; fi
 	check_arch test.o "$HOST_ARCH"
@@ -2238,7 +2238,7 @@ else
 	drop_privs rm -fv gcc-*-plugin-*.deb gcj-*.deb gdc-*.deb ./*objc*.deb ./*-dbg_*.deb
 	dpkg -i *.deb
 	compiler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-gcc-$GCC_VER"
-	if ! which "$compiler"; then echo "$compiler missing in stage3 gcc package"; exit 1; fi
+	if ! command -v "$compiler" >/dev/null; then echo "$compiler missing in stage3 gcc package"; exit 1; fi
 	if ! drop_privs "$compiler" -x c -c /dev/null -o test.o; then echo "stage3 gcc fails to execute"; exit 1; fi
 	if ! test -f test.o; then echo "stage3 gcc fails to create binaries"; exit 1; fi
 	check_arch test.o "$HOST_ARCH"
