@@ -686,8 +686,6 @@ EOF
 	;; esac
 	echo "fix undefined symbol ldlex_defsym #992318"
 	rm -f ld/ldlex.c
-	echo "work around FTCBFS #1000312"
-	drop_privs sed -i -e 's/debugedit/debugedit:native/' debian/control
 }
 
 add_automatic blt
