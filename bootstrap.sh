@@ -705,14 +705,7 @@ builddep_build_essential() {
 add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
-
 add_automatic curl
-builddep_curl() {
-	echo "don't enable zstd support in curl #992505"
-	apt_get_purge libzstd-dev
-	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
-}
-
 add_automatic dash
 add_automatic db-defaults
 add_automatic debianutils
