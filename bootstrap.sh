@@ -127,7 +127,7 @@ check_arch() {
 		return 0
 	else
 		case "$2:$(file -b "$1")" in
-			"arc:ELF 32-bit LSB relocatable, *unknown arch 0xc3* version 1 (SYSV)"*|"ELF 32-bit LSB relocatable, Synopsys ARCv2/HS3x/HS4x cores, version 1 (SYSV)"*)
+			"arc:ELF 32-bit LSB relocatable, *unknown arch 0xc3* version 1 (SYSV)"*|"arc:ELF 32-bit LSB relocatable, Synopsys ARCv2/HS3x/HS4x cores, version 1 (SYSV)"*)
 				return 0
 			;;
 			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*|"csky:ELF 32-bit LSB relocatable, C-SKY processor family, version 1 (SYSV)"*)
