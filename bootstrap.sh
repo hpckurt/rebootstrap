@@ -1552,6 +1552,7 @@ EOF
 add_automatic libsepol
 add_automatic libsm
 add_automatic libsodium
+add_automatic libssh
 
 add_automatic libssh2
 patch_libssh2() {
