@@ -792,6 +792,28 @@ patch_gcc_unapplicable_ada() {
 	echo "fix patch application failure #993205"
 	drop_privs sed -i -e /ada-armel-libatomic/d debian/rules.patch
 }
+patch_gcc_arc_multilib_multiarch() {
+        if test "$HOST_ARCH" = arc; then
+                echo "patching arc gcc: disable multilib #989453"
+                drop_privs patch -p1 <<'EOF'
+diff --git a/debian/rules2 b/debian/rules2
+index 750c03f..880a63e 100644
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -466,6 +466,10 @@ ifneq (,$(findstring arm-vfp,$(DEB_TARGET_GNU_CPU)))
+   CONFARGS += --with-fpu=vfp
+ endif
+
++ifneq (,$(findstring arc-linux,$(DEB_TARGET_GNU_TYPE)))
++  CONFARGS += --disable-multilib
++endif
++
+ ifneq (,$(findstring arm, $(DEB_TARGET_GNU_CPU)))
+   ifeq ($(multilib),yes)
+     CONFARGS += --enable-multilib
+EOF
+        fi
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -803,6 +825,7 @@ patch_gcc_wdotap() {
 patch_gcc_11() {
 	patch_gcc_limits_h_test
 	patch_gcc_default_pie_everywhere
+	patch_gcc_arc_multilib_multiarch
 	patch_gcc_wdotap
 }
 patch_gcc_12() {
