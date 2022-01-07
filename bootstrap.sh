@@ -218,9 +218,7 @@ obtain_source_package() {
 	fi
 }
 
-# #980963
 cat <<EOF >> /usr/share/dpkg/cputable
-arc		arc		arc		32	little
 csky		csky		csky		32	little
 EOF
 
