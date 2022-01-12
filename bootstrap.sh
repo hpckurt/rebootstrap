@@ -2357,7 +2357,7 @@ mark_built pam
 
 automatically_cross_build_packages
 
-cross_build cyrus-sasl2 pkg.cyrus-sasl2.nogssapi,pkg.cyrus-sasl2.noldap,pkg.cyrus-sasl2.nosql cyrus-sask2_1
+cross_build cyrus-sasl2 "pkg.cyrus-sasl2.nogssapi pkg.cyrus-sasl2.noldap pkg.cyrus-sasl2.nosql" cyrus-sask2_1
 mark_built cyrus-sasl2
 # needed by openldap
 
