@@ -1221,24 +1221,6 @@ buildenv_libgcrypt20() {
 }
 
 add_automatic libgpg-error
-patch_libgpg_error() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
-	echo "patching libgpg-error to avoid syscfg for musl #1003313"
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -605,7 +605,7 @@
-   AC_MSG_NOTICE([generated src/lock-obj-pub.native.h for $host])
- elif test x$cross_compiling = xyes; then
-   case $host in
--    *-*-linux-gnu*)
-+    *-*-linux-*)
-     AC_CHECK_TOOL(OBJDUMP, [objdump])
-     if test -n "$OBJDUMP"; then
-       lock_obj_h_generated=yes
-EOF
-}
-
 add_automatic libice
 add_automatic libidn
 
