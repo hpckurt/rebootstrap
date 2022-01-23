@@ -962,7 +962,7 @@ add_automatic gnupg2
 
 patch_gnutls28() {
 	echo "fix FTCBFS #1004183"
-	drop_privs sed -i -e 's/python3,/python3:any,/'
+	drop_privs sed -i -e 's/python3,/python3:any,/' debian/control
 }
 
 add_automatic gpm
