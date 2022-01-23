@@ -802,6 +802,7 @@ patch_gcc_11() {
 	patch_gcc_wdotap
 }
 patch_gcc_12() {
+	patch_gcc_limits_h_test
 	patch_gcc_wdotap
 }
 
