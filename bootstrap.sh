@@ -813,6 +813,12 @@ buildenv_gdbm() {
 }
 
 add_automatic glib2.0
+patch_glib2_0() {
+	dpkg-architecture "-a$HOST_ARCH" -ix32-any-any-any || return 0
+	# https://github.com/mesonbuild/meson/issues/9845
+	echo "working around wrong cc_can_run on x32"
+	drop_privs sed -i -e '/set-cross-properties/a\		needs_exe_wrapper=true \\' debian/rules
+}
 
 builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
