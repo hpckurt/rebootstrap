@@ -788,6 +788,10 @@ patch_gcc_limits_h_test() {
 EOF
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_unapplicable_ada() {
+	echo "fix patch application failure #993205"
+	drop_privs sed -i -e /ada-armel-libatomic/d debian/rules.patch
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -803,6 +807,7 @@ patch_gcc_11() {
 }
 patch_gcc_12() {
 	patch_gcc_limits_h_test
+	patch_gcc_unapplicable_ada
 	patch_gcc_wdotap
 }
 
