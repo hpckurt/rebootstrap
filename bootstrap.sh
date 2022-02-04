@@ -2203,8 +2203,6 @@ EOF
 	sed -i -e '/^Conflicts:.* libc[0-9][^ ]*-dev\(,\|$\)/d' "$package_list" # also make dose ignore the glibc conflict
 	apt-cache show "gcc-${GCC_VER}-base=installed" libgcc-s1=installed libstdc++6=installed libatomic1=installed >> "$package_list" # helps when pulling gcc from experimental
 	cat /var/lib/apt/lists/*_Sources > "$source_list"
-	# work around #1003814
-	sed -i -e 's,<dpkg-repack/author-tests>,<dpkg-repack.author-tests>,' "$source_list"
 	errcode=0
 	dose-builddebcheck --deb-tupletable=/usr/share/dpkg/tupletable --deb-cputable=/usr/share/dpkg/cputable "--deb-native-arch=$(dpkg --print-architecture)" "--deb-host-arch=$HOST_ARCH" "$@" "$package_list" "$source_list" || errcode=$?
 	if test "$errcode" -gt 1; then
