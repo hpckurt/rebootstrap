@@ -808,8 +808,6 @@ patch_gcc_11() {
 patch_gcc_12() {
 	patch_gcc_limits_h_test
 	patch_gcc_unapplicable_ada
-	echo "fix cross-no-locale-include.diff #1004683"
-	drop_privs sed -i -e 's/cppdefault\.c/&c/' debian/patches/cross-no-locale-include.diff
 	patch_gcc_wdotap
 }
 
