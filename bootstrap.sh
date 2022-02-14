@@ -995,24 +995,6 @@ EOF
 }
 
 add_automatic guile-3.0
-patch_guile_3_0() {
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
-		echo "fixing generation of charset.alias for musl #990514"
-		drop_privs patch -p1 <<'EOF'
---- a/lib/Makefile.am
-+++ b/lib/Makefile.am
-@@ -1043,7 +1043,7 @@ install-exec-localcharset: all-local
- 	  case '$(host_os)' in \
- 	    darwin[56]*) \
- 	      need_charset_alias=true ;; \
--	    darwin* | cygwin* | mingw* | pw32* | cegcc*) \
-+	    darwin* | cygwin* | mingw* | pw32* | cegcc* | linux-musl*) \
- 	      need_charset_alias=false ;; \
- 	    *) \
- 	      need_charset_alias=true ;; \
-EOF
-	fi
-}
 
 add_automatic gzip
 buildenv_gzip() {
