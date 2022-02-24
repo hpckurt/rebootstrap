@@ -823,6 +823,39 @@ patch_gcc_wdotap() {
 	fi
 }
 patch_gcc_11() {
+	# do build common libraries
+	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
+	# fix up with_common_libs hacks
+	patch -p1 <<'EOF'
+--- a/debian/rules.defs
++++ b/debian/rules.defs
+@@ -1521,11 +1521,11 @@
+   endif
+
+   # libasan -----------------
+-  #ifeq ($(with_asan)-$(with_common_libs),yes-yes)
++  ifeq ($(with_asan)-$(with_common_libs),yes-yes)
+     ifeq ($(with_asan),yes)
+       with_libasan := yes
+     endif
+-  #endif
++  endif
+
+   # liblsan -----------------
+   ifeq ($(with_lsan)-$(with_common_libs),yes-yes)
+@@ -1535,9 +1535,9 @@
+   endif
+
+   # libtsan -----------------
+-  #ifeq ($(with_tsan)-$(with_common_libs),yes-yes)
++  ifeq ($(with_tsan)-$(with_common_libs),yes-yes)
+       with_libtsan := yes
+-  #endif
++  endif
+
+   # libubsan -----------------
+   ifeq ($(with_ubsan)-$(with_common_libs),yes-yes)
+EOF
 	patch_gcc_limits_h_test
 	patch_gcc_default_pie_everywhere
 	patch_gcc_arc_multilib_multiarch
