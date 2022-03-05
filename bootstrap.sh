@@ -1779,6 +1779,79 @@ builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
 	apt_get_install debhelper binutils dpkg-dev
 }
+patch_zlib() {
+	test "$HOST_ARCH" = arc || return 0
+	echo "fixing overmatching of arc as sparc #1006799"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -39,24 +39,24 @@
+ 32-ARCHS=amd64 ppc64 kfreebsd-amd64 s390x
+ 64-ARCHS=s390 sparc i386 powerpc mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el x32
+
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(32-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(32-ARCHS)))
+ EXTRA_INSTALL=install32
+ EXTRA_BUILD=build32-stamp
+ # s390x fails at compatibility.
+-ifneq (,$(findstring $(DEB_HOST_ARCH), s390x))
++ifneq (,$(filter $(DEB_HOST_ARCH), s390x))
+ m32=-m31
+ else
+ m32=-m32
+ endif
+ endif
+
+-ifneq (,$(findstring s390x, $(DEB_HOST_ARCH)))
++ifneq (,$(filter s390x, $(DEB_HOST_ARCH)))
+ else
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(64-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(64-ARCHS)))
+ EXTRA_INSTALL=install64
+ EXTRA_BUILD=build64-stamp
+ # MIPS doesn't use -m64
+-ifneq (,$(findstring $(DEB_HOST_ARCH), mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el))
++ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel mipsn32 mipsn32el mipsr6 mipsr6el mipsn32r6 mipsn32r6el))
+ m64=-mabi=64
+ else
+ m64=-m64
+@@ -65,7 +65,7 @@
+ endif
+
+ N32-ARCHS=mips mipsel
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(N32-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(N32-ARCHS)))
+ EXTRA_INSTALL+=installn32
+ EXTRA_BUILD+=buildn32-stamp
+ mn32=-mabi=n32
+@@ -74,7 +74,7 @@
+ endif # !nobiarch
+
+ UNALIGNED_ARCHS=i386 amd64 kfreebsd-i386 kfreebsd-amd64 hurd-i386 lpia
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(UNALIGNED_ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(UNALIGNED_ARCHS)))
+ CFLAGS+=-DUNALIGNED_OK
+ endif
+
+@@ -199,13 +199,13 @@
+ 	dh_fixperms -a
+ 	dh_makeshlibs -pzlib1g -V"zlib1g (>= 1:1.2.3.3.dfsg-1)" --add-udeb=zlib1g-udeb
+ ifeq (,$(filter nobiarch,$(DEB_BUILD_PROFILES)))
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(32-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(32-ARCHS)))
+ 	dh_makeshlibs -plib32z1 -V"lib32z1 (>= 1:1.2.3.3.dfsg-1)"
+ endif
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(64-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(64-ARCHS)))
+ 	dh_makeshlibs -plib64z1 -V"lib64z1 (>= 1:1.2.3.3.dfsg-1)"
+ endif
+-ifneq (,$(findstring $(DEB_HOST_ARCH), $(N32-ARCHS)))
++ifneq (,$(filter $(DEB_HOST_ARCH), $(N32-ARCHS)))
+ 	dh_makeshlibs -plibn32z1 -V"libn32z1 (>= 1:1.2.3.3.dfsg-1)"
+ endif
+ endif
+EOF
+}
 
 # choosing libatomic1 arbitrarily here, cause it never bumped soname
 BUILD_GCC_MULTIARCH_VER=`apt-cache show --no-all-versions libatomic1 | sed 's/^Source: gcc-\([0-9.]*\)$/\1/;t;d'`
