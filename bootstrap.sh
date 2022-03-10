@@ -220,6 +220,7 @@ obtain_source_package() {
 
 cat <<EOF >> /usr/share/dpkg/cputable
 csky		csky		csky		32	little
+loongarch64	loongarch64	loongarch64	64	little
 EOF
 
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
