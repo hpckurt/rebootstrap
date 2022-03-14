@@ -133,6 +133,9 @@ check_arch() {
 			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*|"csky:ELF 32-bit LSB relocatable, C-SKY processor family, version 1 (SYSV)"*)
 				return 0
 			;;
+			"loongarch64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
+				return 0
+			;;
 		esac
 		echo "expected $2, but found $(file -b "$1")"
 		return 1
