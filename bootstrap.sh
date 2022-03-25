@@ -1282,51 +1282,6 @@ buildenv_libprelude() {
 
 add_automatic libpsl
 add_automatic libpthread-stubs
-
-patch_libselinux() {
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
-		echo "fix ftbfs on musl #989748"
-		drop_privs patch -p1 <<'EOF'
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -98,6 +98,10 @@ override LDFLAGS += -L/opt/local/lib -un
- LD_SONAME_FLAGS=-install_name,$(LIBSO)
- endif
-
-+ifeq (yes,$(shell printf '#define _GNU_SOURCE\n#include <unistd.h>\n#include <sys/types.h>\nint main(void){pid_t n=gettid();return n;}' | $(CC) -x c -o /dev/null - >/dev/null 2>&1 && echo yes))
-+CFLAGS += -DHAVE_GETTID
-+endif
-+
- PCRE_LDLIBS ?= -lpcre
- # override with -lfts when building on Musl libc to use fts-standalone
- FTS_LDLIBS ?=
---- a/src/procattr.c
-+++ b/src/procattr.c
-@@ -22,19 +22,7 @@ static pthread_key_t destructor_key;
- static int destructor_key_initialized = 0;
- static __thread char destructor_initialized;
-
--/* Bionic and glibc >= 2.30 declare gettid() system call wrapper in unistd.h and
-- * has a definition for it */
--#ifdef __BIONIC__
--  #define OVERRIDE_GETTID 0
--#elif !defined(__GLIBC_PREREQ)
--  #define OVERRIDE_GETTID 1
--#elif !__GLIBC_PREREQ(2,30)
--  #define OVERRIDE_GETTID 1
--#else
--  #define OVERRIDE_GETTID 0
--#endif
--
--#if OVERRIDE_GETTID
-+#ifndef HAVE_GETTID
- static pid_t gettid(void)
- {
- 	return syscall(__NR_gettid);
-EOF
-	fi
-}
-
 add_automatic libsepol
 add_automatic libsm
 add_automatic libsodium
