@@ -1017,7 +1017,31 @@ builddep_gnu_efi() {
 
 add_automatic gnupg2
 add_automatic gpm
+
 add_automatic grep
+patch_grep() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
+	echo "making grep use its internal regex library on musl #1008952"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -26,10 +26,12 @@
+ DEB_CONFIGURE_SCRIPT_ENV += CPPFLAGS="$(CPPFLAGS)"
+ ##########################################################################
+
++include /usr/share/dpkg/architecture.mk
++
+ DEB_UPSTREAM_URL = http://ftp.gnu.org/gnu/grep/
+ DEB_UPSTREAM_TARBALL_EXTENSION = tar.xz
+
+-DEB_CONFIGURE_EXTRA_FLAGS += --without-included-regex
++DEB_CONFIGURE_EXTRA_FLAGS += --with$(if $(filter $(DEB_HOST_ARCH_LIBC),musl),,out)-included-regex
+ DEB_CONFIGURE_SCRIPT_ENV += LIBS="$(LIBS)"
+
+ # FIXME: CDBS should include a specific var for this
+EOF
+}
+
 add_automatic groff
 
 add_automatic guile-2.2
