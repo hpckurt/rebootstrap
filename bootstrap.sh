@@ -858,6 +858,7 @@ patch_gcc_12() {
 	patch_gcc_limits_h_test
 	patch_gcc_default_pie_everywhere
 	patch_gcc_unapplicable_ada
+	patch_gcc_arc_multilib_multiarch
 	patch_gcc_wdotap
 }
 
