@@ -838,6 +838,11 @@ index 750c03f..880a63e 100644
 EOF
         fi
 }
+patch_gcc_rtlibs_libatomic() {
+	test "$ENABLE_MULTIARCH_GCC" = no || return 0
+	echo "do build libatomic rtlibs #1009286"
+	drop_privs sed -i -e '/with_libatomic := disabled for rtlibs stage/d' debian/rules.defs
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -859,6 +864,7 @@ patch_gcc_12() {
 	patch_gcc_default_pie_everywhere
 	patch_gcc_unapplicable_ada
 	patch_gcc_arc_multilib_multiarch
+	patch_gcc_rtlibs_libatomic
 	patch_gcc_wdotap
 }
 
