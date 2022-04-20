@@ -179,6 +179,9 @@ $APT_GET update
 $APT_GET dist-upgrade # we need upgrade later, so make sure the system is clean
 apt_get_install build-essential debhelper reprepro quilt arch-test
 
+echo "fixing debhelper dh_installchangelogs #1009844"
+sed -i -e '/error.*does not exist/d' /usr/bin/dh_installalternatives
+
 if test -z "$DROP_PRIVS"; then
 	drop_privs_exec() {
 		exec env -- "$@"
