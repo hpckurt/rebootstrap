@@ -1098,17 +1098,16 @@ EOF
 add_automatic guile-3.0
 
 add_automatic gzip
+patch_gzip() {
+	test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_BITS)" = 32 || return 0
+	echo "fixing time_t ftcbfs #1009893"
+	drop_privs sed -i -e '/CONFIGURE_ARGS.*--host/s/$/ --build=${DEB_BUILD_GNU_TYPE}/' debian/rules
+}
 buildenv_gzip() {
 	if test "$LIBC_NAME" = musl; then
 		# this avoids replacing fseeko with a variant that is broken
 		echo gl_cv_func_fflush_stdin exported
 		export gl_cv_func_fflush_stdin=yes
-	fi
-	if test "$(dpkg-architecture "-a$1" -qDEB_HOST_ARCH_BITS)" = 32; then
-		# If touch works with large timestamps (e.g. on amd64),
-		# gzip fails instead of warning about 32bit time_t.
-		echo "TIME_T_32_BIT_OK=yes exported"
-		export TIME_T_32_BIT_OK=yes
 	fi
 }
 
