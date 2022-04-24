@@ -746,28 +746,7 @@ add_automatic dpkg
 add_automatic e2fsprogs
 add_automatic expat
 add_automatic file
-
 add_automatic findutils
-patch_findutils() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "fixing gettext in findutils for musl #1009874"
-	drop_privs rm gl/m4/gettext.m4
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -278,7 +278,8 @@
-
- dnl internationalization macros
- AM_GNU_GETTEXT([external])
--AM_GNU_GETTEXT_VERSION([0.19.3])
-+AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.8])
-+AM_GNU_GETTEXT_VERSION([0.19.6])
-
- dnl regextype.c and regexprops.c are designed to be usable outside findutils,
- dnl but findutils doesn't want to support all the regex types in gnulib,
-EOF
-}
-
 add_automatic flex
 add_automatic fontconfig
 add_automatic freetype
