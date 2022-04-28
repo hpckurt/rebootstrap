@@ -1736,7 +1736,15 @@ EOF
 }
 
 add_automatic rtmpdump
+
 add_automatic sed
+patch_sed() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "musl FTBFS #1010224"
+	drop_privs sed -i -e '1ainclude /usr/share/dpkg/architecture.mk' debian/rules
+	drop_privs sed -i -e 's/--without-included-regex/--with$(if $(filter musl,$(DEB_HOST_ARCH_LIBC)),,out)-included-regex/' debian/rules
+}
+
 add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
