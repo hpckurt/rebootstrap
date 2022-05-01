@@ -1962,7 +1962,7 @@ GCC_AUTOCONF=autoconf2.69
 if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
 	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
 		if test "$ENABLE_MULTIARCH_GCC" = yes; then
 			apt_get_install "linux-libc-dev:$HOST_ARCH"
@@ -2099,7 +2099,7 @@ progress_mark "$LIBC_NAME stage2 cross build"
 if test -f "$REPODIR/stamps/gcc_3"; then
 	echo "skipping rebuild of gcc stage3"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
 	if test "$HOST_ARCH" = hppa; then
 		apt_get_install binutils-hppa64-linux-gnu
 	fi
@@ -2168,7 +2168,7 @@ if test "$ENABLE_MULTIARCH_GCC" != yes; then
 if test -f "$REPODIR/stamps/gcc_f1"; then
 	echo "skipping rebuild of gcc rtlibs"
 else
-	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu autogen systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH" time
+	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev dejagnu systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH" time
 	if test "$HOST_ARCH" = hppa; then
 		apt_get_install binutils-hppa64-linux-gnu
 	fi
@@ -2305,7 +2305,7 @@ done
 add_need acl # by coreutils, systemd
 add_need apt # almost essential
 add_need attr # by coreutils, libcap-ng
-add_need autogen # by gcc-VER, gnutls28
+add_need autogen # by gnutls28
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
