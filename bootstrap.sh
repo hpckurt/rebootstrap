@@ -710,26 +710,6 @@ builddep_build_essential() {
 add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
-
-patch_cracklib2() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "fixing FTBFS on musl-any-any #1008711"
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -55,7 +55,8 @@ AC_CHECK_FUNCS(strdup)
- AC_CHECK_FUNCS(getpwuid_r)
-
- dnl internationalization macros
--AM_GNU_GETTEXT_VERSION([0.17])
-+AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.8])
-+AM_GNU_GETTEXT_VERSION([0.19.6])
- AM_GNU_GETTEXT([external])
-
- dnl Control default dictname
-EOF
-}
-
 add_automatic curl
 add_automatic dash
 add_automatic db-defaults
