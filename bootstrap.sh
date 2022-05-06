@@ -1292,10 +1292,77 @@ patch_libgc() {
  %:
 EOF
 	fi
+	if test "$HOST_ARCH" = arc; then
+		echo "patch libgc for arc #994211"
+		# https://github.com/ivmai/bdwgc/commit/968818a12c361a3a7fa6e8d8b851d04847335e58.patch
+		drop_privs patch -p1 <<'EOF'
+From 968818a12c361a3a7fa6e8d8b851d04847335e58 Mon Sep 17 00:00:00 2001
+From: Vineet Gupta <vgupta@synopsys.com>
+Date: Fri, 2 Apr 2021 10:13:15 -0700
+Subject: [PATCH] Add support of Linux/arc
+
+Issue #351 (bdwgc).
+
+* include/private/gcconfig.h [__arc__ && LINUX] (ARC): Define
+macro.
+* include/private/gcconfig.h [ARC] (CPP_WORDSZ, MACH_TYPE, ALIGNMENT,
+CACHE_LINE_SIZE): Likewise.
+* include/private/gcconfig.h [ARC && LINUX] (OS_TYPE,
+LINUX_STACKBOTTOM, COUNT_UNMAPPED_REGIONS, DYNAMIC_LOADING,
+DATASTART): Likewise.
+* include/private/gcconfig.h [ARC && LINUX] (__data_start): Declare
+extern variable.
+---
+ include/private/gcconfig.h | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/include/private/gcconfig.h b/include/private/gcconfig.h
+index f500d20c9..8de3023bc 100644
+--- a/include/private/gcconfig.h
++++ b/include/private/gcconfig.h
+@@ -651,6 +651,10 @@ EXTERN_C_BEGIN
+ #   define NONSTOP
+ #   define mach_type_known
+ # endif
++# if defined(__arc__) && defined(LINUX)
++#   define ARC
++#   define mach_type_known
++# endif
+ # if defined(__hexagon__) && defined(LINUX)
+ #    define HEXAGON
+ #    define mach_type_known
+@@ -2894,6 +2898,21 @@ EXTERN_C_BEGIN
+ #   endif
+ # endif /* X86_64 */
+ 
++# ifdef ARC
++#   define CPP_WORDSZ 32
++#   define MACH_TYPE "ARC"
++#   define ALIGNMENT 4
++#   define CACHE_LINE_SIZE 64
++#   ifdef LINUX
++#     define OS_TYPE "LINUX"
++#     define LINUX_STACKBOTTOM
++#     define COUNT_UNMAPPED_REGIONS
++#     define DYNAMIC_LOADING
++      extern int __data_start[] __attribute__((__weak__));
++#     define DATASTART ((ptr_t)__data_start)
++#   endif
++# endif /* ARC */
++
+ # ifdef HEXAGON
+ #   define CPP_WORDSZ 32
+ #   define MACH_TYPE "HEXAGON"
+EOF
+	fi
 }
 buildenv_libgc() {
 	if dpkg-architecture "-a$1" -imusl-linux-any; then
 		echo "ignoring symbol differences for musl for now"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+	fi
+	if test "$1" = arc; then
+		echo "ignoring symbol differences for arc #994211"
 		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 	fi
 }
