@@ -643,7 +643,6 @@ add_automatic() { automatic_packages=$(set_add "$automatic_packages" "$1"); }
 add_automatic acl
 add_automatic apt
 add_automatic attr
-add_automatic autogen
 add_automatic base-files
 add_automatic base-passwd
 add_automatic bash
@@ -2352,7 +2351,6 @@ done
 add_need acl # by coreutils, systemd
 add_need apt # almost essential
 add_need attr # by coreutils, libcap-ng
-add_need autogen # by gnutls28
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
@@ -2535,7 +2533,7 @@ automatically_cross_build_packages
 
 cross_build libxml2 nopython libxml2_1
 mark_built libxml2
-# needed by autogen
+# TODO: we no longer need autogen, do we still need libxml2?
 
 automatically_cross_build_packages
 
@@ -2572,7 +2570,7 @@ mark_built unbound
 
 automatically_cross_build_packages
 
-assert_built "gmp libidn2 autogen p11-kit libtasn1-6 unbound libunistring nettle"
+assert_built "gmp libidn2 p11-kit libtasn1-6 unbound libunistring nettle"
 cross_build gnutls28 noguile gnutls28_1
 mark_built gnutls28
 # needed by libprelude, openldap, curl
