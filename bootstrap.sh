@@ -2364,7 +2364,7 @@ add_need gnupg2 # for apt
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need gpm # by ncurses
 add_need groff # for man-db
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need kmod # by systemd
-add_need icu # TODO: we no longer need libxml2, do we still need icu?
+add_need icu # by libxml2
 add_need krb5 # by audit
 add_need libatomic-ops # by gcc-VER
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
@@ -2399,6 +2399,7 @@ add_need sqlite3 # by python2.7
 add_need tcl8.6 # by newt
 add_need tcltk-defaults # by python2.7
 add_need tcp-wrappers # by audit
+add_need xz-utils # by libxml2
 
 automatically_cross_build_packages() {
 	local dosetmp profiles buildable new_needed line pkg missing source
@@ -2485,7 +2486,7 @@ automatically_cross_build_packages
 
 cross_build zlib "$(if test "$ENABLE_MULTILIB" != yes; then echo stage1; fi)"
 mark_built zlib
-# needed by dpkg, file, gnutls28, libpng1.6, libtool, perl, slang2, tcl8.6, util-linux
+# needed by dpkg, file, gnutls28, libpng1.6, libtool, libxml2, perl, slang2, tcl8.6, util-linux
 
 automatically_cross_build_packages
 
@@ -2503,7 +2504,7 @@ automatically_cross_build_packages
 
 cross_build readline
 mark_built readline
-# needed by gnupg2, guile-X.Y
+# needed by gnupg2, guile-X.Y, libxml2
 
 automatically_cross_build_packages
 
@@ -2527,6 +2528,12 @@ automatically_cross_build_packages
 cross_build db5.3 "pkg.db5.3.notcl nojava" db5.3_1
 mark_built db5.3
 # needed by perl, python2.7, needed for db-defaults
+
+automatically_cross_build_packages
+
+cross_build libxml2 nopython libxml2_1
+mark_built libxml2
+# needed by nghttp2
 
 automatically_cross_build_packages
 
