@@ -825,37 +825,6 @@ patch_gcc_rtlibs_libatomic() {
 	echo "do build libatomic rtlibs #1009286"
 	drop_privs sed -i -e '/with_libatomic := disabled for rtlibs stage/d' debian/rules.defs
 }
-patch_gcc_cross_fixes_diff() {
-	echo "fix application of cross-fixes.diff #1010330"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/patches/cross-fixes.diff
-+++ b/debian/patches/cross-fixes.diff
-@@ -9,20 +9,16 @@
-
- --- a/src/libgcc/config/ia64/fde-glibc.c
- +++ b/src/libgcc/config/ia64/fde-glibc.c
--@@ -28,6 +28,7 @@
-+@@ -28,8 +28,8 @@
-  #ifndef _GNU_SOURCE
-  #define _GNU_SOURCE 1
-  #endif
- +#ifndef inhibit_libc
-  #include "config.h"
-+-#ifndef inhibit_libc
-  #include <stddef.h>
-  #include <stdlib.h>
--@@ -159,3 +160,5 @@ _Unwind_FindTableEntry (void *pc, unw_wo
-- 
--   return data.ret;
-- }
--+
--+#endif
-+ #include <link.h>
- --- a/src/libgcc/config/ia64/unwind-ia64.c
- +++ b/src/libgcc/config/ia64/unwind-ia64.c
- @@ -26,6 +26,7 @@
-EOF
-}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -878,7 +847,6 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_arc_multilib_multiarch
 	patch_gcc_rtlibs_libatomic
-	patch_gcc_cross_fixes_diff
 	patch_gcc_wdotap
 }
 
