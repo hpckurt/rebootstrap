@@ -2299,7 +2299,7 @@ add_need attr # by coreutils, libcap-ng
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
-add_need db-defaults # by perl, python2.7, python3.5
+add_need db-defaults # by perl, python3.X
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
@@ -2340,9 +2340,9 @@ add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
 add_need popt # by newt
 add_need slang2 # by cdebconf, newt
-add_need sqlite3 # by python2.7
+add_need sqlite3 # by python3.X
 add_need tcl8.6 # by newt
-add_need tcltk-defaults # by python2.7
+add_need tcltk-defaults # by python3.X
 add_need tcp-wrappers # by audit
 add_need xz-utils # by libxml2
 
@@ -2472,7 +2472,7 @@ automatically_cross_build_packages
 
 cross_build db5.3 "pkg.db5.3.notcl nojava" db5.3_1
 mark_built db5.3
-# needed by perl, python2.7, needed for db-defaults
+# needed by perl, python3.X, needed for db-defaults
 
 automatically_cross_build_packages
 
@@ -2608,7 +2608,7 @@ automatically_cross_build_packages
 
 cross_build gdbm pkg.gdbm.nodietlibc gdbm_1
 mark_built gdbm
-# needed by man-db, perl, python2.7
+# needed by man-db, perl, python3.X
 
 automatically_cross_build_packages
 
