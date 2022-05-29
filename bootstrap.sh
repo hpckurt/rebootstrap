@@ -2304,7 +2304,6 @@ add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by libsemanage, pam
 add_need fribidi # by newt
-add_need gmp # by gnutls28
 add_need gnupg2 # for apt
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need gpm # by ncurses
 add_need groff # for man-db
