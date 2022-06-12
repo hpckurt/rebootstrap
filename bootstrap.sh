@@ -2620,7 +2620,7 @@ add_need groff # for man-db
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need kmod # by systemd
 add_need icu # by libxml2
 add_need krb5 # by audit
-add_need libatomic-ops # by gcc-VER
+test "$HOST_ARCH" = ia64 && add_need libatomic-ops # by gcc-VER
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
