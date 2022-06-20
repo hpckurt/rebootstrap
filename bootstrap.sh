@@ -2637,7 +2637,7 @@ add_need bzip2 # by perl
 add_need db-defaults # by perl, python3.X
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
-add_need flex # by libsemanage, pam
+add_need flex # by pam
 add_need fribidi # by newt
 add_need gnupg2 # for apt
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need gpm # by ncurses
