@@ -2083,30 +2083,6 @@ add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
 
-patch_systemd() {
-	echo "fixing stage1 ftbfs #1012738"
-	drop_privs patch -p1 <<'EOF'
---- a/control
-+++ b/debian/control
-@@ -440,6 +440,7 @@
-  processes before an OOM occurs in kernel space.
-
- Package: systemd-userdbd
-+Build-Profiles: <!stage1>
- Architecture: linux-any
- Depends: ${shlibs:Depends},
-          ${misc:Depends},
-@@ -452,6 +453,7 @@
-  also pick up statically defined JSON user/group records from drop-in files.
-
- Package: systemd-homed
-+Build-Profiles: <!stage1>
- Architecture: linux-any
- Depends: ${shlibs:Depends},
-          ${misc:Depends},
-EOF
-}
-
 add_automatic sysvinit
 
 add_automatic tar
