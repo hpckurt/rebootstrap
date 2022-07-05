@@ -822,6 +822,27 @@ patch_gcc_rtlibs_libatomic() {
 	echo "do build libatomic rtlibs #1009286"
 	drop_privs sed -i -e '/with_libatomic := disabled for rtlibs stage/d' debian/rules.defs
 }
+patch_gcc_crypt_h() {
+	echo "fix libsanitizer failing to find crypt.h #1014375"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -1251,6 +1251,13 @@
+ 	  mkdir -p $(builddir)/sys-include; \
+ 	  ln -sf /usr/include/$(DEB_TARGET_MULTIARCH)/asm $(builddir)/sys-include/asm; \
+ 	fi
++	: # Fall back to the host crypt.h when target is unavailable as the sizeof(struct crypt_data) is unlikely to change, needed by libsanitizer.
++	if [ ! -f /usr/include/crypt.h ] && \
++		[ ! -f /usr/include/$(DEB_TARGET_MULTIARCH)/crypt.h ] && \
++		[ -f /usr/include/$(DEB_HOST_MULTIARCH)/crypt.h ]; then \
++	  mkdir -p $(builddir)/sys-include; \
++	  ln -sf /usr/include/$(DEB_HOST_MULTIARCH)/crypt.h $(builddir)/sys-include/crypt.h; \
++	fi
+
+ 	touch $(configure_stamp)
+
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -844,6 +865,7 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_arc_multilib_multiarch
 	patch_gcc_rtlibs_libatomic
+	patch_gcc_crypt_h
 	patch_gcc_wdotap
 }
 
