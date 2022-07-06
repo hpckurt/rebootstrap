@@ -1074,7 +1074,12 @@ add_automatic isl-0.18
 add_automatic jansson
 add_automatic jemalloc
 add_automatic keyutils
+
 add_automatic kmod
+patch_kmod() {
+	echo "fixing kmod to not cross-grade zstd #1014437"
+	drop_privs sed -i -e 's/\<zstd,/zstd <!nocheck>,/' debian/control
+}
 
 add_automatic krb5
 buildenv_krb5() {
