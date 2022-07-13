@@ -2131,7 +2131,13 @@ patch_sed() {
 add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
+
 add_automatic sqlite3
+patch_sqlite3() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "fix libc dependency #1014893"
+	drop_privs sed -i -e 's/libc6-dev/libc-dev/' debian/control
+}
 
 add_automatic sysvinit
 
