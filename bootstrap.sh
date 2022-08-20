@@ -1659,43 +1659,6 @@ buildenv_openldap() {
 	export ac_cv_func_memcmp_working=yes
 }
 
-patch_openssl() {
-	case "$HOST_ARCH" in arc|nios2|sparc)
-		echo "Bug #1015792: Add explicit use of libatomic for 64-bit atomics"
-		drop_privs patch -p1 <<'EOF'
---- a/Configurations/20-debian.conf
-+++ b/Configurations/20-debian.conf
-@@ -14,7 +14,7 @@
- 		cflags => add("-mcpu=ev5"),
- 	},
- 	"debian-arc" => {
--		inherit_from => [ "linux-generic32", "debian" ],
-+		inherit_from => [ "linux-latomic", "debian" ],
- 	},
- 	"debian-arm64" => {
- 		inherit_from => [ "linux-aarch64", "debian" ],
-@@ -157,7 +157,7 @@
- 	},
- 
- 	"debian-nios2" => {
--		inherit_from => [ "linux-generic32", "debian" ],
-+		inherit_from => [ "linux-latomic", "debian" ],
- 	},
- 	"debian-powerpc" => {
- 		inherit_from => [ "linux-ppc", "debian" ],
-@@ -199,7 +199,7 @@
- 		inherit_from => [ "linux-latomic", "debian" ],
- 	},
- 	"debian-sparc" => {
--		inherit_from => [ "linux-generic32", "debian", ],
-+		inherit_from => [ "linux-latomic", "debian", ],
- 		asm_arch         => 'sparcv9',
- 		cflags => add("-DB_ENDIAN -DBN_DIV2W"),
- 	},
-EOF
-	;; esac
-}
-
 add_automatic openssl
 add_automatic openssl1.0
 
