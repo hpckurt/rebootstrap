@@ -1043,38 +1043,38 @@ EOF
 -ln -sf $(DEB_HOST_MULTIARCH)/bits debian/$(1)/usr/include/; \
 -ln -sf $(DEB_HOST_MULTIARCH)/gnu debian/$(1)/usr/include/; \
 -ln -sf $(DEB_HOST_MULTIARCH)/fpu_control.h debian/$(1)/usr/include/; \
--for i in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/sys`; do \
+-for i in `ls debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/sys`; do \
 -	ln -sf ../$(DEB_HOST_MULTIARCH)/sys/$$i debian/$(1)/usr/include/sys/$$i; \
 +mkdir -p debian/$(1)/usr/include; \
-+for i in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)`; do \
-+	if test -d "debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/$$i" && ! test "$$i" = bits -o "$$i" = gnu; then \
++for i in `ls debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)`; do \
++	if test -d "debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/$$i" && ! test "$$i" = bits -o "$$i" = gnu; then \
 +		mkdir -p "debian/$(1)/usr/include/$$i"; \
-+		for j in `ls debian/tmp-libc/usr/include/$(DEB_HOST_MULTIARCH)/$$i`; do \
++		for j in `ls debian/tmp/usr/include/$(DEB_HOST_MULTIARCH)/$$i`; do \
 +			ln -sf "../$(DEB_HOST_MULTIARCH)/$$i/$$j" "debian/$(1)/usr/include/$$i/$$j"; \
 +		done; \
 +	else \
 +		ln -sf "$(DEB_HOST_MULTIARCH)/$$i" "debian/$(1)/usr/include/$$i"; \
 +	fi; \
  done
- endef
- 
-@@ -218,15 +218,11 @@
+ mkdir -p debian/$(1)/usr/include/finclude; \
+ for i in `ls debian/tmp/usr/include/finclude/$(DEB_HOST_MULTIARCH)`; do \
+@@ -270,15 +272,11 @@
  	    echo "/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	    echo "/usr/lib/$(DEB_HOST_GNU_TYPE)" >> $$conffile; \
  	  fi; \
--	  mkdir -p debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/bits debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/gnu debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/sys debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/fpu_control.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/a.out.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/ieee754.h debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH); \
-+	  mkdir -p debian/tmp-$(curpass)/usr/include.tmp; \
-+	  mv debian/tmp-$(curpass)/usr/include debian/tmp-$(curpass)/usr/include.tmp/$(DEB_HOST_MULTIARCH); \
-+	  mv debian/tmp-$(curpass)/usr/include.tmp debian/tmp-$(curpass)/usr/include; \
- 	  mkdir -p debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
--	  mv debian/tmp-$(curpass)/usr/include/finclude/math-vector-fortran.h debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
-+	  mv debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/finclude/math-vector-fortran.h debian/tmp-$(curpass)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
+-	  mkdir -p $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/bits $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/gnu $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/sys $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/fpu_control.h $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/a.out.h $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/ieee754.h $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH); \
++	  mkdir -p $(debian-tmp)/usr/include.tmp; \
++	  mv $(debian-tmp)/usr/include $(debian-tmp)/usr/include.tmp/$(DEB_HOST_MULTIARCH); \
++	  mv $(debian-tmp)/usr/include.tmp $(debian-tmp)/usr/include; \
+ 	  mkdir -p $(debian-tmp)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
+-	  mv $(debian-tmp)/usr/include/finclude/math-vector-fortran.h $(debian-tmp)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
++	  mv $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/finclude/math-vector-fortran.h $(debian-tmp)/usr/include/finclude/$(DEB_HOST_MULTIARCH); \
  	fi
  
  	ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
@@ -1082,11 +1082,11 @@ EOF
 +++ b/debian/sysdeps/hurd-i386.mk
 @@ -18,9 +18,6 @@ endif
  define libc_extra_install
- mkdir -p debian/tmp-$(curpass)/lib
- ln -s ld.so.1 debian/tmp-$(curpass)/lib/ld.so
--mkdir -p debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/mach
--mv debian/tmp-$(curpass)/usr/include/mach/i386 debian/tmp-$(curpass)/usr/include/$(DEB_HOST_MULTIARCH)/mach/
--ln -s ../$(DEB_HOST_MULTIARCH)/mach/i386 debian/tmp-$(curpass)/usr/include/mach/i386
+ mkdir -p $(debian-tmp)/lib
+ ln -s ld.so.1 $(debian-tmp)/lib/ld.so
+-mkdir -p $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/mach
+-mv $(debian-tmp)/usr/include/mach/i386 $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/mach/
+-ln -s ../$(DEB_HOST_MULTIARCH)/mach/i386 $(debian-tmp)/usr/include/mach/i386
  endef
  
  # FIXME: We are having runtime issues with ifunc...
