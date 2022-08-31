@@ -1433,6 +1433,7 @@ add_automatic libidn2
 patch_libidn2() {
 	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
 	echo "patching gettext version for musl support #999510"
+	drop_privs rm -f m4/gettext.m4
 	drop_privs patch -p1 <<'EOF'
 --- a/configure.ac
 +++ b/configure.ac
