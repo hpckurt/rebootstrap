@@ -706,30 +706,7 @@ builddep_build_essential() {
 add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
-
 add_automatic curl
-patch_curl() {
-	if dpkg-architecture "-a$HOST_ARCH" -iany-amd64 || dpkg-architecture "-a$HOST_ARCH" -iany-i386 || dpkg-architecture "-a$HOST_ARCH" -i any-arm64; then
-		return 0
-	fi
-	echo "fix FTBFS #1014596"
-	drop_privs patch -p1 <<'EOF'
---- a/lib/easy_lock.h
-+++ b/lib/easy_lock.h
-@@ -37,6 +37,10 @@
- #elif defined (HAVE_ATOMIC)
- #include <stdatomic.h>
- 
-+#if !defined(__i386__) && !defined(__x86_64__) && !defined(__aarch64__) && defined(HAVE_SCHED_YIELD)
-+#include <sched.h>
-+#endif
-+
- #define curl_simple_lock atomic_bool
- #define CURL_SIMPLE_LOCK_INIT false
- 
-EOF
-}
-
 add_automatic dash
 add_automatic db-defaults
 add_automatic debianutils
