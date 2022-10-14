@@ -327,6 +327,11 @@ cat >/etc/dpkg/dpkg.cfg.d/binNMU-changelogs <<EOF
 path-exclude=/usr/share/doc/*/changelog.Debian.$(dpkg-architecture -qDEB_BUILD_ARCH).gz
 EOF
 
+# debhelper/13.10 started trimming changelogs, this breaks all over the place
+cat >/etc/dpkg/dpkg.cfg.d/trimmed-changelogs <<'EOF'
+path-exclude=/usr/share/doc/*/changelog.Debian.gz
+EOF
+
 if test "$HOST_ARCH" = nios2; then
 	echo "fixing libtool's nios2 misdetection as os2 #851253"
 	apt_get_install libtool
