@@ -1801,6 +1801,33 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
+patch_systemd() {
+	echo "fix stage1 ftbfs #1021821"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -217,6 +217,7 @@
+ 	# files shipped by cryptsetup
+ ifeq (, $(filter stage1, $(DEB_BUILD_PROFILES)))
+ 	rm -f debian/tmp/usr/share/man/man5/crypttab.5
++	dh_install -psystemd debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/cryptsetup usr/lib/$(DEB_HOST_MULTIARCH)
+ endif
+
+ 	# files shipped by systemd
+--- a/debian/systemd.install
++++ b/debian/systemd.install
+@@ -17,7 +17,6 @@
+ usr/lib/systemd/
+ usr/lib/tmpfiles.d/
+ usr/lib/kernel
+-usr/lib/*/cryptsetup/
+ usr/share/bash-completion/
+ usr/share/zsh/vendor-completions/
+ usr/share/dbus-1/
+EOF
+}
+
 add_automatic sysvinit
 
 add_automatic tar
