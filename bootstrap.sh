@@ -1131,6 +1131,14 @@ buildenv_libunistring() {
 		echo "glibc does not prefer rwlock writers to readers"
 		export gl_cv_pthread_rwlock_rdlock_prefer_writer=no
 	fi
+	echo "memchr and strstr generally work"
+	export gl_cv_func_memchr_works=yes
+	export gl_cv_func_strstr_works_always=yes
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "setting malloc/realloc do not return 0"
+		export ac_cv_func_malloc_0_nonnull=yes
+		export ac_cv_func_realloc_0_nonnull=yes
+	fi
 }
 
 add_automatic libusb
