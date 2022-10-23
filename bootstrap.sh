@@ -1134,6 +1134,7 @@ buildenv_libunistring() {
 	echo "memchr and strstr generally work"
 	export gl_cv_func_memchr_works=yes
 	export gl_cv_func_strstr_works_always=yes
+	export gl_cv_func_strstr_linear=yes
 	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
 		echo "setting malloc/realloc do not return 0"
 		export ac_cv_func_malloc_0_nonnull=yes
