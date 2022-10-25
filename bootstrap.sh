@@ -330,6 +330,7 @@ EOF
 # debhelper/13.10 started trimming changelogs, this breaks all over the place
 cat >/etc/dpkg/dpkg.cfg.d/trimmed-changelogs <<'EOF'
 path-exclude=/usr/share/doc/*/changelog.Debian.gz
+path-exclude=/usr/share/doc/*/changelog.gz
 EOF
 
 if test "$HOST_ARCH" = nios2; then
