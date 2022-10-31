@@ -856,6 +856,33 @@ patch_gcc_crypt_h() {
 
 EOF
 }
+patch_gcc_has_include_next() {
+	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
+	echo "fix __has_include_next https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80755"
+	drop_privs tee debian/patches/has_include_next.diff >/dev/null <<EOF
+--- a/src/libcpp/files.cc
++++ b/src/libcpp/files.cc
+@@ -1042,7 +1042,7 @@
+      path use the normal search logic.  */
+   if (type == IT_INCLUDE_NEXT && file->dir
+       && file->dir != &pfile->no_search_path)
+-    dir = file->dir->next;
++    return file->dir->next;
+   else if (angle_brackets)
+     dir = pfile->bracket_include;
+   else if (type == IT_CMDLINE)
+@@ -2145,6 +2145,8 @@
+ 		 enum include_type type)
+ {
+   cpp_dir *start_dir = search_path_head (pfile, fname, angle_brackets, type);
++  if (!start_dir)
++    return false;
+   _cpp_file *file = _cpp_find_file (pfile, fname, start_dir, angle_brackets,
+ 				    _cpp_FFK_HAS_INCLUDE, 0);
+   return file->err_no != ENOENT;
+EOF
+	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -870,6 +897,7 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_rtlibs_libatomic
 	patch_gcc_crypt_h
+	patch_gcc_has_include_next
 	patch_gcc_wdotap
 }
 
