@@ -1096,7 +1096,13 @@ add_automatic libbsd
 add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
+
 add_automatic libevent
+buildenv_libevent() {
+	echo "work around ftbfs #1023284"
+	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+}
+
 add_automatic libffi
 
 add_automatic libgc
