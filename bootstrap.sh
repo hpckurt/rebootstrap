@@ -133,7 +133,7 @@ check_arch() {
 			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*|"csky:ELF 32-bit LSB relocatable, C-SKY processor family, version 1 (SYSV)"*)
 				return 0
 			;;
-			"loongarch64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
+			"loong64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
 				return 0
 			;;
 		esac
@@ -223,7 +223,7 @@ obtain_source_package() {
 
 cat <<EOF >> /usr/share/dpkg/cputable
 csky		csky		csky		32	little
-loongarch64	loongarch64	loongarch64	64	little
+loong64		loongarch64	loongarch64	64	little
 EOF
 
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
