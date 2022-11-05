@@ -1246,14 +1246,6 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
-
-patch_libxcrypt() {
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
-		echo "fixup musl support #1017820"
-		drop_privs sed -i -e 's/1:4\.4\.27-1\.2~/1.2.2-2~/g' debian/control
-	fi
-}
-
 add_automatic libxdmcp
 
 add_automatic libxext
