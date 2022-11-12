@@ -1964,6 +1964,10 @@ apt_get_install "hurd-dev:$HOST_ARCH"
 progress_mark "hurd stage3 cross build"
 fi
 
+cross_build pkgconf
+progress_mark pkgconf
+# needed by libxcrypt
+
 # libcrypt1-dev is defacto build-essential, because unstaged libc6-dev (and
 # later build-essential) depends on it.
 cross_build libxcrypt
