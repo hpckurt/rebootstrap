@@ -1083,7 +1083,13 @@ add_automatic isl-0.18
 add_automatic jansson
 add_automatic jemalloc
 add_automatic keyutils
+
 add_automatic kmod
+builddep_kmod() {
+	echo "working around FTCBFS #1023895"
+	apt_get_install "pkg-config:$1"
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
 
 add_automatic krb5
 buildenv_krb5() {
