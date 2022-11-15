@@ -1289,6 +1289,7 @@ patch_linux() {
 		arc|csky|ia64|nios2)
 			kernel_arch=$HOST_ARCH
 		;;
+		loong64) kernel_arch=loongarch ;;
 		mipsr6|mipsr6el|mipsn32r6|mipsn32r6el|mips64r6|mips64r6el)
 			kernel_arch=defines-only
 		;;
