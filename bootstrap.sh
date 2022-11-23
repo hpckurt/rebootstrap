@@ -1297,6 +1297,13 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
+
+add_automatic libxcrypt
+patch_libxcrypt() {
+	echo "do not abuse Important and Protected fields #1024616"
+	drop_privs sed -i -e '/\(Important\|Protected\):/d' debian/control
+}
+
 add_automatic libxdmcp
 
 add_automatic libxext
@@ -1465,6 +1472,11 @@ patch_p11_kit() {
 EOF
 }
 
+patch_pam() {
+	echo "missing Build-Depends: libcrypt-dev #1024645"
+	drop_privs sed -i -e '/^Build-Depends:/s/$/, libcrypt-dev/' debian/control
+}
+
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
@@ -1504,7 +1516,17 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
+patch_systemd() {
+	echo "missing Build-Depends: libcrypt-dev #1024646"
+	drop_privs sed -i -e '/^Build-Depends:/s/$/ libcrypt-dev,/' debian/control
+}
+
 add_automatic sysvinit
+patch_sysvinit() {
+	echo "sysvinit misses a dependency on libcrypt-dev #972315"
+	drop_privs sed -i -e '/^Build-Depends:/s/$/libcrypt-dev,/' debian/control
+}
 
 add_automatic tar
 buildenv_tar() {
@@ -1949,17 +1971,6 @@ apt_get_install "hurd-dev:$HOST_ARCH"
 progress_mark "hurd stage3 cross build"
 fi
 
-cross_build pkgconf
-progress_mark pkgconf
-# needed by libxcrypt
-
-# libcrypt1-dev is defacto build-essential, because unstaged libc6-dev (and
-# later build-essential) depends on it.
-cross_build libxcrypt
-apt_get_install "libcrypt-dev:$HOST_ARCH"
-progress_mark libxcrypt
-# is defacto build-essential
-
 apt_get_install dose-builddebcheck dctrl-tools
 
 call_dose_builddebcheck() {
@@ -2059,6 +2070,7 @@ fi
 add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
 add_need libunistring # by gnutls28
+add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd
 add_need libxrender # by cairo
 add_need libzstd # by systemd
 add_need lz4 # by systemd
