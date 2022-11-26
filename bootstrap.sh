@@ -1110,7 +1110,13 @@ add_automatic gnupg2
 add_automatic gpm
 add_automatic grep
 add_automatic groff
+
 add_automatic guile-3.0
+patch_guile_3_0() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "fixing libc dependency #1008712"
+	drop_privs sed -i -e s/libc6-dev/libc-dev/ debian/control
+}
 
 add_automatic gzip
 patch_gzip() {
