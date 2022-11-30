@@ -1567,8 +1567,8 @@ patch_systemd() {
 
 add_automatic sysvinit
 patch_sysvinit() {
-	echo "sysvinit misses a dependency on libcrypt-dev #972315"
-	drop_privs sed -i -e '/^Build-Depends:/s/$/libcrypt-dev,/' debian/control
+	echo "stop requiring libcrypt-dev #972315"
+	drop_privs sed -i -e 's/+= sulogin\(.8\)\? /+= /' src/Makefile
 }
 
 add_automatic tar
