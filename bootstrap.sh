@@ -1624,6 +1624,9 @@ builddep_zlib() {
 	apt_get_install debhelper binutils dpkg-dev
 }
 
+echo "work around dpkg-genbuildinfo failing without a cross compiler #1025273"
+sed -i -e 's/subprocerr.*/return;/' /usr/bin/dpkg-genbuildinfo
+
 # choosing libatomic1 arbitrarily here, cause it never bumped soname
 BUILD_GCC_MULTIARCH_VER=`apt-cache show --no-all-versions libatomic1 | sed 's/^Source: gcc-\([0-9.]*\)$/\1/;t;d'`
 if test "$GCC_VER" != "$BUILD_GCC_MULTIARCH_VER"; then
