@@ -1855,8 +1855,8 @@ else
 	fi
 	(
 		case "$LIBC_NAME:$ENABLE_MULTILIB" in
-			glibc:yes) profiles=stage2 ;;
-			glibc:no) profiles=stage2,nobiarch ;;
+			glibc:yes) profiles=stage2,noudeb ;;
+			glibc:no) profiles=stage2,nobiarch,noudeb ;;
 			*) profiles=cross,nocheck ;;
 		esac
 		# tell unmet build depends
