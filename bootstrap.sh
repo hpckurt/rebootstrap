@@ -950,7 +950,9 @@ patch_glib2_0() {
 	dpkg-architecture "-a$HOST_ARCH" -ix32-any-any-any || return 0
 	# https://github.com/mesonbuild/meson/issues/9845
 	echo "working around wrong cc_can_run on x32"
-	drop_privs sed -i -e '/set-cross-properties/a\		needs_exe_wrapper=true \\' debian/rules
+	drop_privs tee -a debian/meson/libc-properties.ini >/dev/null <<EOF
+needs_exe_wrapper=true
+EOF
 }
 
 builddep_glibc() {
