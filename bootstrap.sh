@@ -1805,11 +1805,11 @@ else
 		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
 	fi
 	(
-		case "$LIBC_NAME:$ENABLE_MULTILIB" in
-			glibc:yes) profiles=stage2,noudeb ;;
-			glibc:no) profiles=stage2,nobiarch,noudeb ;;
-			*) profiles=cross,nocheck ;;
-		esac
+		profiles=$(join_words , $DEFAULT_PROFILES)
+		if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+			profiles="$profiles,stage2"
+			test "$ENABLE_MULTILIB" != yes && profiles="$profiles,nobiarch"
+		fi
 		# tell unmet build depends
 		drop_privs dpkg-checkbuilddeps -B "-a$HOST_ARCH" "-P$profiles" || :
 		export DEB_GCC_VERSION="-$GCC_VER"
