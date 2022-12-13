@@ -1143,7 +1143,78 @@ buildenv_krb5() {
 add_automatic libassuan
 add_automatic libatomic-ops
 add_automatic libbsd
+
 add_automatic libcap2
+patch_libcap2() {
+	echo "fix ftcbfs #1025983"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -23,32 +23,33 @@
+ COPTS = COPTS=-O0
+ endif
+
++MAKE_ASSIGNMENTS=GOLANG=no FORCELINKPAM=yes
+
+ %:
+ 	dh ${@}
+
+
+ override_dh_auto_clean:
+ 	dh_auto_clean -- GOLANG=no
+
+
+ override_dh_auto_build:
+ 	# See pam_cap/Makefile for FORCELINKPAM
+ 	dh_auto_build -- \
++		$(MAKE_ASSIGNMENTS) \
+ 		CC=$(CC) \
+ 		BUILD_CC=$(BUILD_CC) \
++		CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- \
+ 		$(COPTS) \
+ 		DYNAMIC=yes \
+-		FORCELINKPAM=yes \
+-		SUDO=$(DEB_GAIN_ROOT_CMD) \
+-		GOLANG=no
++		SUDO=$(DEB_GAIN_ROOT_CMD)
+ 	# Some of test suite is only invoked when run as real root. Explicitly
+ 	# build all binaries so we can include them in the autopkgtest.
+-	$(MAKE) -C libcap cap_test
+-	$(MAKE) -C pam_cap test_pam_cap
++	dh_auto_build -D libcap -- $(MAKE_ASSIGNMENTS) cap_test
++	dh_auto_build -D pam_cap -- $(MAKE_ASSIGNMENTS) test_pam_cap
+ 	# Change lookup from sibling dir to current dir
+ 	sed -i -e 's,\.\./progs/tcapsh-static,./tcapsh-static,g' tests/libcap_launch_test.c
+-	$(MAKE) -C tests \
++	dh_auto_build -D tests -- $(MAKE_ASSIGNMENTS) \
+ 		psx_test \
+ 		libcap_psx_test \
+ 		uns_test \
+@@ -57,7 +58,7 @@
+ 		noop \
+ 		exploit \
+ 		noexploit
+-	$(MAKE) -C progs tcapsh-static
++	dh_auto_build -D progs -- $(MAKE_ASSIGNMENTS) tcapsh-static
+
+
+ override_dh_installdirs:
+@@ -81,10 +82,10 @@
+ 		exploit \
+ 		noexploit
+ 	dh_auto_install -- \
++		$(MAKE_ASSIGNMENTS) \
+ 		lib=lib/$(DEB_HOST_MULTIARCH) \
+ 		PKGCONFIGDIR=/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig \
+-		RAISE_SETFCAP=no \
+-		GOLANG=no
++		RAISE_SETFCAP=no
+
+ 	# libcap-dev:
+ 	#   Move the development files from lib/ to usr/lib. dh_link will
+EOF
+}
+
 add_automatic libdebian-installer
 add_automatic libev
 
