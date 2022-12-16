@@ -884,41 +884,6 @@ patch_gcc_has_include_next() {
 EOF
 	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
 }
-patch_gcc_loong64() {
-	test "$HOST_ARCH" = loong64 || return 0
-	echo "add support for loong64 #1023785"
-	drop_privs tee -a debian/patches/gcc-multilib-multiarch.diff >/dev/null <<'EOF'
---- a/src/gcc/config/loongarch/t-linux
-+++ b/src/gcc/config/loongarch/t-linux
-@@ -32,23 +32,20 @@ ifneq ($(call if_multiarch,yes),yes)
- else
-     # Only define MULTIARCH_DIRNAME when multiarch is enabled,
-     # or it would always introduce ${target} into the search path.
--    MULTIARCH_DIRNAME = $(LA_MULTIARCH_TRIPLET)
-+    MULTIARCH_DIRNAME = $(call if_multiarch,loongarch64-linux-gnu)
- endif
-
- # Don't define MULTILIB_OSDIRNAMES if multilib is disabled.
- ifeq ($(filter LA_DISABLE_MULTILIB,$(tm_defines)),)
-
-     MULTILIB_OSDIRNAMES = \
--      mabi.lp64d=../lib64$\
--      $(call if_multiarch,:loongarch64-linux-gnuf64)
-+      mabi.lp64d=../lib$(call if_multiarch,:loongarch64-linux-gnu)
-
-     MULTILIB_OSDIRNAMES += \
--      mabi.lp64f=../lib64/f32$\
--      $(call if_multiarch,:loongarch64-linux-gnuf32)
-+      mabi.lp64f=../lib/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
-
-     MULTILIB_OSDIRNAMES += \
--      mabi.lp64s=../lib64/sf$\
--      $(call if_multiarch,:loongarch64-linux-gnusf)
-+      mabi.lp64s=../lib/sf$(call if_multiarch,:loongarch64-linux-gnusf)
-
- endif
-EOF
-}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -933,7 +898,6 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_crypt_h
 	patch_gcc_has_include_next
-	patch_gcc_loong64
 	patch_gcc_wdotap
 }
 
