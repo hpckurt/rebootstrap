@@ -741,13 +741,6 @@ add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
 add_automatic curl
-
-patch_cyrus_sasl2() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "fixing libc dependency #1023838"
-	drop_privs sed -i -e 's/libc6-dev/libc-dev/' debian/control
-}
-
 add_automatic dash
 add_automatic db-defaults
 add_automatic debianutils
