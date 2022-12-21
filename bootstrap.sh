@@ -1474,10 +1474,6 @@ patch_systemd() {
 }
 
 add_automatic sysvinit
-patch_sysvinit() {
-	echo "stop requiring libcrypt-dev #972315"
-	drop_privs sed -i -e 's/+= sulogin\(.8\)\? /+= /' src/Makefile
-}
 
 add_automatic tar
 buildenv_tar() {
