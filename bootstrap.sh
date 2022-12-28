@@ -1274,6 +1274,10 @@ buildenv_libxt() {
 }
 
 add_automatic libzstd
+patch_libzstd() {
+	echo "fix FTCBFS #1027126"
+	sed -i -e '1aDPKG_EXPORT_BUILDTOOLS=1\ninclude /usr/share/dpkg/buildtools.mk' debian/rules
+}
 
 patch_linux() {
 	local kernel_arch comment
