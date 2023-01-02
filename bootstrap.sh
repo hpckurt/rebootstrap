@@ -1485,10 +1485,6 @@ buildenv_tk8_6() {
 add_automatic uchardet
 add_automatic ustr
 
-patch_util_linux() {
-	echo "fix missing libcrypt-dev dependency #1024794"
-	drop_privs sed -i -e '/^Build-Depends:/s/$/ libcrypt-dev <!stage1>,/' debian/control
-}
 buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
 }
