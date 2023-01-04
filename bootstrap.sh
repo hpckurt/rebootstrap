@@ -647,36 +647,7 @@ add_automatic apt
 add_automatic attr
 add_automatic base-files
 add_automatic base-passwd
-
 add_automatic bash
-patch_bash() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
-	echo "fixing logic error around wrapping strtoimax #1023053"
-	drop_privs patch -p1 <<'EOF'
---- a/m4/strtoimax.m4
-+++ b/m4/strtoimax.m4
-@@ -29,7 +29,7 @@
-   fi
- ])
- AC_MSG_RESULT($bash_cv_func_strtoimax)
--if test $bash_cv_func_strtoimax = yes; then
-+if test $bash_cv_func_strtoimax = no; then
- AC_LIBOBJ(strtoimax)
- fi
- ])
---- a/configure
-+++ b/configure
-@@ -20443,7 +20443,7 @@
-
- { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $bash_cv_func_strtoimax" >&5
- printf "%s\n" "$bash_cv_func_strtoimax" >&6; }
--if test $bash_cv_func_strtoimax = yes; then
-+if test $bash_cv_func_strtoimax = no; then
- case " $LIBOBJS " in
-   *" strtoimax.$ac_objext "* ) ;;
-   *) LIBOBJS="$LIBOBJS strtoimax.$ac_objext"
-EOF
-}
 
 patch_binutils() {
 	echo "patching binutils to discard ldscripts"
