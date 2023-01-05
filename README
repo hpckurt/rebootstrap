@@ -6,9 +6,13 @@ The bootstrap.sh script tries to re-bootstrap a given (host) architecture from
 a build chroot with nothing but sid sources. No binaries from the host
 architecture are reused. It expects to be able to install packages and will
 leave the filesystem in a dirty state (creating symlinks without tracking
-them). It has only ever been tested with pbuilder:
+them). The original way to run it was using pbuilder:
 
 pbuilder --execute bootstrap.sh HOST_ARCH=$host_arch
+
+Alternatively, you can use mmdebstrap:
+
+mmdebstrap --verbose --variant=apt --mode=unshare --customize-hook="upload bootstrap.sh /bootstrap.sh" --customize-hook='chroot "$1" sh /bootstrap.sh HOST_ARCH=...'  unstable /dev/null
 
 The following variables are supposed to be given as parameters (but setting
 others is not prohibited):
@@ -87,7 +91,7 @@ in a shell script, e.g. by using "sed" to alter files.  An example:
 
   patch_elfutils() {
     echo "work around FTBFS with gcc-7 #853387"
-    sed -i -e 's/-Werror//' config/eu.am
+    drop_privs sed -i -e 's/-Werror//' config/eu.am
   }
 
 
@@ -120,10 +124,10 @@ it gets called instead with the host-arch as $1 and the set of
 build-profiles as $2.
 
 Note that "automatic" packages (see below) cannot have a build
-dependency hook unless the satisfiability of can be determined
-using the original Build-Depends (e.g. adding dh-autoreconf is ok).
+dependency hook unless the satisfiability can be determined using
+the original Build-Depends (e.g. adding dh-autoreconf is ok).
 Updating Build-Depends via a patch hook should be preferred (with
-the same limitatios regarding "automatic" packages).
+the same limitations regarding "automatic" packages).
 
 
 Package build mechanism
