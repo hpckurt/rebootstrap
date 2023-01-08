@@ -1251,9 +1251,10 @@ patch_libzstd() {
 }
 
 patch_linux() {
-	local kernel_arch comment
+	local kernel_arch comment regen_control
 	kernel_arch=
 	comment="just building headers yet"
+	regen_control=
 	case "$HOST_ARCH" in
 		arc|csky|ia64|nios2)
 			kernel_arch=$HOST_ARCH
@@ -1285,9 +1286,14 @@ EOF
 			echo "patching linux to enable $HOST_ARCH"
 		fi
 		drop_privs sed -i -e "/^arches:/a\\ $HOST_ARCH" debian/config/defines
-		apt_get_install kernel-wedge
-		drop_privs ./debian/rules debian/rules.gen || : # intentionally exits 1 to avoid being called automatically. we are doing it wrong
+		regen_control=yes
 	fi
+	echo "fix jinja dependency #1028184"
+	drop_privs sed -i -e 's/\(python3-jinja2\),/\1:native,/' debian/templates/source.control.in
+	regen_control=yes
+	test "$regen_control" = yes || return 0
+	apt_get_install kernel-wedge python3-jinja2
+	drop_privs ./debian/rules debian/rules.gen || : # intentionally exits 1 to avoid being called automatically. we are doing it wrong
 }
 
 add_automatic lz4
