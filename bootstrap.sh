@@ -1389,11 +1389,6 @@ patch_p11_kit() {
 EOF
 }
 
-patch_pam() {
-	echo "missing Build-Depends: libcrypt-dev #1024645"
-	drop_privs sed -i -e '/^Build-Depends:/s/$/, libcrypt-dev/' debian/control
-}
-
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
