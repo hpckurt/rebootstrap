@@ -200,6 +200,10 @@ if test "$ENABLE_MULTIARCH_GCC" = yes; then
 	apt_get_install cross-gcc-dev
 	echo "removing unused unstripped_exe patch"
 	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
+	if ! test -d "/usr/share/cross-gcc/patches/gcc-$GCC_VER"; then
+		# missing patch stack #1028094
+		cp -R "/usr/share/cross-gcc/patches/gcc-$((GCC_VER - 1))" "/usr/share/cross-gcc/patches/gcc-$GCC_VER"
+	fi
 fi
 
 obtain_source_package() {
