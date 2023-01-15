@@ -196,6 +196,10 @@ drop_privs() {
 	( drop_privs_exec "$@" )
 }
 
+if test -z "$GCC_VER"; then
+	GCC_VER=`apt-cache depends gcc | sed 's/^ *Depends: gcc-\([0-9.]*\)$/\1/;t;d'`
+fi
+
 if test "$ENABLE_MULTIARCH_GCC" = yes; then
 	apt_get_install cross-gcc-dev
 	echo "removing unused unstripped_exe patch"
@@ -240,10 +244,6 @@ grep -q '^deb-src .*sid' /etc/apt/sources.list.d/*.list || echo "deb-src $MIRROR
 
 dpkg --add-architecture $HOST_ARCH
 $APT_GET update
-
-if test -z "$GCC_VER"; then
-	GCC_VER=`apt-cache depends gcc | sed 's/^ *Depends: gcc-\([0-9.]*\)$/\1/;t;d'`
-fi
 
 rm -Rf /tmp/buildd
 drop_privs mkdir -p /tmp/buildd
