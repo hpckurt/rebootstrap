@@ -233,6 +233,12 @@ cat <<EOF >> /usr/share/dpkg/cputable
 csky		csky		csky		32	little
 EOF
 
+if test "$HOST_ARCH" = loong64; then
+	echo "updating tuple for loong64 #1028654"
+	echo 'f64-gnu-linux-loong64 loong64' >>/usr/share/dpkg/tupletable
+	echo 'f64-gnu-linux linux-gnuf64 linux[^-]*-gnuf64' >>/usr/share/dpkg/ostable
+fi
+
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
 	echo "architecture $HOST_ARCH unknown to dpkg"
 	exit 1
