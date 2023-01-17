@@ -793,17 +793,20 @@ patch_gcc_limits_h_test() {
 @@ -3139,11 +3139,7 @@
  	  sysroot_headers_suffix=`echo $${ml} | sed -e 's/;.*$$//'`; \
  	  multi_dir=`echo $${ml} | sed -e 's/^[^;]*;//'`; \
- 	  fix_dir=include-fixed$${multi_dir}; \
+ 	  include_dir=include$${multi_dir}; \
 -	  if $(LIMITS_H_TEST) ; then \
 -	    cat $(srcdir)/limitx.h $(T_GLIMITS_H) $(srcdir)/limity.h > tmp-xlimits.h; \
 -	  else \
 -	    cat $(T_GLIMITS_H) > tmp-xlimits.h; \
 -	  fi; \
 +	  cat $(srcdir)/limitx.h $(T_GLIMITS_H) $(srcdir)/limity.h > tmp-xlimits.h; \
- 	  $(mkinstalldirs) $${fix_dir}; \
- 	  chmod a+rx $${fix_dir} || true; \
+ 	  $(mkinstalldirs) $${include_dir}; \
+ 	  chmod a+rx $${include_dir} || true; \
  	  $(SHELL) $(srcdir)/../move-if-change \
 EOF
+	if test "$GCC_VER" -le 12; then
+		drop_privs sed -i -e 's/include_dir=include/fix_dir=include-fixed/' -e 's/{include_dir}/{fix_dir}/' debian/patches/limits-h-test.diff
+	fi
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
 }
 patch_gcc_unapplicable_ada() {
@@ -875,6 +878,7 @@ patch_gcc_12() {
 	patch_gcc_wdotap
 }
 patch_gcc_13() {
+	patch_gcc_limits_h_test
 	patch_gcc_wdotap
 }
 
