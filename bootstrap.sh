@@ -732,6 +732,22 @@ buildenv_diffutils() {
 		export gl_cv_func_getopt_gnu=yes
 	fi
 }
+patch_diffutils() {
+	test "$HOST_ARCH" = loong64 || return 0
+	echo "Add loong support #1029275"
+	drop_privs patch -p1 <<'EOF'
+--- a/m4/stack-direction.m4
++++ b/m4/stack-direction.m4
+@@ -37,6 +37,7 @@
+       m88k | \
+       mcore | \
+       microblaze | \
++      loongarch* | \
+       mips* | \
+       mmix | \
+       mn10200 | \
+EOF
+}
 
 add_automatic dpkg
 add_automatic e2fsprogs
