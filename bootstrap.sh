@@ -1422,6 +1422,7 @@ EOF
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
+add_automatic perl
 add_automatic pkgconf
 add_automatic popt
 
