@@ -649,7 +649,13 @@ automatic_packages=
 add_automatic() { automatic_packages=$(set_add "$automatic_packages" "$1"); }
 
 add_automatic acl
+
 add_automatic apt
+patch_apt() {
+	echo "fix FTBFS with gcc-13 #1030592"
+	drop_privs sed -i -e '1i#include <cstdint>' apt-pkg/contrib/mmap.cc
+}
+
 add_automatic attr
 add_automatic base-files
 add_automatic base-passwd
