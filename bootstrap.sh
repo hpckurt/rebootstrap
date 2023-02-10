@@ -1319,9 +1319,6 @@ EOF
 		drop_privs sed -i -e "/^arches:/a\\ $HOST_ARCH" debian/config/defines
 		regen_control=yes
 	fi
-	echo "fix jinja dependency #1028184"
-	drop_privs sed -i -e 's/\(python3-jinja2\),/\1:native,/' debian/templates/source.control.in
-	regen_control=yes
 	test "$regen_control" = yes || return 0
 	apt_get_install kernel-wedge python3-jinja2
 	drop_privs ./debian/rules debian/rules.gen || : # intentionally exits 1 to avoid being called automatically. we are doing it wrong
