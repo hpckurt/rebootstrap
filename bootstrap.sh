@@ -1069,11 +1069,10 @@ patch_gzip() {
 	drop_privs sed -i -e '/CONFIGURE_ARGS.*--host/s/$/ --build=${DEB_BUILD_GNU_TYPE}/' debian/rules
 }
 buildenv_gzip() {
-	if test "$LIBC_NAME" = musl; then
-		# this avoids replacing fseeko with a variant that is broken
-		echo gl_cv_func_fflush_stdin exported
-		export gl_cv_func_fflush_stdin=yes
-	fi
+	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
+	# this avoids replacing fseeko with a variant that is broken
+	echo gl_cv_func_fflush_stdin exported
+	export gl_cv_func_fflush_stdin=yes
 }
 
 add_automatic hostname
@@ -1725,7 +1724,7 @@ if test -f "$REPODIR/stamps/${LIBC_NAME}_2"; then
 	echo "skipping rebuild of $LIBC_NAME stage2"
 else
 	cross_build_setup "$LIBC_NAME" "${LIBC_NAME}_2"
-	if test "$LIBC_NAME" = glibc; then
+	if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
 		"$(get_hook builddep glibc)" "$HOST_ARCH" stage2
 	else
 		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
@@ -1743,7 +1742,7 @@ else
 	)
 	cd ..
 	ls -l
-	if test "$LIBC_NAME" = musl; then
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
 		pickup_packages *.changes
 		dpkg -i musl*.deb
 	else
@@ -1778,14 +1777,11 @@ else
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		apt_get_install "libc-dev:$HOST_ARCH" $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1:$HOST_ARCH/g")
 	else
-		case "$LIBC_NAME" in
-			glibc)
-				apt_get_install "libc6-dev-$HOST_ARCH-cross" $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross/g")
-			;;
-			musl)
-				apt_get_install "musl-dev-$HOST_ARCH-cross"
-			;;
-		esac
+		if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+			apt_get_install "libc6-dev-$HOST_ARCH-cross" $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross/g")
+		elif dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+			apt_get_install "musl-dev-$HOST_ARCH-cross"
+		fi
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc3
 	check_binNMU
