@@ -225,15 +225,11 @@ obtain_source_package() {
 	fi
 }
 
+# loong64: #1028654
 cat <<EOF >> /usr/share/dpkg/cputable
 csky		csky		csky		32	little
+loong64		loongarch64	loongarch64	64	little
 EOF
-
-if test "$HOST_ARCH" = loong64; then
-	echo "updating tuple for loong64 #1028654"
-	echo 'f64-gnu-linux-loong64 loong64' >>/usr/share/dpkg/tupletable
-	echo 'f64-gnu-linux linux-gnuf64 linux[^-]*-gnuf64' >>/usr/share/dpkg/ostable
-fi
 
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
 	echo "architecture $HOST_ARCH unknown to dpkg"
@@ -873,6 +869,32 @@ patch_gcc_has_include_next() {
 EOF
 	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_loong64() {
+	test "$HOST_ARCH" = loong64 || return 0
+	echo "revert loong64 tuple #1031850"
+	drop_privs tee debian/patches/loong64_tuple.diff >/dev/null <<'EOF'
+--- a/src/gcc/config/loongarch/t-linux
++++ b/src/gcc/config/loongarch/t-linux
+@@ -32,14 +32,14 @@ ifneq ($(call if_multiarch,yes),yes)
+ else
+     # Only define MULTIARCH_DIRNAME when multiarch is enabled,
+     # or it would always introduce ${target} into the search path.
+-    MULTIARCH_DIRNAME = $(call if_multiarch,loongarch64-linux-gnuf64)
++    MULTIARCH_DIRNAME = $(LA_MULTIARCH_TRIPLET)
+ endif
+
+ # Don't define MULTILIB_OSDIRNAMES if multilib is disabled.
+ ifeq ($(filter LA_DISABLE_MULTILIB,$(tm_defines)),)
+
+     MULTILIB_OSDIRNAMES = \
+-      mabi.lp64d=../lib$(call if_multiarch,:loongarch64-linux-gnuf64)
++      mabi.lp64d=../lib$(call if_multiarch,:loongarch64-linux-gnu)
+
+     MULTILIB_OSDIRNAMES += \
+       mabi.lp64f=../lib/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
+EOF
+	echo "debian_patches += loong64_tuple" | drop_privs tee -a debian/rules.patch >/dev/null
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -887,10 +909,12 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_crypt_h
 	patch_gcc_has_include_next
+	patch_gcc_loong64
 	patch_gcc_wdotap
 }
 patch_gcc_13() {
 	patch_gcc_limits_h_test
+	patch_gcc_loong64
 	patch_gcc_wdotap
 }
 
