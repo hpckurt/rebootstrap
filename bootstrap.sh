@@ -15,7 +15,6 @@ ENABLE_MULTIARCH_GCC=yes
 REPODIR=/tmp/repo
 APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o Debug::pkgDepCache::Marker=1 -o Debug::pkgDepCache::AutoInstall=1 -o Acquire::Languages=none"
 DEFAULT_PROFILES="cross nocheck noinsttest noudeb"
-LIBC_NAME=glibc
 DROP_PRIVS=buildd
 GCC_NOLANG="ada asan brig d gcn go itm java jit hppa64 lsan m2 nvptx objc obj-c++ rust tsan ubsan"
 ENABLE_DIFFOSCOPE=no
@@ -632,10 +631,6 @@ cross_build() {
 	fi
 	progress_mark "$stamp cross build"
 }
-
-case "$HOST_ARCH" in
-	musl-linux-*) LIBC_NAME=musl ;;
-esac
 
 if test "$ENABLE_MULTIARCH_GCC" != yes; then
 	apt_get_install dpkg-cross
@@ -1744,6 +1739,10 @@ fi
 # we'll have to remove build arch multilibs to be able to install host arch multilibs
 apt_get_remove $(dpkg-query -W "libc[0-9]*-*:$(dpkg --print-architecture)" | sed "s/\\s.*//;/:$(dpkg --print-architecture)/d")
 
+case "$HOST_ARCH" in
+	musl-linux-*) LIBC_NAME=musl ;;
+	*) LIBC_NAME=glibc ;;
+esac
 if test -f "$REPODIR/stamps/${LIBC_NAME}_2"; then
 	echo "skipping rebuild of $LIBC_NAME stage2"
 else
