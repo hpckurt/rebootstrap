@@ -1079,6 +1079,9 @@ EOF
  		--enable-stackguard-randomization \
 EOF
 }
+buildenv_glibc() {
+	export DEB_GCC_VERSION="-$GCC_VER"
+}
 
 add_automatic gmp
 
@@ -1808,10 +1811,10 @@ else
 		if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
 			profiles="$profiles,stage2"
 			test "$ENABLE_MULTILIB" != yes && profiles="$profiles,nobiarch"
+			buildenv_glibc
 		fi
 		# tell unmet build depends
 		drop_privs dpkg-checkbuilddeps -B "-a$HOST_ARCH" "-P$profiles" || :
-		export DEB_GCC_VERSION="-$GCC_VER"
 		drop_privs_exec dpkg-buildpackage -B -uc -us "-a$HOST_ARCH" -d "-P$profiles" || buildpackage_failed "$?"
 	)
 	cd ..
