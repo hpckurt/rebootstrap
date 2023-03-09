@@ -1177,6 +1177,10 @@ buildenv_libevent() {
 }
 
 add_automatic libffi
+patch_libffi() {
+	echo "fix symbols for loong64 #1024359"
+	drop_privs sed -i '/)LIBFFI_COMPLEX_8\.0 /s/)/ !loong64)/' debian/libffi8.symbols
+}
 
 add_automatic libgc
 buildenv_libgc() {
