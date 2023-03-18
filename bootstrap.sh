@@ -224,10 +224,8 @@ obtain_source_package() {
 	fi
 }
 
-# loong64: #1028654
 cat <<EOF >> /usr/share/dpkg/cputable
 csky		csky		csky		32	little
-loong64		loongarch64	loongarch64	64	little
 EOF
 
 if test -z "$HOST_ARCH" || ! dpkg-architecture "-a$HOST_ARCH"; then
