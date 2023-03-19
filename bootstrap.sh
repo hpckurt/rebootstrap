@@ -2205,7 +2205,7 @@ if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
-dpkg-architecture "-a$1" -ilinux-any && assert_built libselinux
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built libselinux
 assert_built "ncurses zlib"
 cross_build util-linux "stage1 pkg.util-linux.noverity" util-linux_1
 mark_built util-linux
@@ -2336,7 +2336,7 @@ mark_built libsemanage
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
-dpkg-architecture "-a$1" -ilinux-any && assert_built "audit libcap-ng libselinux systemd"
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "audit libcap-ng libselinux systemd"
 assert_built "ncurses zlib"
 cross_build util-linux "pkg.util-linux.noverity"
 # essential
