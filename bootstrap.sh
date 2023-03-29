@@ -1041,22 +1041,25 @@ EOF
  
  # FIXME: We are having runtime issues with ifunc...
 EOF
-	echo "patching glibc to avoid -Werror"
+	# https://salsa.debian.org/glibc-team/glibc/-/merge_requests/16
+	echo "patching glibc to support -Wno-error"
 	drop_privs patch -p1 <<'EOF'
 --- a/debian/rules.d/build.mk
 +++ b/debian/rules.d/build.mk
-@@ -85,6 +85,7 @@
- 		$(CURDIR)/configure \
- 		--host=$(call xx,configure_target) \
- 		--build=$$configure_build --prefix=/usr \
-+		--disable-werror \
- 		--enable-add-ons=$(standard-add-ons)"$(call xx,add-ons)" \
- 		--without-selinux \
- 		--enable-stackguard-randomization \
+@@ -116,6 +116,7 @@ endif
+ 		$(if $(filter $(pt_chown),yes),--enable-pt_chown) \
+ 		$(if $(filter $(threads),no),--disable-nscd) \
+ 		$(if $(filter $(call xx,mvec),no),--disable-mathvec) \
++		$(if $(filter -Wno-error,$(shell dpkg-buildflags --get CFLAGS)),--disable-werror) \
+ 		$(call xx,with_headers) $(call xx,extra_config_options)
+ 	touch $@
+
 EOF
 }
 buildenv_glibc() {
 	export DEB_GCC_VERSION="-$GCC_VER"
+	# glibc passes -Werror by default as it uses a fixed gcc version. We change that version.
+	export DEB_CFLAGS_APPEND="$DEB_CFLAGS_APPEND -Wno-error"
 }
 
 add_automatic gmp
