@@ -1059,7 +1059,7 @@ EOF
 buildenv_glibc() {
 	export DEB_GCC_VERSION="-$GCC_VER"
 	# glibc passes -Werror by default as it uses a fixed gcc version. We change that version.
-	export DEB_CFLAGS_APPEND="$DEB_CFLAGS_APPEND -Wno-error"
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -Wno-error"
 }
 
 add_automatic gmp
