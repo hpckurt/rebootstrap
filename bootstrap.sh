@@ -1080,6 +1080,14 @@ patch_guile_3_0() {
 	echo "fixing libc dependency #1008712"
 	drop_privs sed -i -e s/libc6-dev/libc-dev/ debian/control
 }
+builddep_guile_3_0() {
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P cross ./
+	if test "$HOST_ARCH" = loong64; then
+		echo "add loong64 support #1024295"
+		# https://git.savannah.gnu.org/gitweb/?p=guile.git;a=commit;h=f3ea8f7fa1d84a559c7bf834fe5b675abe0ae7b8
+		sed -i -e 's/"riscv/"loongarch/' /usr/share/guile/3.0/system/base/target.scm
+	fi
+}
 
 add_automatic gzip
 patch_gzip() {
