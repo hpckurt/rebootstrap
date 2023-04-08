@@ -1446,25 +1446,7 @@ buildenv_openldap() {
 
 add_automatic openssl
 add_automatic openssl1.0
-
 add_automatic p11-kit
-patch_p11_kit() {
-	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
-	echo "addressing FTBFS on hurd-any #989235"
-	drop_privs patch -p1 <<'EOF'
---- a/p11-kit/lists.c
-+++ b/p11-kit/lists.c
-@@ -40,6 +40,7 @@
- #include <assert.h>
- #include <ctype.h>
- #include <string.h>
-+#include <stdint.h>
- #include <stdio.h>
- #include <stdlib.h>
- #include <unistd.h>
-EOF
-}
-
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
