@@ -884,6 +884,24 @@ patch_gcc_loong64() {
 EOF
 	echo "debian_patches += loong64_tuple" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_hunk_update() {
+	echo "fixing cross-install-location.diff to apply again #1034293"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/patches/cross-install-location.diff
++++ b/debian/patches/cross-install-location.diff
+@@ -382,9 +382,9 @@
+  gcc_version := $(shell @get_gcc_base_ver@ $(srcdir)/../gcc/BASE-VER)
+ -libexecsubdir := $(libexecdir)/gcc/$(target_noncanonical)/$(gcc_version)
+ +libexecsubdir := $(libexecdir)/gcc-cross/$(target_noncanonical)/$(gcc_version)
++ INSTALL := @INSTALL@
+  INSTALL_PROGRAM := @INSTALL_PROGRAM@
+  INSTALL_STRIP_PROGRAM := $(srcdir)/../install-sh -c -s
+- AUTOCONF := @AUTOCONF@
+ --- a/src/libgm2/libm2cor/Makefile.am
+ +++ b/src/libgm2/libm2cor/Makefile.am
+ @@ -27,7 +27,7 @@ MAKEOVERRIDES=
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -904,6 +922,7 @@ patch_gcc_12() {
 patch_gcc_13() {
 	patch_gcc_limits_h_test
 	patch_gcc_loong64
+	patch_gcc_hunk_update
 	patch_gcc_wdotap
 }
 
