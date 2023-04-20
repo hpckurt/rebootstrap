@@ -135,6 +135,10 @@ check_arch() {
 			"loong64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
 				return 0
 			;;
+			"riscv32:ELF 32-bit LSB relocatable, UCB RISC-V, double-float ABI, version 1 (SYSV)"*|"riscv32:ELF 32-bit LSB relocatable, UCB RISC-V, RVC, double-float ABI, version 1 (SYSV)"*)
+				# https://github.com/kilobyte/arch-test/pull/11
+				return 0
+			;;
 		esac
 		echo "expected $2, but found $(file -b "$1")"
 		return 1
