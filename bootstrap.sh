@@ -1371,6 +1371,8 @@ patch_linux() {
 		;;
 		powerpcel) kernel_arch=powerpc; ;;
 		riscv64) kernel_arch=riscv; ;;
+		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
+		riscv32) kernel_arch=riscv; ;;
 		*-linux-*)
 			if ! test -d "debian/config/$HOST_ARCH"; then
 				kernel_arch=$(sed 's/^kernel-arch: //;t;d' < "debian/config/${HOST_ARCH#*-linux-}/defines")
