@@ -1473,7 +1473,15 @@ add_automatic openssl
 add_automatic openssl1.0
 add_automatic p11-kit
 add_automatic patch
+
 add_automatic pcre2
+patch_pcre2() {
+	if test "$HOST_ARCH" = sparc; then
+		echo "fixing FTBFS on sparc #1034779"
+		drop_privs sed -i -e 's/ sparc / /' debian/rules
+	fi
+}
+
 add_automatic pcre3
 
 patch_perl() {
