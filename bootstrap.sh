@@ -907,7 +907,6 @@ patch_gcc_12() {
 }
 patch_gcc_13() {
 	patch_gcc_limits_h_test
-	patch_gcc_loong64
 	patch_gcc_wdotap
 }
 
