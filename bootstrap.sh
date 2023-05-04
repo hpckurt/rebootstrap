@@ -1571,6 +1571,10 @@ if dpkg --compare-versions "$GCC_VER" gt "$BUILD_GCC_MULTIARCH_VER"; then
 	$APT_GET -t experimental install g++ g++-$GCC_VER
 	rm -f /etc/apt/sources.list.d/tmp-experimental.list
 	$APT_GET update
+	if test "$GCC_VER" = 13 && test -h /usr/lib/bfd-plugins/liblto_plugin.so && ! test -e /usr/lib/bfd-plugins/liblto_plugin.so; then
+		echo "fix broken liblto_plugin.so plugin #1035521"
+		ln -sf "../../libexec/gcc/$(dpkg-architecture -qDEB_HOST_GNU_TYPE)/$GCC_VER/liblto_plugin.so" /usr/lib/bfd-plugins/liblto_plugin.so
+	fi
 elif test -f "$REPODIR/stamps/gcc_0"; then
 	echo "skipping rebuild of build gcc"
 	$APT_GET --force-yes dist-upgrade # downgrade!
