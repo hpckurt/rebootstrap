@@ -1346,9 +1346,6 @@ patch_linux() {
 			kernel_arch=$HOST_ARCH
 		;;
 		loong64) kernel_arch=loongarch ;;
-		mipsr6|mipsr6el|mipsn32r6|mipsn32r6el|mips64r6|mips64r6el)
-			kernel_arch=defines-only
-		;;
 		powerpcel) kernel_arch=powerpc; ;;
 		riscv64) kernel_arch=riscv; ;;
 		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
