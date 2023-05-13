@@ -1347,7 +1347,6 @@ patch_linux() {
 		;;
 		loong64) kernel_arch=loongarch ;;
 		powerpcel) kernel_arch=powerpc; ;;
-		riscv64) kernel_arch=riscv; ;;
 		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
 		riscv32) kernel_arch=riscv; ;;
 		*-linux-*)
