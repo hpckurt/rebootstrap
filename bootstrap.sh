@@ -9,7 +9,7 @@ export DH_VERBOSE=1
 HOST_ARCH=undefined
 # select gcc version from gcc-defaults package unless set
 GCC_VER=
-: ${MIRROR:="http://http.debian.net/debian"}
+: "${MIRROR:=http://deb.debian.org/debian}"
 ENABLE_MULTILIB=no
 ENABLE_MULTIARCH_GCC=yes
 REPODIR=/tmp/repo
