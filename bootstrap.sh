@@ -13,6 +13,7 @@ GCC_VER=
 ENABLE_MULTILIB=no
 ENABLE_MULTIARCH_GCC=yes
 REPODIR=/tmp/repo
+# https://salsa.debian.org/apt-team/apt#debugging
 APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o Debug::pkgDepCache::Marker=1 -o Debug::pkgDepCache::AutoInstall=1 -o Acquire::Languages=none"
 DEFAULT_PROFILES="cross nocheck noinsttest noudeb"
 DROP_PRIVS=buildd
