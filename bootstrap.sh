@@ -1108,7 +1108,6 @@ buildenv_gzip() {
 
 add_automatic hostname
 add_automatic icu
-add_automatic isl-0.18
 add_automatic jansson
 add_automatic jemalloc
 add_automatic keyutils
