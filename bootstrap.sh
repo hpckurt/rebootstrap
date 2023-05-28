@@ -1425,6 +1425,22 @@ patch_nss() {
 
 EOF
 	fi
+	echo "support building without -Werror #1036211"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -74,8 +74,9 @@
+ 	$(NULL)
+
+ # Disable -Werror on less mainline architectures.
+-ifneq (,$(filter-out i386 x86_64 aarch64,$(DEB_HOST_GNU_CPU)))
++ifneq (,$(filter-out i386 x86_64 aarch64,$(DEB_HOST_GNU_CPU))$(filter -Wno-error,$(CFLAGS)))
+ COMMON_MAKE_FLAGS += NSS_ENABLE_WERROR=0
++CFLAGS := $(filter-out -Wno-error,$(CFLAGS))
+ endif
+
+ NSS_TOOLS := \
+EOF
 }
 
 buildenv_openldap() {
