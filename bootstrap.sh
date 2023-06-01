@@ -1378,7 +1378,23 @@ EOF
 }
 
 add_automatic lz4
-add_automatic make-dfsg
+
+patch_make_dfsg() {
+	echo "fixing the noguile build profile #993944"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -36,6 +36,7 @@
+ Provides: make (= ${source:Version})
+ Replaces: make
+ Architecture: any
++Build-Profiles: <!noguile>
+ Multi-Arch: allowed
+ Description: utility for directing compilation with guile support
+  GNU Make is a utility which controls the generation of executables
+EOF
+}
+
 add_automatic man-db
 add_automatic mawk
 add_automatic mpclib3
@@ -2061,7 +2077,6 @@ add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd
 add_need libxrender # by cairo
 add_need libzstd # by systemd
 add_need lz4 # by systemd
-add_need make-dfsg # for build-essential
 add_need man-db # for debhelper
 add_need mawk # for base-files (alternatively: gawk)
 add_need mpclib3 # by gcc-VER
@@ -2354,6 +2369,12 @@ automatically_cross_build_packages
 cross_build cdebconf pkg.cdebconf.nogtk cdebconf_1
 mark_built cdebconf
 # needed by base-passwd
+
+automatically_cross_build_packages
+
+cross_build make-dfsg noguile make-dfsg_1
+mark_built make-dfsg
+# needed by build-essential
 
 automatically_cross_build_packages
 
