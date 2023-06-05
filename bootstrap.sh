@@ -1078,21 +1078,6 @@ add_automatic gpm
 add_automatic grep
 add_automatic groff
 
-add_automatic guile-3.0
-patch_guile_3_0() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "fixing libc dependency #1008712"
-	drop_privs sed -i -e s/libc6-dev/libc-dev/ debian/control
-}
-builddep_guile_3_0() {
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P cross ./
-	if test "$HOST_ARCH" = loong64; then
-		echo "add loong64 support #1024295"
-		# https://git.savannah.gnu.org/gitweb/?p=guile.git;a=commit;h=f3ea8f7fa1d84a559c7bf834fe5b675abe0ae7b8
-		sed -i -e 's/"riscv/"loongarch/' /usr/share/guile/3.0/system/base/target.scm
-	fi
-}
-
 add_automatic gzip
 patch_gzip() {
 	test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_BITS)" = 32 || return 0
@@ -2185,19 +2170,19 @@ automatically_cross_build_packages
 
 cross_build libtool
 mark_built libtool
-# needed by guile-X.Y, libffi
+# needed libffi
 
 automatically_cross_build_packages
 
 cross_build ncurses
 mark_built ncurses
-# needed by bash, bsdmainutils, dpkg, guile-X.Y, readline, slang2
+# needed by bash, bsdmainutils, dpkg, readline, slang2
 
 automatically_cross_build_packages
 
 cross_build readline
 mark_built readline
-# needed by gnupg2, guile-X.Y, libxml2
+# needed by gnupg2, libxml2
 
 automatically_cross_build_packages
 
