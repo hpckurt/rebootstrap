@@ -1093,6 +1093,7 @@ buildenv_gzip() {
 
 add_automatic hostname
 add_automatic icu
+add_automatic isl
 add_automatic jansson
 add_automatic jemalloc
 add_automatic keyutils
@@ -2044,6 +2045,7 @@ test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_nee
 add_need groff # for man-db
 test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need kmod # by systemd
 add_need icu # by libxml2
+add_need isl # by gcc-VER
 add_need krb5 # by audit
 test "$HOST_ARCH" = ia64 && add_need libatomic-ops # by gcc-VER
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
