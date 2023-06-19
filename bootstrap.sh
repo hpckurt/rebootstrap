@@ -1451,6 +1451,10 @@ EOF
  NSS_TOOLS := \
 EOF
 }
+buildenv_nss() {
+	# nss tends to FTBFS with next gcc
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -Wno-error"
+}
 
 buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
