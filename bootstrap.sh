@@ -721,13 +721,7 @@ builddep_build_essential() {
 }
 
 add_automatic bzip2
-
 add_automatic c-ares
-patch_c_ares() {
-	echo "fix FTCBFS #1038165"
-	drop_privs sed -i -e 's/--enable-tests/--disable-tests/' debian/rules
-}
-
 add_automatic coreutils
 add_automatic curl
 add_automatic dash
