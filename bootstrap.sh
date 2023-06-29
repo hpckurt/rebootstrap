@@ -242,13 +242,13 @@ fi
 test -f /etc/apt/sources.list && mv -v /etc/apt/sources.list /etc/apt/sources.list.d/local.list
 grep -q '^deb-src .*sid' /etc/apt/sources.list.d/*.list || echo "deb-src $MIRROR sid main" >> /etc/apt/sources.list.d/sid-source.list
 
-dpkg --add-architecture $HOST_ARCH
+dpkg --add-architecture "$HOST_ARCH"
 $APT_GET update
 
 rm -Rf /tmp/buildd
 drop_privs mkdir -p /tmp/buildd
 
-HOST_ARCH_SUFFIX="-`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE | tr _ -`"
+HOST_ARCH_SUFFIX="-$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE | tr _ -)"
 
 case "$HOST_ARCH" in
 	amd64) MULTILIB_NAMES="i386 x32" ;;
@@ -931,22 +931,18 @@ EOF
 builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
 	apt_get_install gettext file quilt autoconf gawk debhelper rdfind symlinks binutils bison netbase "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
-	case "$(dpkg-architecture "-a$1" -qDEB_HOST_ARCH_OS)" in
-		linux)
-			if test "$ENABLE_MULTIARCH_GCC" = yes; then
-				apt_get_install "linux-libc-dev:$HOST_ARCH"
-			else
-				apt_get_install "linux-libc-dev-$HOST_ARCH-cross"
-			fi
-		;;
-		hurd)
-			apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
-		;;
-		*)
-			echo "rebootstrap-error: unsupported kernel"
-			exit 1
-		;;
-	esac
+	if dpkg-architecture "-a$1" -ilinux-any; then
+		if test "$ENABLE_MULTIARCH_GCC" = yes; then
+			apt_get_install "linux-libc-dev:$1"
+		else
+			apt_get_install "linux-libc-dev-$1-cross"
+		fi
+	elif dpkg-architecture "-a$1" -ihurd-any; then
+		apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
+	else
+		echo "rebootstrap-error: unsupported kernel"
+		exit 1
+	fi
 }
 patch_glibc() {
 	echo "patching glibc to pass -l to dh_shlibdeps for multilib"
@@ -1086,7 +1082,7 @@ patch_gzip() {
 	drop_privs sed -i -e '/CONFIGURE_ARGS.*--host/s/$/ --build=${DEB_BUILD_GNU_TYPE}/' debian/rules
 }
 buildenv_gzip() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any || return 0
+	dpkg-architecture "-a$1" -imusl-linux-any || return 0
 	# this avoids replacing fseeko with a variant that is broken
 	echo gl_cv_func_fflush_stdin exported
 	export gl_cv_func_fflush_stdin=yes
@@ -1206,10 +1202,10 @@ add_automatic libpipeline
 add_automatic libpng1.6
 
 buildenv_libprelude() {
-	case $(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_SYSTEM) in *gnu*)
+	if dpkg-architecture "-a$1" -ignu-any-any; then
 		echo "glibc does not return NULL for malloc(0)"
 		export ac_cv_func_malloc_0_nonnull=yes
-	;; esac
+	fi
 }
 
 add_automatic libpsl
@@ -1234,7 +1230,7 @@ builddep_libtool() {
 
 add_automatic libunistring
 buildenv_libunistring() {
-	if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+	if dpkg-architecture "-a$1" -ignu-any-any; then
 		echo "glibc does not prefer rwlock writers to readers"
 		export gl_cv_pthread_rwlock_rdlock_prefer_writer=no
 	fi
@@ -1242,7 +1238,7 @@ buildenv_libunistring() {
 	export gl_cv_func_memchr_works=yes
 	export gl_cv_func_strstr_works_always=yes
 	export gl_cv_func_strstr_linear=yes
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+	if dpkg-architecture "-a$1" -imusl-any-any; then
 		echo "setting malloc/realloc do not return 0"
 		export ac_cv_func_malloc_0_nonnull=yes
 		export ac_cv_func_realloc_0_nonnull=yes
@@ -1388,18 +1384,18 @@ add_automatic mpclib3
 add_automatic mpfr4
 
 builddep_ncurses() {
-	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
+	if dpkg-architecture "-a$1" -ilinux-any; then
 		assert_built gpm
 		apt_get_install "libgpm-dev:$1"
 	fi
 	# g++-multilib dependency unsatisfiable
 	apt_get_install debhelper pkg-config autoconf-dickey
-	case "$ENABLE_MULTILIB:$HOST_ARCH" in
+	case "$ENABLE_MULTILIB:$1" in
 		yes:amd64|yes:i386|yes:powerpc|yes:ppc64|yes:s390|yes:sparc)
 			test "$1" = "$HOST_ARCH"
 			apt_get_install "g++-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
-			ln -sf "`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
+			ln -sf "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)/asm" /usr/include/asm
 		;;
 	esac
 }
@@ -1481,18 +1477,18 @@ builddep_readline() {
 	assert_built "ncurses"
 	# gcc-multilib dependency unsatisfiable
 	apt_get_install debhelper "libtinfo-dev:$1" "libncursesw5-dev:$1" mawk texinfo autotools-dev
-	case "$ENABLE_MULTILIB:$HOST_ARCH" in
+	case "$ENABLE_MULTILIB:$1" in
 		yes:amd64|yes:ppc64)
 			test "$1" = "$HOST_ARCH"
 			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib32tinfo-dev:$1" "lib32ncursesw5-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
-			ln -sf "`dpkg-architecture -a$1 -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
+			ln -sf "$(dpkg-architecture "-a$1" -qDEB_HOST_MULTIARCH)/asm" /usr/include/asm
 		;;
 		yes:i386|yes:powerpc|yes:sparc|yes:s390)
 			test "$1" = "$HOST_ARCH"
 			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib64ncurses5-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
-			ln -sf "`dpkg-architecture -a$1 -qDEB_HOST_MULTIARCH`/asm" /usr/include/asm
+			ln -sf "$(dpkg-architecture "-a$1" -qDEB_HOST_MULTIARCH)/asm" /usr/include/asm
 		;;
 	esac
 }
@@ -1515,15 +1511,15 @@ add_automatic sysvinit
 
 add_automatic tar
 buildenv_tar() {
-	case $(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_SYSTEM) in *gnu*)
+	if dpkg-architecture "-a$1" -ignu-any-any; then
 		echo "struct dirent contains working d_ino on glibc systems"
 		export gl_cv_struct_dirent_d_ino=yes
-	;; esac
-	if ! dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
+	fi
+	if ! dpkg-architecture "-a$1" -ilinux-any; then
 		echo "forcing broken posix acl check to fail on non-linux #850668"
 		export gl_cv_getxattr_with_posix_acls=no
 	fi
-	case "$HOST_ARCH" in arm64ilp32|x32)
+	case "$1" in arm64ilp32|x32)
 		echo "work around time64 inconsistency FTBFS to be fixed via #1030159"
 		export DEB_CPPFLAGS_APPEND="${DEB_CPPFLAGS_APPEND:+$DEB_CPPFLAGS_APPEND }-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
 	esac
@@ -1616,7 +1612,7 @@ else
 	ls -l
 	pickup_packages *.changes
 	apt_get_install "binutils$HOST_ARCH_SUFFIX"
-	assembler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-as"
+	assembler="$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE)-as"
 	if ! command -v "$assembler" >/dev/null; then echo "$assembler missing in binutils package"; exit 1; fi
 	if ! drop_privs "$assembler" -o test.o /dev/null; then echo "binutils fail to execute"; exit 1; fi
 	if ! test -f test.o; then echo "binutils fail to create object"; exit 1; fi
@@ -1647,7 +1643,7 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	progress_mark "cross binutils-hppa64"
 fi
 
-if test "`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS`" = "linux"; then
+if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 if test -f "$REPODIR/stamps/linux_1"; then
 	echo "skipping rebuild of linux-libc-dev"
 else
@@ -1674,7 +1670,7 @@ fi
 progress_mark "linux-libc-dev cross build"
 fi
 
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
+if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 if test -f "$REPODIR/stamps/gnumach_1"; then
 	echo "skipping rebuild of gnumach stage1"
 else
@@ -1696,7 +1692,7 @@ if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
 	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
-	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
+	if dpkg-architecture "-a$HOST_ARCH" -qlinux-any; then
 		if test "$ENABLE_MULTIARCH_GCC" = yes; then
 			apt_get_install "linux-libc-dev:$HOST_ARCH"
 		else
@@ -1745,7 +1741,7 @@ for prog in c++ cpp g++ gcc gcc-ar gcc-ranlib gfortran; do
 	ln -fs "`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-$prog-$GCC_VER" "/usr/bin/`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-$prog"
 done
 
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
+if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 if test -f "$REPODIR/stamps/hurd_1"; then
 	echo "skipping rebuild of hurd stage1"
 else
@@ -1762,7 +1758,7 @@ fi
 progress_mark "hurd stage1 cross build"
 fi
 
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = hurd; then
+if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 if test -f "$REPODIR/stamps/mig_1"; then
 	echo "skipping rebuild of mig cross"
 else
@@ -1880,14 +1876,14 @@ else
 	apt_get_remove "gcc-$GCC_VER-base:$HOST_ARCH"
 	drop_privs rm -fv gcc-*-plugin-*.deb gcj-*.deb gdc-*.deb ./*objc*.deb ./*-dbg_*.deb
 	dpkg -i *.deb
-	compiler="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-gcc-$GCC_VER"
+	compiler="$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE)-gcc-$GCC_VER"
 	if ! command -v "$compiler" >/dev/null; then echo "$compiler missing in stage3 gcc package"; exit 1; fi
 	if ! drop_privs "$compiler" -x c -c /dev/null -o test.o; then echo "stage3 gcc fails to execute"; exit 1; fi
 	if ! test -f test.o; then echo "stage3 gcc fails to create binaries"; exit 1; fi
 	check_arch test.o "$HOST_ARCH"
 	mkdir -p "/usr/include/$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)"
-	touch /usr/include/`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_MULTIARCH`/include_path_test_header.h
-	preproc="`dpkg-architecture -a$HOST_ARCH -qDEB_HOST_GNU_TYPE`-cpp-$GCC_VER"
+	touch "/usr/include/$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)/include_path_test_header.h"
+	preproc="$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE)-cpp-$GCC_VER"
 	if ! echo '#include "include_path_test_header.h"' | drop_privs "$preproc" -E -; then echo "stage3 gcc fails to search /usr/include/<triplet>"; exit 1; fi
 	touch "$REPODIR/stamps/gcc_3"
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
@@ -2041,9 +2037,9 @@ add_need file # by gcc-6, for debhelper
 add_need flex # by pam
 add_need fribidi # by newt
 add_need gnupg2 # for apt
-test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need gpm # by ncurses
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need gpm # by ncurses
 add_need groff # for man-db
-test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux && add_need kmod # by systemd
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need kmod # by systemd
 add_need icu # by libxml2
 add_need isl # by gcc-VER
 add_need krb5 # by audit
@@ -2272,7 +2268,7 @@ mark_built gnu-efi
 automatically_cross_build_packages
 fi
 
-if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_OS)" = linux; then
+if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
 	cross_build libseccomp nopython libseccomp_1
 	mark_built libseccomp
