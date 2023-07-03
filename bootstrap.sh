@@ -1042,20 +1042,6 @@ EOF
  
  # FIXME: We are having runtime issues with ifunc...
 EOF
-	# https://salsa.debian.org/glibc-team/glibc/-/merge_requests/16
-	echo "patching glibc to support -Wno-error"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules.d/build.mk
-+++ b/debian/rules.d/build.mk
-@@ -116,6 +116,7 @@ endif
- 		$(if $(filter $(pt_chown),yes),--enable-pt_chown) \
- 		$(if $(filter $(threads),no),--disable-nscd) \
- 		$(if $(filter $(call xx,mvec),no),--disable-mathvec) \
-+		$(if $(filter -Wno-error,$(shell dpkg-buildflags --get CFLAGS)),--disable-werror) \
- 		$(call xx,with_headers) $(call xx,extra_config_options)
- 	touch $@
-
-EOF
 }
 buildenv_glibc() {
 	export DEB_GCC_VERSION="-$GCC_VER"
