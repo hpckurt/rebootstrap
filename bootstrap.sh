@@ -837,7 +837,6 @@ patch_gcc_crypt_h() {
 EOF
 }
 patch_gcc_has_include_next() {
-	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
 	echo "fix __has_include_next https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80755"
 	drop_privs tee debian/patches/has_include_next.diff >/dev/null <<EOF
 --- a/src/libcpp/files.cc
