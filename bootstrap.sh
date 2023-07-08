@@ -476,7 +476,7 @@ pickup_packages() {
 	for source in $sources; do
 		i=1
 		while test -e "$REPODIR/archive/${source}_$i"; do
-			i=`expr $i + 1`
+			i=$((i + 1))
 		done
 		i="$REPODIR/archive/${source}_$i"
 		mkdir "$i"
@@ -545,7 +545,7 @@ check_binNMU() {
 	case "$maxversion" in
 		"$srcversion+b"*)
 			echo "rebootstrap-warning: binNMU detected for $(dpkg-parsechangelog -SSource) $srcversion/$maxversion"
-			add_binNMU_changelog "${maxversion#$srcversion+b}" "Bump to binNMU version of $(dpkg --print-architecture)."
+			add_binNMU_changelog "${maxversion#"$srcversion+b"}" "Bump to binNMU version of $(dpkg --print-architecture)."
 		;;
 	esac
 }
@@ -553,7 +553,7 @@ check_binNMU() {
 PROGRESS_MARK=1
 progress_mark() {
 	echo "progress-mark:$PROGRESS_MARK:$*"
-	PROGRESS_MARK=$(($PROGRESS_MARK + 1 ))
+	PROGRESS_MARK=$((PROGRESS_MARK + 1))
 }
 
 # prints the set (as in set_create) of installed packages
@@ -1590,7 +1590,7 @@ if test "$GCC_VER" != "$BUILD_GCC_MULTIARCH_VER"; then
 if dpkg --compare-versions "$GCC_VER" gt "$BUILD_GCC_MULTIARCH_VER"; then
 	echo "deb [ arch=$(dpkg --print-architecture) ] $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
 	$APT_GET update
-	$APT_GET -t experimental install g++ g++-$GCC_VER
+	$APT_GET -t experimental install g++ "g++-$GCC_VER"
 	rm -f /etc/apt/sources.list.d/tmp-experimental.list
 	$APT_GET update
 elif test -f "$REPODIR/stamps/gcc_0"; then
@@ -1924,7 +1924,7 @@ else
 		apt_get_install binutils-hppa64-linux-gnu
 	fi
 	if test "$ENABLE_MULTILIB" = yes -a -n "$MULTILIB_NAMES"; then
-		apt_get_install $(echo $MULTILIB_NAMES | sed "s/\(\S\+\)/libc6-dev-\1-$HOST_ARCH-cross libc6-dev-\1:$HOST_ARCH/g")
+		apt_get_install $(echo "$MULTILIB_NAMES" | sed 's/\(\S\+\)/libc6-dev-\1-'"$HOST_ARCH-cross libc6-dev-\\1:$HOST_ARCH/g")
 	fi
 	cross_build_setup "gcc-$GCC_VER" gcc_f1
 	check_binNMU
@@ -2123,7 +2123,7 @@ automatically_cross_build_packages() {
 					missing=${line#*: }
 					missing=${missing%% | *} # drop alternatives
 					missing=${missing% (* *)} # drop version constraint
-					missing=${missing%:$HOST_ARCH} # skip architecture
+					missing=${missing%":$HOST_ARCH"} # skip architecture
 					if is_arch_all "$missing"; then
 						echo "rebootstrap-warning: $pkg misses dependency $missing which is arch:all"
 					else
@@ -2281,7 +2281,7 @@ mark_built openldap
 
 automatically_cross_build_packages
 
-if apt-cache showsrc systemd | grep -q "^Build-Depends:.*gnu-efi[^,]*[[ ]$HOST_ARCH[] ]"; then
+if apt-cache showsrc systemd | grep -q "^Build-Depends:.*gnu-efi[^,]*[[ ]${HOST_ARCH}[] ]"; then
 cross_build gnu-efi
 mark_built gnu-efi
 # needed by systemd
@@ -2290,7 +2290,7 @@ automatically_cross_build_packages
 fi
 
 if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
+if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]${HOST_ARCH}[] ]"; then
 	cross_build libseccomp nopython libseccomp_1
 	mark_built libseccomp
 # needed by man-db, systemd
@@ -2300,7 +2300,7 @@ fi
 
 
 assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
-if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]" debian/control; then
+if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]${HOST_ARCH}[] ]" debian/control; then
 	assert_built libseccomp
 fi
 cross_build systemd stage1 systemd_1
