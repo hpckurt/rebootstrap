@@ -1437,43 +1437,7 @@ buildenv_openldap() {
 }
 
 add_automatic openssl
-
 add_automatic p11-kit
-patch_p11_kit() {
-	echo "fix FTCBFS #1040472"
-	drop_privs patch -p1 <<'EOF'
---- a/configure.ac
-+++ b/configure.ac
-@@ -167,7 +167,8 @@
-
- 	AC_CHECK_FUNC(
- 		[strerror_r],
--		[AC_RUN_IFELSE(
-+		[AC_CACHE_CHECK([strerror_r return value],[ac_cv_strerror_r_ret],[
-+		     AC_RUN_IFELSE(
- 			[AC_LANG_SOURCE([[
- 				#include <errno.h>
- 				#include <string.h>
-@@ -178,10 +179,13 @@
- 					return strerror_r (EINVAL, buf, 32);
- 				}
- 			]])],
-+			[ac_cv_strerror_r_ret=xsi],
-+			[ac_cv_strerror_r_ret=gnu],
-+			[ac_cv_strerror_r_ret=cross])])
-+		 dnl Guess that we cross build on glibc
-+		 AS_IF([test "$ac_cv_strerror_r_ret" = xsi],
-                         [AC_DEFINE([HAVE_XSI_STRERROR_R], 1, [Whether XSI-compliant strerror_r() is available])],
--			[AC_DEFINE([HAVE_GNU_STRERROR_R], 1, [Whether GNU-specific strerror_r() is available])],
--			[])],
--		[])
-+			[AC_DEFINE([HAVE_GNU_STRERROR_R], 1, [Whether GNU-specific strerror_r() is available])])])
- 
- 	AC_CACHE_CHECK([for thread-local storage class],
- 		[ac_cv_tls_keyword],
-EOF
-}
-
 add_automatic patch
 
 add_automatic pcre2
