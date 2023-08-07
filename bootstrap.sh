@@ -1449,12 +1449,6 @@ patch_pcre2() {
 }
 
 add_automatic pcre3
-
-patch_perl() {
-	echo "add missing libcrypt-dev dependency #1029753"
-	drop_privs sed -i -e '/^Build-Depends:/s/$/libcrypt-dev,/' debian/control
-}
-
 add_automatic pkgconf
 add_automatic popt
 
