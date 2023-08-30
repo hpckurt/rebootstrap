@@ -1270,13 +1270,7 @@ buildenv_libx11() {
 add_automatic libxau
 add_automatic libxaw
 add_automatic libxcb
-
 add_automatic libxcrypt
-patch_libxcrypt() {
-	echo "do not abuse Important and Protected fields #1024616"
-	drop_privs sed -i -e '/\(Important\|Protected\):/d' debian/control
-}
-
 add_automatic libxdmcp
 
 add_automatic libxext
