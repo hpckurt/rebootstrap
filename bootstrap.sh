@@ -1779,7 +1779,7 @@ else
 	ls -l
 	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
 		pickup_packages *.changes
-		dpkg -i musl*.deb
+		apt_get_install ./musl*.deb
 	else
 		if test "$ENABLE_MULTIARCH_GCC" = yes; then
 			pickup_packages *.changes
