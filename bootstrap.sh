@@ -1534,6 +1534,34 @@ builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
 	apt_get_install debhelper binutils dpkg-dev
 }
+patch_zlib() {
+	echo "fix FTCBFS #1050995"
+	drop_privs patch -p1 <<'EOF'
+--- a/contrib/minizip/Makefile.am
++++ b/contrib/minizip/Makefile.am
+@@ -39,7 +39,7 @@
+ EXTRA_PROGRAMS = miniunzip minizip
+
+ miniunzip_SOURCES = miniunz.c
+-miniunzip_LDADD = libminizip.la
++miniunzip_LDADD = libminizip.la -lz
+
+ minizip_SOURCES = minizip.c
+ minizip_LDADD = libminizip.la -lz
+--- a/debian/rules
++++ b/debian/rules
+@@ -87,7 +77,8 @@
+
+ 	AR=$(AR) CC="$(DEB_HOST_GNU_TYPE)-gcc" CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" uname=GNU ./configure --shared --prefix=/usr --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+
+-	cd contrib/minizip && autoreconf -fis && CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" uname=GNU ./configure --prefix=/usr --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
++	cd contrib/minizip && autoreconf -fis
++	CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" uname=GNU dh_auto_configure --sourcedirectory=contrib/minizip
+
+ 	touch $@
+
+EOF
+}
 
 # choosing libatomic1 arbitrarily here, cause it never bumped soname
 BUILD_GCC_MULTIARCH_VER=`apt-cache show --no-all-versions libatomic1 | sed 's/^Source: gcc-\([0-9.]*\)$/\1/;t;d'`
