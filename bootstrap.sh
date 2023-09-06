@@ -1650,13 +1650,14 @@ if test -f "$REPODIR/stamps/linux_1"; then
 else
 	cross_build_setup linux
 	check_binNMU
+	linux_libc_dev_profiles="$DEFAULT_PROFILES,pkg.linux.nokernel,pkg.linux.nosource,pkg.linux.notools"
 	if dpkg-architecture -ilinux-any && test "$(dpkg-query -W -f '${Version}' "linux-libc-dev:$(dpkg --print-architecture)")" != "$(dpkg-parsechangelog -SVersion)"; then
 		echo "rebootstrap-warning: working around linux-libc-dev m-a:same skew"
-		apt_get_build_dep --arch-only -Pstage1 ./
-		drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B -Pstage1 -uc -us
+		apt_get_build_dep --arch-only "-P$linux_libc_dev_profiles" ./
+		drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B "-P$linux_libc_dev_profiles" -uc -us
 	fi
-	apt_get_build_dep --arch-only "-a$HOST_ARCH" -Pstage1 ./
-	drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage1 -uc -us
+	apt_get_build_dep --arch-only "-a$HOST_ARCH" "-P$linux_libc_dev_profiles" ./
+	drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B "-a$HOST_ARCH" "-P$linux_libc_dev_profiles" -uc -us
 	cd ..
 	ls -l
 	if test "$ENABLE_MULTIARCH_GCC" != yes; then
