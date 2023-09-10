@@ -1453,7 +1453,7 @@ builddep_readline() {
 	case "$ENABLE_MULTILIB:$1" in
 		yes:amd64|yes:ppc64)
 			test "$1" = "$HOST_ARCH"
-			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib32tinfo-dev:$1" "lib32ncursesw-dev:$1"
+			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib32ncurses-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
 			ln -sf "$(dpkg-architecture "-a$1" -qDEB_HOST_MULTIARCH)/asm" /usr/include/asm
 		;;
