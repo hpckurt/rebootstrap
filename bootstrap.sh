@@ -1433,15 +1433,7 @@ buildenv_openldap() {
 add_automatic openssl
 add_automatic p11-kit
 add_automatic patch
-
 add_automatic pcre2
-patch_pcre2() {
-	if test "$HOST_ARCH" = sparc; then
-		echo "fixing FTBFS on sparc #1034779"
-		drop_privs sed -i -e 's/ sparc / /' debian/rules
-	fi
-}
-
 add_automatic pcre3
 add_automatic pkgconf
 add_automatic popt
