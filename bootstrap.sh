@@ -1432,12 +1432,6 @@ buildenv_openldap() {
 
 add_automatic openssl
 add_automatic p11-kit
-
-patch_pam() {
-	echo "fix FTBFS #1054228"
-	drop_privs sed -i -e s/QUILT_PATCH_DIR/QUILT_PATCHES/ debian/rules
-}
-
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
