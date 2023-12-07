@@ -725,7 +725,25 @@ add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
 add_automatic curl
+
 add_automatic dash
+patch_dash() {
+	echo "fix FTCBFS #1057339"
+	drop_privs patch -p1 <<'EOF'
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -12,7 +12,7 @@
+ COMPILE_FOR_BUILD = \
+ 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(AM_CPPFLAGS_FOR_BUILD) \
+ 	$(CPPFLAGS_FOR_BUILD) \
+-	$(CPPFLAGS) $(CFLAGS) $(LDFLAGS) \
++	$(LDFLAGS) \
+ 	$(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) 
+
+ bin_PROGRAMS = dash
+EOF
+}
+
 add_automatic db-defaults
 add_automatic debianutils
 
