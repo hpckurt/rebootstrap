@@ -1099,7 +1099,25 @@ buildenv_gzip() {
 }
 
 add_automatic hostname
+
 add_automatic icu
+patch_icu() {
+	echo "fix FTCBFS #1057726"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -35,7 +35,7 @@
+ ifeq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
+ 	dh_auto_configure -- --enable-static --disable-layoutex --disable-icu-config
+ else
+-	dh_auto_configure -B $(CURDIR)/build-native -- --host=$(DEB_BUILD_GNU_TYPE) --disable-layoutex --disable-icu-config
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_configure --reload-all-buildenv-variables -B $(CURDIR)/build-native -- --disable-layoutex --disable-icu-config
+ 	dh_auto_build -B $(CURDIR)/build-native
+ 	dh_auto_configure -- --enable-static --with-cross-build=$(CURDIR)/build-native
+ endif
+EOF
+}
+
 add_automatic isl
 add_automatic jansson
 add_automatic jemalloc
