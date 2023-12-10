@@ -1475,6 +1475,12 @@ buildenv_openldap() {
 
 add_automatic openssl
 add_automatic p11-kit
+
+patch_pam() {
+	echo "fix FTCBFS #1057729"
+	drop_privs sed -i -e '/fix-autoreconf/d' debian/patches-applied/series
+}
+
 add_automatic patch
 add_automatic pcre2
 add_automatic pcre3
