@@ -136,6 +136,10 @@ check_arch() {
 			"loong64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
 				return 0
 			;;
+			"mips64r6el:ELF 32-bit LSB relocatable, MIPS, MIPS64 rel6 version 1 (SYSV)"*)
+				# elf-arch only recognizes some of the binaries but not others.
+				return 0
+			;;
 			"riscv32:ELF 32-bit LSB relocatable, UCB RISC-V, double-float ABI, version 1 (SYSV)"*|"riscv32:ELF 32-bit LSB relocatable, UCB RISC-V, RVC, double-float ABI, version 1 (SYSV)"*)
 				# https://github.com/kilobyte/arch-test/pull/11
 				return 0
