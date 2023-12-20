@@ -891,32 +891,6 @@ patch_gcc_has_include_next() {
 EOF
 	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
 }
-patch_gcc_loong64() {
-	test "$HOST_ARCH" = loong64 || return 0
-	echo "revert loong64 tuple #1031850"
-	drop_privs tee debian/patches/loong64_tuple.diff >/dev/null <<'EOF'
---- a/src/gcc/config/loongarch/t-linux
-+++ b/src/gcc/config/loongarch/t-linux
-@@ -32,14 +32,14 @@ ifneq ($(call if_multiarch,yes),yes)
- else
-     # Only define MULTIARCH_DIRNAME when multiarch is enabled,
-     # or it would always introduce ${target} into the search path.
--    MULTIARCH_DIRNAME = $(call if_multiarch,loongarch64-linux-gnuf64)
-+    MULTIARCH_DIRNAME = $(LA_MULTIARCH_TRIPLET)
- endif
-
- # Don't define MULTILIB_OSDIRNAMES if multilib is disabled.
- ifeq ($(filter LA_DISABLE_MULTILIB,$(tm_defines)),)
-
-     MULTILIB_OSDIRNAMES = \
--      mabi.lp64d=../lib$(call if_multiarch,:loongarch64-linux-gnuf64)
-+      mabi.lp64d=../lib$(call if_multiarch,:loongarch64-linux-gnu)
-
-     MULTILIB_OSDIRNAMES += \
-       mabi.lp64f=../lib/f32$(call if_multiarch,:loongarch64-linux-gnuf32)
-EOF
-	echo "debian_patches += loong64_tuple" | drop_privs tee -a debian/rules.patch >/dev/null
-}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -931,7 +905,6 @@ patch_gcc_12() {
 	patch_gcc_unapplicable_ada
 	patch_gcc_crypt_h
 	patch_gcc_has_include_next
-	patch_gcc_loong64
 	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
