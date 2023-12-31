@@ -1351,7 +1351,9 @@ EOF
 	fi
 	test "$regen_control" = yes || return 0
 	apt_get_install kernel-wedge python3-jinja2
-	drop_privs ./debian/rules debian/rules.gen || : # intentionally exits 1 to avoid being called automatically. we are doing it wrong
+	# intentionally exits 1 to avoid being called automatically. we are doing it wrong
+	drop_privs sed -i -e '/^\s*exit 1$/d' debian/rules
+	drop_privs ./debian/rules debian/rules.gen
 }
 
 add_automatic lz4
