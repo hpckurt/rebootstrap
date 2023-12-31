@@ -1657,32 +1657,41 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	progress_mark "cross binutils-hppa64"
 fi
 
-if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-if test -f "$REPODIR/stamps/linux_1"; then
+if ! dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
+	:
+elif test -f "$REPODIR/stamps/linux_1"; then
 	echo "skipping rebuild of linux-libc-dev"
 else
-	cross_build_setup linux
-	check_binNMU
-	linux_libc_dev_profiles="$DEFAULT_PROFILES,pkg.linux.nokernel,pkg.linux.nosource,pkg.linux.notools"
-	if dpkg-architecture -ilinux-any && test "$(dpkg-query -W -f '${Version}' "linux-libc-dev:$(dpkg --print-architecture)")" != "$(dpkg-parsechangelog -SVersion)"; then
-		echo "rebootstrap-warning: working around linux-libc-dev m-a:same skew"
-		apt_get_build_dep --arch-only "-P$linux_libc_dev_profiles" ./
-		drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B "-P$linux_libc_dev_profiles" -uc -us
+	REBUILD_LINUX=
+	apt_get_install linux-libc-dev
+	if ! test -h "/usr/include/$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_MULTIARCH)/asm/unistd.h"; then
+		REBUILD_LINUX=missing
 	fi
-	apt_get_build_dep --arch-only "-a$HOST_ARCH" "-P$linux_libc_dev_profiles" ./
-	drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -B "-a$HOST_ARCH" "-P$linux_libc_dev_profiles" -uc -us
-	cd ..
-	ls -l
-	if test "$ENABLE_MULTIARCH_GCC" != yes; then
-		drop_privs dpkg-cross -M -a "$HOST_ARCH" -b ./linux-libc-dev_*"_$HOST_ARCH.deb"
+	if test -n "$REBUILD_LINUX"; then
+		cross_build_setup linux
+		cat - debian/changelog <<EOF |
+linux ($(dpkg-parsechangelog -SVersion)+rebootstrap1) sid; urgency=medium
+
+  * Update for $REBUILD_LINUX $HOST_ARCH
+
+ -- rebootstrap <invalid@invalid>  $(dpkg-parsechangelog -SDate)
+
+EOF
+		drop_privs tee debian/changelog.new >/dev/null
+		drop_privs mv debian/changelog.new debian/changelog
+		linux_libc_dev_profiles=nocheck,pkg.linux.nokernel,pkg.linux.notools,pkg.linux.quick
+		apt_get_build_dep --indep-only "-P$linux_libc_dev_profiles" ./
+		drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -A "-P$linux_libc_dev_profiles" -uc -us
+		cd ..
+		ls -l
+		reprepro include rebootstrap-native ./*.changes
+		$APT_GET update
+		apt_get_install linux-libc-dev
+		cd ..
+		drop_privs rm -Rf linux
 	fi
-	pickup_packages *.deb
 	touch "$REPODIR/stamps/linux_1"
-	compare_native ./*.deb
-	cd ..
-	drop_privs rm -Rf linux
-fi
-progress_mark "linux-libc-dev cross build"
+	progress_mark "linux-libc-dev cross build"
 fi
 
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
