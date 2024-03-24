@@ -910,6 +910,7 @@ patch_gcc_12() {
 }
 patch_gcc_13() {
 	patch_gcc_limits_h_test
+	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
 
