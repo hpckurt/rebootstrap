@@ -1315,9 +1315,8 @@ buildenv_libxt() {
 add_automatic libzstd
 
 patch_linux() {
-	local kernel_arch comment regen_control
+	local kernel_arch regen_control
 	kernel_arch=
-	comment="just building headers yet"
 	regen_control=
 	case "$HOST_ARCH" in
 		arc|csky|ia64|nios2)
@@ -1330,24 +1329,18 @@ patch_linux() {
 		*-linux-*)
 			if ! test -d "debian/config/$HOST_ARCH"; then
 				kernel_arch=$(sed 's/^kernel-arch: //;t;d' < "debian/config/${HOST_ARCH#*-linux-}/defines")
-				comment="$HOST_ARCH must be part of a multiarch installation with a ${HOST_ARCH#*-linux-*} kernel"
 			fi
 		;;
 	esac
 	if test -n "$kernel_arch"; then
-		if test "$kernel_arch" != defines-only; then
-			echo "patching linux for $HOST_ARCH with kernel-arch $kernel_arch"
-			drop_privs mkdir -p "debian/config/$HOST_ARCH"
-			drop_privs tee "debian/config/$HOST_ARCH/defines" >/dev/null <<EOF
-[base]
-kernel-arch: $kernel_arch
-featuresets:
-# empty; $comment
+		echo "patching linux for $HOST_ARCH with kernel-arch $kernel_arch"
+		drop_privs mkdir -p debian/config.local
+		drop_privs tee debian/config.local/defines.toml >/dev/null <<EOF
+[[kernelarch]]
+name = '$kernel_arch'
+  [[kernelarch.debianarch]]
+  name = '$HOST_ARCH'
 EOF
-		else
-			echo "patching linux to enable $HOST_ARCH"
-		fi
-		drop_privs sed -i -e "/^arches:/a\\ $HOST_ARCH" debian/config/defines
 		regen_control=yes
 	fi
 	test "$regen_control" = yes || return 0
