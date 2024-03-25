@@ -1180,11 +1180,7 @@ builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
 	apt_get_install gettext file quilt autoconf gawk debhelper rdfind symlinks binutils bison netbase "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
 	if dpkg-architecture "-a$1" -ilinux-any; then
-		if test "$ENABLE_MULTIARCH_GCC" = yes; then
-			apt_get_install "linux-libc-dev:$1"
-		else
-			apt_get_install "linux-libc-dev-$1-cross"
-		fi
+		apt_get_install linux-libc-dev
 	elif dpkg-architecture "-a$1" -ihurd-any; then
 		apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
 	else
@@ -1933,7 +1929,7 @@ EOF
 		drop_privs rm -Rf linux
 	fi
 	touch "$REPODIR/stamps/linux_1"
-	progress_mark "linux-libc-dev cross build"
+	progress_mark "linux-libc-dev build"
 fi
 
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
@@ -1958,13 +1954,6 @@ if test -f "$REPODIR/stamps/gcc_1"; then
 	echo "skipping rebuild of gcc stage1"
 else
 	apt_get_install debhelper gawk patchutils bison flex lsb-release quilt libtool $GCC_AUTOCONF zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev systemtap-sdt-dev sharutils "binutils$HOST_ARCH_SUFFIX" time
-	if dpkg-architecture "-a$HOST_ARCH" -qlinux-any; then
-		if test "$ENABLE_MULTIARCH_GCC" = yes; then
-			apt_get_install "linux-libc-dev:$HOST_ARCH"
-		else
-			apt_get_install "linux-libc-dev-${HOST_ARCH}-cross"
-		fi
-	fi
 	if test "$HOST_ARCH" = hppa; then
 		apt_get_install binutils-hppa64-linux-gnu
 	fi
