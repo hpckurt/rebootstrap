@@ -208,12 +208,6 @@ if test -z "$GCC_VER"; then
 	GCC_VER=`apt-cache depends gcc | sed 's/^ *Depends: gcc-\([0-9.]*\)$/\1/;t;d'`
 fi
 
-if test "$ENABLE_MULTIARCH_GCC" = yes; then
-	apt_get_install cross-gcc-dev
-	echo "removing unused unstripped_exe patch"
-	sed -i '/made-unstripped_exe-setting-overridable/d' /usr/share/cross-gcc/patches/gcc-*/series
-fi
-
 obtain_source_package() {
 	local use_experimental
 	use_experimental=
@@ -894,9 +888,261 @@ EOF
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
-		drop_privs rm -Rf .pc
-		drop_privs QUILT_PATCHES="/usr/share/cross-gcc/patches/gcc-$GCC_VER" quilt push -a
-		drop_privs rm -Rf .pc
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/control.m4
++++ b/debian/control.m4
+@@ -131,12 +131,13 @@
+  in a newer Ubuntu LTS release.
+ ',`dnl regexp SRCNAME
+ dnl default base package dependencies
+-define(`BASEDEP', `gcc`'PV`'TS-base (= ${gcc:Version})')
+-define(`SOFTBASEDEP', `gcc`'PV`'TS-base (>= ${gcc:SoftVersion})')
++define(`BASEPKG', `gcc`'PV`'ifdef(`CROSS_ARCH', ifelse(CROSS_ARCH, `all', `TS'))-base`'GCC_PORTS_BUILD')
++define(`BASEDEP', `BASEPKG (= ${gcc:Version})')
++define(`SOFTBASEDEP', `BASEPKG (>= ${gcc:SoftVersion})')
+
+ ifdef(`TARGET',`
+-define(`BASELDEP', `gcc`'PV`'ifelse(CROSS_ARCH,`all',`-cross')-base`'GCC_PORTS_BUILD (= ${gcc:Version})')
+-define(`SOFTBASELDEP', `gcc`'PV`'ifelse(CROSS_ARCH, `all',`-cross')-base`'GCC_PORTS_BUILD (>= ${gcc:SoftVersion})')
++define(`BASELDEP', `BASEPKG (= ${gcc:Version})')
++define(`SOFTBASELDEP', `BASEPKG (>= ${gcc:SoftVersion})')
+ ',`dnl
+ define(`BASELDEP', `BASEDEP')
+ define(`SOFTBASELDEP', `SOFTBASEDEP')
+@@ -142,7 +143,7 @@
+ ')
+
+ ifenabled(`gccbase',`
+-Package: gcc`'PV`'TS-base
++Package: BASEPKG
+ Architecture: any
+ Multi-Arch: same
+ ifdef(`TARGET',`dnl',`Section: libs')
+--- a/debian/rules.conf
++++ b/debian/rules.conf
+@@ -683,7 +683,7 @@
+ 	-DTARGET=$(DEB_TARGET_ARCH) \
+ 	-DLIBUNWIND_BUILD_DEP="$(LIBUNWIND_BUILD_DEP)" \
+ 	-DLIBATOMIC_OPS_BUILD_DEP="$(LIBATOMIC_OPS_BUILD_DEP)"
+-  ifeq ($(DEB_STAGE),rtlibs)
++  ifeq ($(LS),)
+     ctrl_flags += -DCROSS_ARCH=$(DEB_TARGET_ARCH)
+   endif
+ else
+@@ -1264,8 +1264,7 @@
+
+ symbols-files: control-file
+ ifeq ($(DEB_CROSS),yes)
+-  ifneq ($(DEB_STAGE),rtlibs)
+-	test -n "$(LS)"
++  ifneq ($(LS),)
+ 	set -e; \
+ 	for p in $$(dh_listpackages -i | grep '^lib'); do \
+ 	  p=$${p%$(LS)}; \
+--- a/debian/rules.d/binary-base.mk
++++ b/debian/rules.d/binary-base.mk
+@@ -23,7 +23,7 @@
+ 	dh_installchangelogs -p$(p_base)
+ 	dh_compress -p$(p_base)
+ 	dh_fixperms -p$(p_base)
+-ifeq ($(DEB_STAGE)-$(DEB_CROSS),rtlibs-yes)
++ifeq ($(DEB_CROSS)-$(LS),yes-)
+ 	$(cross_gencontrol) dh_gencontrol -p$(p_base) -- -v$(DEB_VERSION) $(common_substvars)
+ else
+ 	dh_gencontrol -p$(p_base) -- -v$(DEB_VERSION) $(common_substvars)
+--- a/debian/rules.defs
++++ b/debian/rules.defs
+@@ -182,9 +182,6 @@
+   $(error Invalid architecure.)
+ endif
+
+-# Force this, people get confused about the default. See #760770.
+-override with_deps_on_target_arch_pkgs :=
+-
+ # including unversiond symlinks for binaries
+ #with_unversioned = yes
+
+@@ -204,10 +201,16 @@
+     # cross compiler, sets WITH_SYSROOT on it's own
+     DEB_CROSS = yes
+     build_type = build-cross
++    ifeq ($(with_deps_on_target_arch_pkgs),yes)
++      with_sysroot = /
++    endif
+   else ifeq ($(FORCE_CROSS_LAYOUT),yes)
+     # a native build with a cross layout
+     DEB_CROSS = yes
+     build_type = build-cross
++    ifeq ($(with_deps_on_target_arch_pkgs),yes)
++      with_sysroot = /
++    endif
+   else
+     # native build
+     build_type = build-native
+@@ -229,16 +232,24 @@
+   TARGET := $(DEB_TARGET_ARCH)
+   TP :=  $(subst _,-,$(DEB_TARGET_GNU_TYPE))-
+   TS := -$(subst _,-,$(DEB_TARGET_ALIAS))
+-  LS := -$(subst _,-,$(DEB_TARGET_ARCH))-cross
+-  AQ :=
+
+   cross_bin_arch := -$(subst _,-,$(DEB_TARGET_ALIAS))
+-  cross_lib_arch := -$(subst _,-,$(DEB_TARGET_ARCH))-cross
+   cmd_prefix := $(DEB_TARGET_GNU_TYPE)-
+
++  ifeq ($(with_deps_on_target_arch_pkgs),yes)
++    LS :=
++    cross_lib_arch :=
++    AQ := :$(TARGET)
++    lib_binaries := arch_binaries
++  else
++    LS := -$(subst _,-,$(DEB_TARGET_ARCH))-cross
++    cross_lib_arch := -$(subst _,-,$(DEB_TARGET_ARCH))-cross
++    AQ :=
++    lib_binaries := indep_binaries
++  endif
++
+   TARGET_ALIAS := $(DEB_TARGET_ALIAS)
+
+-  lib_binaries := indep_binaries
+   cross_shlibdeps =  DEB_HOST_ARCH=$(TARGET) ARCH=$(DEB_TARGET_ARCH) MAKEFLAGS="CC=something"
+   cross_gencontrol = DEB_HOST_ARCH=$(TARGET)
+   cross_makeshlibs = DEB_HOST_ARCH=$(TARGET)
+@@ -701,8 +712,8 @@
+
+ # build -base packages
+ with_gccbase := yes
+-ifeq ($(build_type),build-cross)
+-  ifneq ($(DEB_STAGE),rtlibs)
++ifeq ($(DEB_CROSS),yes)
++  ifneq ($(LS),)
+     with_gcclbase := yes
+   endif
+ endif
+@@ -2138,7 +2149,7 @@
+   # FIXME: don't stop at the first shlibdeps failure ...
+   ignshld = -
+ endif
+-ifeq ($(DEB_STAGE),rtlibs)
++ifeq ($(LS),)
+   define cross_mangle_shlibs
+   endef
+   define cross_mangle_substvars
+--- a/debian/rules.patch
++++ b/debian/rules.patch
+@@ -188,7 +188,9 @@
+
+ ifneq (,$(filter $(build_type), build-cross cross-build-cross))
+   debian_patches += cross-fixes
+-  debian_patches += cross-install-location
++  ifneq ($(LS),)
++    debian_patches += cross-install-location
++  endif
+ endif
+
+ debian_patches += hurd-multiarch
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -854,9 +854,12 @@
+ 	--target=$(TARGET_ALIAS)
+
+ ifeq ($(DEB_CROSS),yes)
+-  CONFARGS += \
+-	--program-prefix=$(TARGET_ALIAS)- \
+-	--includedir=/$(PFL)/include
++  CONFARGS += --program-prefix=$(TARGET_ALIAS)-
++  ifeq ($(LS),)
++    CONFARGS += --with-gxx-include-dir='/$(PF)/include/c++/$(BASE_VERSION)'
++  else
++    CONFARGS += --includedir=/$(PFL)/include
++  endif
+ endif
+
+ ifeq ($(with_bootstrap),off)
+@@ -979,19 +982,17 @@
+ endif
+
+ ifeq ($(DEB_CROSS),yes)
+-ifneq ($(DEB_STAGE),rtlibs)
++ifneq ($(LS),)
+   PFL		= $(PF)/$(DEB_TARGET_GNU_TYPE)
+   RPF		= $(PF)/$(DEB_TARGET_GNU_TYPE)
+ endif
+ endif
+
+-ifeq ($(with_multiarch_lib),yes)
+-  ifeq ($(DEB_CROSS),yes)
+-    libdir	= lib
+-  else
+-    libdir	= lib/$(DEB_TARGET_MULTIARCH)
+-  endif
+-else
++libdir		= lib/$(DEB_TARGET_MULTIARCH)
++ifeq ($(DEB_CROSS)-$(if $(LS),crosslayout),yes-crosslayout)
++  libdir	= lib
++endif
++ifneq ($(with_multiarch_lib),yes)
+   libdir	= lib
+ endif
+ configured_libdir = lib
+@@ -1015,7 +1015,9 @@
+ gcc_subdir_name = gcc
+ ifneq ($(single_package),yes)
+   ifeq ($(DEB_CROSS),yes)
+-    gcc_subdir_name = gcc-cross
++    ifneq ($(with_deps_on_target_arch_pkgs),yes)
++      gcc_subdir_name = gcc-cross
++    endif
+   endif
+ endif
+
+@@ -1035,8 +1036,8 @@
+ d_l= debian/$(p_l)
+ d_d= debian/$(p_d)
+
+-ifeq ($(DEB_CROSS),yes)
+-  usr_lib = $(PFL)/lib
++ifeq ($(DEB_CROSS)-$(LS),yes-)
++  usr_lib = $(PF)/lib/$(DEB_TARGET_MULTIARCH)
+ else
+   usr_lib = $(PFL)/$(libdir)
+ endif
+@@ -1045,11 +1046,6 @@
+ usr_libx32 = $(PFL)/libx32
+ usr_lib64 = $(PFL)/lib64
+
+-ifeq ($(DEB_STAGE)-$(DEB_CROSS),rtlibs-yes)
+-  libdir	= lib/$(DEB_TARGET_MULTIARCH)
+-  usr_lib	= $(PF)/lib/$(DEB_TARGET_MULTIARCH)
+-endif
+-
+ gcc_lib_dir32 = $(gcc_lib_dir)/$(biarch32subdir)
+ gcc_lib_dirn32 = $(gcc_lib_dir)/$(biarchn32subdir)
+ gcc_lib_dirx32 = $(gcc_lib_dir)/$(biarchx32subdir)
+@@ -2237,12 +2233,11 @@
+ endif
+
+ # if native or rtlibs build
+-ifeq ($(if $(filter yes,$(DEB_CROSS)),$(if $(filter rtlibs,$(DEB_STAGE)),native,cross),native),native)
++ifneq ($(DEB_CROSS)-$(if $(LS),crosslayout),yes-crosslayout)
+   p_base = gcc$(pkg_ver)-base
+   p_lbase = $(p_base)
+   p_xbase = gcc$(pkg_ver)-base
+ else
+-  # only triggered if DEB_CROSS set
+   p_base = gcc$(pkg_ver)$(cross_bin_arch)-base
+   p_lbase = gcc$(pkg_ver)-cross-base$(GCC_PORTS_BUILD)
+   p_xbase = gcc$(pkg_ver)$(cross_bin_arch)-base
+@@ -2641,7 +2636,7 @@
+
+ 	rm -rf $(d)/$(gcc_lib_dir)/include-fixed
+
+-ifeq ($(DEB_STAGE)-$(DEB_CROSS),rtlibs-yes)
++ifeq ($(DEB_CROSS)-$(LS),yes-)
+ 	@echo configured_libdir=$(configured_libdir) / libdir=$(libdir) / usr_lib=$(usr_lib)
+ 	ls $(d)/$(PF)/$(TARGET_ALIAS)/lib
+ 	set -x; \
+EOF
 	fi
 }
 patch_gcc_12() {
