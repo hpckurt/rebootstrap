@@ -1560,9 +1560,18 @@ buildenv_libxt() {
 add_automatic libzstd
 
 patch_linux() {
-	local kernel_arch regen_control
+	local kernel_arch
 	kernel_arch=
-	regen_control=
+	cat - debian/changelog <<EOF |
+linux ($(dpkg-parsechangelog -SVersion)+rebootstrap1) sid; urgency=medium
+
+  * Update for $HOST_ARCH
+
+ -- rebootstrap <invalid@invalid>  $(dpkg-parsechangelog -SDate)
+
+EOF
+	drop_privs tee debian/changelog.new >/dev/null
+	drop_privs mv debian/changelog.new debian/changelog
 	case "$HOST_ARCH" in
 		arc|csky|ia64|nios2)
 			kernel_arch=$HOST_ARCH
@@ -1586,9 +1595,7 @@ name = '$kernel_arch'
   [[kernelarch.debianarch]]
   name = '$HOST_ARCH'
 EOF
-		regen_control=yes
 	fi
-	test "$regen_control" = yes || return 0
 	apt_get_install kernel-wedge python3-jinja2
 	# intentionally exits 1 to avoid being called automatically. we are doing it wrong
 	drop_privs sed -i -e '/^\s*exit 1$/d' debian/rules
@@ -1910,16 +1917,6 @@ else
 	fi
 	if test -n "$REBUILD_LINUX"; then
 		cross_build_setup linux
-		cat - debian/changelog <<EOF |
-linux ($(dpkg-parsechangelog -SVersion)+rebootstrap1) sid; urgency=medium
-
-  * Update for $REBUILD_LINUX $HOST_ARCH
-
- -- rebootstrap <invalid@invalid>  $(dpkg-parsechangelog -SDate)
-
-EOF
-		drop_privs tee debian/changelog.new >/dev/null
-		drop_privs mv debian/changelog.new debian/changelog
 		linux_libc_dev_profiles=nocheck,pkg.linux.nokernel,pkg.linux.notools,pkg.linux.quick
 		apt_get_build_dep --indep-only "-P$linux_libc_dev_profiles" ./
 		drop_privs KBUILD_VERBOSE=1 dpkg-buildpackage -A "-P$linux_libc_dev_profiles" -uc -us
