@@ -885,6 +885,1188 @@ patch_gcc_has_include_next() {
 EOF
 	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
 }
+patch_gcc_for_host_in_rtlibs() {
+	echo "moving -for-host packages to rlibs build #1069065"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control.m4
++++ b/debian/control.m4
+@@ -800,19 +800,6 @@
+  a fairly portable optimizing compiler for C.
+ ')`'dnl for_each_arch
+
+-Package: gcc`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gcc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  cpp`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU C compiler for the host architecture
+- This is the GNU C compiler, a fairly portable optimizing compiler for C.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gcc`'PV`'-for-build
+ Architecture: all
+@@ -892,6 +879,22 @@
+ ')`'dnl plugindev
+ ')`'dnl cdev
+
++ifenabled(`gccforhost',`dnl
++Package: gcc`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gcc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  cpp`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU C compiler for the host architecture
++ This is the GNU C compiler, a fairly portable optimizing compiler for C.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl gccforhost
++
+ ifenabled(`cdev',`
+ Package: gcc`'PV-hppa64-linux-gnu
+ Architecture: ifdef(`TARGET',`any',hppa amd64 i386 x32)
+@@ -924,24 +927,6 @@
+  the compiler.
+ ')`'dnl for_each_arch
+
+-Package: cpp`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Section: ifdef(`TARGET',`devel',`interpreters')
+-Depends: BASEDEP, cpp`'PV`'${target:suffix} (>= ${gcc:SoftVersion}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU C preprocessor for the host architecture
+- A macro processor that is used automatically by the GNU C compiler
+- to transform programs before actual compilation.
+- .
+- This package has been separated from gcc for the benefit of those who
+- require the preprocessor configured for the host architecture but not
+- the compiler.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: cpp`'PV`'-for-build
+ Architecture: all
+@@ -999,6 +984,27 @@
+ ')`'dnl native
+ ')`'dnl cdev
+
++ifenabled(`cppforhost',`dnl
++Package: cpp`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Section: ifdef(`TARGET',`devel',`interpreters')
++Depends: BASEDEP, cpp`'PV`'${target:suffix} (>= ${gcc:SoftVersion}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU C preprocessor for the host architecture
++ A macro processor that is used automatically by the GNU C compiler
++ to transform programs before actual compilation.
++ .
++ This package has been separated from gcc for the benefit of those who
++ require the preprocessor configured for the host architecture but not
++ the compiler.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl cppforhost
++
+ ifenabled(`c++',`
+ ifenabled(`c++dev',`dnl
+ for_each_arch(`
+@@ -1015,21 +1021,6 @@
+  This package contains C++ cross-compiler for arch_gnu architecture.
+ ')`'dnl for_each_arch
+
+-Package: g++`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, g++`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU C++ compiler for the host architecture
+- This is the GNU C++ compiler, a fairly portable optimizing compiler for C++.
+- .
+- This package contains C++ cross-compiler for the host architecture.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: g++`'PV`'-for-build
+ Architecture: all
+@@ -1071,6 +1062,24 @@
+ ')`'dnl c++dev
+ ')`'dnl c++
+
++ifenabled(`c++forhost',`dnl
++Package: g++`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, g++`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU C++ compiler for the host architecture
++ This is the GNU C++ compiler, a fairly portable optimizing compiler for C++.
++ .
++ This package contains C++ cross-compiler for the host architecture.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl c++forhost
++
+ ifdef(`TARGET', `', `
+ ifenabled(`ssp',`
+ Package: libssp`'SSP_SO`'LS
+@@ -2518,22 +2527,6 @@
+  It uses the gcc backend to generate optimized code.
+ ')`'dnl for_each_arch
+
+-Package: gobjc++`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gobjc++`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gobjc`'PV`'-for-host (= ${gcc:Version}), g++`'PV`'-for-host (= ${gcc:Version}),
+-  ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Objective-C++ compiler for the host architecture
+- This is the GNU Objective-C++ compiler for the host architecture,
+- which compiles Objective-C++ on platforms supported by the gcc compiler.
+- It uses the gcc backend to generate optimized code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gobjc++`'PV`'-for-build
+ Architecture: all
+@@ -2563,6 +2556,25 @@
+ ')`'dnl TARGET
+ ')`'dnl obcppdev
+
++ifenabled(`objppforhost',`dnl
++Package: gobjc++`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gobjc++`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gobjc`'PV`'-for-host (= ${gcc:Version}), g++`'PV`'-for-host (= ${gcc:Version}),
++  ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Objective-C++ compiler for the host architecture
++ This is the GNU Objective-C++ compiler for the host architecture,
++ which compiles Objective-C++ on platforms supported by the gcc compiler.
++ It uses the gcc backend to generate optimized code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl objppforhost
++
+ ifenabled(`multilib',`
+ Package: gobjc++`'PV-multilib`'TS
+ Architecture: ifdef(`TARGET',`any',MULTILIB_ARCHS)
+@@ -2595,21 +2607,6 @@
+  It uses the gcc backend to generate optimized code.
+ ')`'dnl for_each_arch
+
+-Package: gobjc`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gobjc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gobjc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Objective-C compiler for the host architecture
+- This is the GNU Objective-C compiler for the host architecture,
+- which compiles Objective-C on platforms supported by the gcc compiler.
+- It uses the gcc backend to generate optimized code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gobjc`'PV`'-for-build
+ Architecture: all
+@@ -2705,6 +2702,24 @@
+ ')`'dnl libx32objc
+ ')`'dnl objcdev
+
++ifenabled(`objcforhost',`dnl
++Package: gobjc`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gobjc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gobjc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Objective-C compiler for the host architecture
++ This is the GNU Objective-C compiler for the host architecture,
++ which compiles Objective-C on platforms supported by the gcc compiler.
++ It uses the gcc backend to generate optimized code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl objcforhost
++
+ ifenabled(`libobjc',`
+ Package: libobjc`'OBJC_SO`'LS
+ TARGET_PACKAGE`'dnl
+@@ -2840,21 +2855,6 @@
+  It uses the gcc backend to generate optimized code.
+ ')')`'dnl for_each_arch
+
+-Package: gfortran`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gfortran`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Fortran compiler for the host architecture
+- This is the GNU Fortran compiler for the host architecture,
+- which compiles Fortran on platforms supported by the gcc compiler.
+- It uses the gcc backend to generate optimized code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gfortran`'PV`'-for-build
+ Architecture: all
+@@ -3089,6 +3089,24 @@
+ ')`'dnl libx32gfortran
+ ')`'dnl fortran
+
++ifenabled(`fortranforhost',`dnl
++Package: gfortran`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gfortran`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Fortran compiler for the host architecture
++ This is the GNU Fortran compiler for the host architecture,
++ which compiles Fortran on platforms supported by the gcc compiler.
++ It uses the gcc backend to generate optimized code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl fortranforhost
++
+ ifenabled(`ggo',`
+ ifenabled(`godev',`
+ for_each_arch(`ifelse(index(` 'go_no_archs` ',` !'arch_deb` '),`-1',`
+@@ -3107,21 +3125,6 @@
+  backend to generate optimized code.
+ ')')`'dnl for_each_arch
+
+-Package: gccgo`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gccgo`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Go compiler for the host architecture
+- This is the GNU Go compiler for the host architecture, which
+- compiles Go on platforms supported by the gcc compiler. It uses the gcc
+- backend to generate optimized code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gccgo`'PV`'-for-build
+ Architecture: all
+@@ -3362,6 +3365,24 @@
+ ')`'dnl libx32go
+ ')`'dnl ggo
+
++ifenabled(`godevforhost',`dnl
++Package: gccgo`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gccgo`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Go compiler for the host architecture
++ This is the GNU Go compiler for the host architecture, which
++ compiles Go on platforms supported by the gcc compiler. It uses the gcc
++ backend to generate optimized code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl godevforhost
++
+ ifenabled(`c++',`
+ ifenabled(`libcxx',`
+ Package: libstdc++CXX_SO`'LS
+@@ -3818,23 +3839,6 @@
+  exceptions using the default zero-cost mechanism.
+ ')')`'dnl for_each_arch
+
+-Package: gnat`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gnat`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Ada compiler for the host architecture
+- GNAT is a compiler for the Ada programming language. It produces optimized
+- code on platforms supported by the GNU Compiler Collection (GCC).
+- .
+- This package provides the compiler, tools and runtime library that handles
+- exceptions using the default zero-cost mechanism.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gnat`'PV`'-for-build
+ Architecture: all
+@@ -3963,6 +3967,26 @@
+ ')`'dnl gfdldoc
+ ')`'dnl ada
+
++ifenabled(`adaforhost',`dnl
++Package: gnat`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gnat`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Ada compiler for the host architecture
++ GNAT is a compiler for the Ada programming language. It produces optimized
++ code on platforms supported by the GNU Compiler Collection (GCC).
++ .
++ This package provides the compiler, tools and runtime library that handles
++ exceptions using the default zero-cost mechanism.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl adaforhost
++
+ ifenabled(`d ',`dnl
+ for_each_arch(`ifelse(index(` 'd_no_archs` ',` !'arch_deb` '),`-1',`
+ Package: gdc`'PV`'arch_gnusuffix
+@@ -3978,23 +4002,6 @@
+  This compiler supports D language version 2.
+ ')')`'dnl for_each_arch
+
+-Package: gdc`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gdc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU D compiler (version 2) for the host architecture
+- This is the GNU D compiler for the host architecture, which compiles D on
+- platforms supported by gcc. It uses the gcc backend to generate optimised
+- code.
+- .
+- This compiler supports D language version 2.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gdc`'PV`'-for-build
+ Architecture: all
+@@ -4252,6 +4259,26 @@
+ ')`'dnl libphobos
+ ')`'dnl d
+
++ifenabled(`dforhost',`dnl
++Package: gdc`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gdc`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU D compiler (version 2) for the host architecture
++ This is the GNU D compiler for the host architecture, which compiles D on
++ platforms supported by gcc. It uses the gcc backend to generate optimised
++ code.
++ .
++ This compiler supports D language version 2.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl dforhost
++
+ ifenabled(`m2 ',`dnl
+ for_each_arch(`ifelse(index(` 'm2_no_archs` ',` !'arch_deb` '),`-1',`
+ Package: gm2`'PV`'arch_gnusuffix
+@@ -4265,21 +4292,6 @@
+  backend to generate optimised code.
+ ')')`'dnl for_each_arch
+
+-Package: gm2`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gm2`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Modula-2 compiler for the host architecture
+- This is the GNU Modula-2 compiler for the host architecture,
+- which compiles Modula-2 on platforms supported by gcc.  It uses the gcc
+- backend to generate optimised code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: gm2`'PV`'-for-build
+ Architecture: all
+@@ -4506,6 +4518,24 @@
+  Documentation for the GNU Modula-2 compiler in HTML and info `format'.
+ ')`'dnl m2
+
++ifenabled(`m2forhost',`dnl
++Package: gm2`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gm2`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Modula-2 compiler for the host architecture
++ This is the GNU Modula-2 compiler for the host architecture,
++ which compiles Modula-2 on platforms supported by gcc.  It uses the gcc
++ backend to generate optimised code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl m2forhost
++
+ ifenabled(`rust ',`
+ for_each_arch(`ifelse(index(` 'rs_no_archs` ',` !'arch_deb` '),`-1',`
+ Package: gccrs`'PV`'arch_gnusuffix
+@@ -4525,28 +4555,6 @@
+  and not usable yet for compiling real Rust programs !!!!!
+ ')')`'dnl for_each_arch
+
+-Package: gccrs`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, gccrs`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Rust compiler for the host architecture
+- !!!!! Please note, the compiler is in a very early stage
+- and not usable yet for compiling real Rust programs !!!!!
+- .
+- gccrs is a full alternative implementation of the Rust
+- language ontop of GCC with the goal to become fully
+- upstream with the GNU toolchain.
+- .
+- !!!!! Please note, the compiler is in a very early stage
+- and not usable yet for compiling real Rust programs !!!!!
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+-
+ Package: gccrs`'PV`'-for-build
+ Architecture: all
+ Multi-Arch: foreign
+@@ -4584,6 +4592,30 @@
+  and not usable yet for compiling real Rust programs !!!!!
+ ')`'dnl rust
+
++ifenabled(`rustforhost',`dnl
++Package: gccrs`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, gccrs`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Rust compiler for the host architecture
++ !!!!! Please note, the compiler is in a very early stage
++ and not usable yet for compiling real Rust programs !!!!!
++ .
++ gccrs is a full alternative implementation of the Rust
++ language ontop of GCC with the goal to become fully
++ upstream with the GNU toolchain.
++ .
++ !!!!! Please note, the compiler is in a very early stage
++ and not usable yet for compiling real Rust programs !!!!!
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl rustforhost
++
+ ifdef(`TARGET',`',`dnl
+ ifenabled(`libs',`
+ #Package: gcc`'PV-soft-float
+--- a/debian/rules.conf
++++ b/debian/rules.conf
+@@ -739,6 +739,9 @@
+ ifeq ($(with_gcclbase),yes)
+   addons += gcclbase
+ endif
++ifeq ($(LS),)
++  addons += cppforhost gccforhost c++forhost fortranforhost objcforhost objppforhost
++endif
+ ifneq ($(DEB_STAGE),rtlibs)
+   addons += cdev c++dev source multilib
+   ifeq ($(build_type),build-native)
+@@ -851,6 +854,9 @@
+     addons += libdevphobos libdevn32phobos
+     addons += $(if $(findstring amd64,$(biarchx32archs)),libdevx32phobos)
+   endif
++  ifeq ($(LS),)
++    addons += dforhost
++  endif
+ endif
+ ifeq ($(with_go),yes)
+   addons += ggo godev
+@@ -858,6 +864,9 @@
+     addons += libggo lib32ggo lib64ggo libn32ggo
+     addons += $(if $(findstring amd64,$(biarchx32archs)),libx32ggo)
+   endif
++  ifeq ($(LS),)
++    addons += godevforhost
++  endif
+ endif
+ ifeq ($(with_m2),yes)
+   languages += m2
+@@ -866,6 +875,9 @@
+     addons += libgm2 # lib32gm2 lib64gm2 libn32gm2
+     #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32gm2)
+   endif
++  ifeq ($(LS),)
++    addons += m2forhost
++  endif
+ endif
+ ifeq ($(with_rs),yes)
+   languages += rust
+@@ -874,6 +886,9 @@
+   #  addons += libgrs # lib32gm2 lib64gm2 libn32gm2
+   #  #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32gm2)
+   #endif
++  ifeq ($(LS),)
++    addons += rustforhost
++  endif
+ endif
+ ifeq ($(with_ada),yes)
+   languages += ada
+@@ -881,6 +896,9 @@
+   ifeq ($(with_gnatsjlj),yes)
+     addons += adasjlj
+   endif
++  ifeq ($(LS),)
++    addons += adaforhost
++  endif
+ endif
+ 
+   ifneq ($(DEB_CROSS),yes)
+--- a/debian/rules.d/binary-ada.mk
++++ b/debian/rules.d/binary-ada.mk
+@@ -5,7 +5,7 @@
+   $(lib_binaries) += libgnat
+ endif
+
+-arch_binaries := $(arch_binaries) ada-nat ada-host
++arch_binaries := $(arch_binaries) ada-nat
+ ifeq ($(unprefixed_names),yes)
+   arch_binaries := $(arch_binaries) ada
+   indep_binaries := $(indep_binaries) ada-build
+@@ -20,7 +20,6 @@
+ p_glbase	= $(p_lbase)
+
+ p_gnat_n = gnat-$(GNAT_VERSION)-$(subst _,-,$(TARGET_ALIAS))
+-p_gnat_h = gnat-$(GNAT_VERSION)-for-host
+ p_gnat_b = gnat-$(GNAT_VERSION)-for-build
+ p_gnat	= gnat-$(GNAT_VERSION)
+ p_gnatsjlj= gnat-$(GNAT_VERSION)-sjlj$(cross_bin_arch)
+@@ -30,7 +29,6 @@
+
+ d_gbase	= debian/$(p_gbase)
+ d_gnat_n = debian/$(p_gnat_n)
+-d_gnat_h = debian/$(p_gnat_h)
+ d_gnat_b = debian/$(p_gnat_b)
+ d_gnat	= debian/$(p_gnat)
+ d_gnatsjlj	= debian/$(p_gnatsjlj)
+@@ -167,15 +165,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-ada-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_gnat_h)
+-	debian/dh_doclink -p$(p_gnat_h) $(p_xbase)
+-	echo $(p_gnat_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-ada-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-cpp.mk
++++ b/debian/rules.d/binary-cpp.mk
+@@ -1,5 +1,5 @@
+ ifneq ($(DEB_STAGE),rtlibs)
+-  arch_binaries  := $(arch_binaries) cpp-nat cpp-host
++  arch_binaries  := $(arch_binaries) cpp-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries  := $(arch_binaries) cpp
+     indep_binaries := $(indep_binaries) cpp-build
+@@ -13,12 +13,10 @@
+
+ p_cpp  = cpp$(pkg_ver)
+ p_cpp_n = cpp$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_cpp_h = cpp$(pkg_ver)-for-host
+ p_cpp_d = cpp$(pkg_ver)-doc
+
+ d_cpp	= debian/$(p_cpp)
+ d_cpp_n = debian/$(p_cpp_n)
+-d_cpp_h = debian/$(p_cpp_h)
+ d_cpp_b = debian/$(p_cpp_b)
+ d_cpp_d	= debian/$(p_cpp_d)
+
+@@ -75,15 +73,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-cpp-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_cpp_h)
+-	debian/dh_doclink -p$(p_cpp_h) $(p_xbase)
+-	echo $(p_cpp_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-cpp-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-cxx.mk
++++ b/debian/rules.d/binary-cxx.mk
+@@ -2,7 +2,7 @@
+   ifneq (,$(filter yes, $(biarch64) $(biarch32) $(biarchn32) $(biarchx32)))
+     arch_binaries  := $(arch_binaries) cxx-multi
+   endif
+-  arch_binaries  := $(arch_binaries) cxx-nat cxx-host
++  arch_binaries  := $(arch_binaries) cxx-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries  := $(arch_binaries) cxx
+     indep_binaries := $(indep_binaries) cxx-build
+@@ -11,12 +11,10 @@
+
+ p_cxx = g++$(pkg_ver)
+ p_cxx_n = g++$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_cxx_h = g++$(pkg_ver)-for-host
+ p_cxx_b = g++$(pkg_ver)-for-build
+
+ d_cxx = debian/$(p_cxx)
+ d_cxx_n = debian/$(p_cxx_n)
+-d_cxx_h = debian/$(p_cxx_h)
+ d_cxx_b = debian/$(p_cxx_b)
+
+ dirs_cxx_n = \
+@@ -75,15 +73,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-cxx-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_cxx_h)
+-	debian/dh_doclink -p$(p_cxx_h) $(p_xbase)
+-	echo $(p_cxx_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-cxx-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-d.mk
++++ b/debian/rules.d/binary-d.mk
+@@ -2,7 +2,7 @@
+   ifneq (,$(filter yes, $(biarch64) $(biarch32) $(biarchn32)))
+     arch_binaries  := $(arch_binaries) gdc-multi
+   endif
+-  arch_binaries := $(arch_binaries) gdc-nat gdc-host
++  arch_binaries := $(arch_binaries) gdc-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries := $(arch_binaries) gdc
+     indep_binaries := $(indep_binaries) gdc-build
+@@ -43,7 +43,6 @@
+ endif
+
+ p_gdc_n		= gdc$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_gdc_h		= gdc$(pkg_ver)-for-host
+ p_gdc_b		= gdc$(pkg_ver)-for-build
+ p_gdc           = gdc$(pkg_ver)
+ p_gdc_m		= gdc$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -51,7 +50,6 @@
+ p_libphobosdev  = libgphobos$(pkg_ver)-dev
+
+ d_gdc_n		= debian/$(p_gdc_n)
+-d_gdc_h		= debian/$(p_gdc_h)
+ d_gdc_b		= debian/$(p_gdc_b)
+ d_gdc           = debian/$(p_gdc)
+ d_gdc_m		= debian/$(p_gdc_m)
+@@ -139,15 +137,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-gdc-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_gdc_h)
+-	debian/dh_doclink -p$(p_gdc_h) $(p_xbase)
+-	echo $(p_gdc_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-gdc-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- /dev/null
++++ b/debian/rules.d/binary-forhost.mk
+@@ -0,0 +1,97 @@
++ifeq ($(with_cdev),yes)
++  arch_binaries := $(arch_binaries) cpp-host gcc-host
++endif
++ifeq ($(with_cxx),yes)
++  arch_binaries  := $(arch_binaries) cxx-host
++endif
++ifeq ($(with_fortran),yes)
++  arch_binaries  := $(arch_binaries) fdev-host
++endif
++ifeq ($(with_objc),yes)
++  arch_binaries  := $(arch_binaries) objc-host
++endif
++ifeq ($(with_objcxx),yes)
++  arch_binaries  := $(arch_binaries) objcxx-host
++endif
++ifeq ($(with_d),yes)
++  arch_binaries  := $(arch_binaries) gdc-host
++endif
++ifeq ($(with_go),yes)
++  arch_binaries  := $(arch_binaries) gccgo-host
++endif
++ifeq ($(with_m2),yes)
++  arch_binaries  := $(arch_binaries) gm2-host
++endif
++ifeq ($(with_rs),yes)
++  arch_binaries  := $(arch_binaries) grs-host
++endif
++ifeq ($(with_ada),yes)
++  arch_binaries  := $(arch_binaries) ada-host
++endif
++
++p_cpp_h = cpp$(pkg_ver)-for-host
++p_gcc_h = gcc$(pkg_ver)-for-host
++p_cxx_h = g++$(pkg_ver)-for-host
++p_g95_h = gfortran$(pkg_ver)-for-host
++p_objc_h = gobjc$(pkg_ver)-for-host
++p_objcx_h = gobjc++$(pkg_ver)-for-host
++p_gdc_h	= gdc$(pkg_ver)-for-host
++p_go_h	= gccgo$(pkg_ver)-for-host
++p_gm2_h	= gm2$(pkg_ver)-for-host
++p_grs_h = gccrs$(pkg_ver)-for-host
++p_gnat_h = gnat-$(GNAT_VERSION)-for-host
++
++d_cpp_h = debian/$(p_cpp_h)
++d_gcc_h = debian/$(p_gcc_h)
++d_cxx_h = debian/$(p_cxx_h)
++d_g95_h = debian/$(p_g95_h)
++d_objc_h = debian/$(p_objc_h)
++d_objcx_h = debian/$(p_objcx_h)
++d_gdc_h = debian/$(p_gdc_h)
++d_go_h  = debian/$(p_go_h)
++d_gm2_h	= debian/$(p_gm2_h)
++d_grs_h = debian/$(p_grs_h)
++d_gnat_h = debian/$(p_gnat_h)
++
++define do_for_host_package
++	dh_testdir
++	dh_testroot
++	mv $(install_stamp) $(install_stamp)-tmp
++	rm -rf debian/$(d_$(1)_h)
++	debian/dh_doclink -p$(p_$(1)_h) $(p_xbase)
++	echo $(p_$(1)_h) >> debian/arch_binaries
++	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
++endef
++
++$(binary_stamp)-cpp-host: $(install_stamp)
++	$(call do_for_host_package,cpp)
++
++$(binary_stamp)-gcc-host: $(install_dependencies)
++	$(call do_for_host_package,gcc)
++
++$(binary_stamp)-cxx-host: $(install_stamp)
++	$(call do_for_host_package,cxx)
++
++$(binary_stamp)-fdev-host: $(install_stamp)
++	$(call do_for_host_package,g95)
++
++$(binary_stamp)-objc-host: $(install_stamp)
++	$(call do_for_host_package,objc)
++
++$(binary_stamp)-objcxx-host: $(install_stamp)
++	$(call do_for_host_package,objcx)
++
++$(binary_stamp)-gdc-host: $(install_stamp)
++	$(call do_for_host_package,gdc)
++
++$(binary_stamp)-gccgo-host: $(install_stamp)
++	$(call do_for_host_package,go)
++
++$(binary_stamp)-gm2-host: $(install_stamp)
++	$(call do_for_host_package,gm2)
++
++$(binary_stamp)-grs-host: $(install_stamp)
++	$(call do_for_host_package,grs)
++
++$(binary_stamp)-ada-host: $(install_stamp)
++	$(call do_for_host_package,gnat)
+--- a/debian/rules.d/binary-fortran.mk
++++ b/debian/rules.d/binary-fortran.mk
+@@ -33,7 +33,7 @@
+   ifneq (,$(filter yes, $(biarch64) $(biarch32) $(biarchn32) $(biarchx32)))
+     arch_binaries  := $(arch_binaries) fdev-multi
+   endif
+-  arch_binaries  := $(arch_binaries) fdev-nat fdev-host
++  arch_binaries  := $(arch_binaries) fdev-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries  := $(arch_binaries) fdev
+     indep_binaries := $(indep_binaries) fdev-build
+@@ -46,7 +46,6 @@
+ endif
+
+ p_g95_n = gfortran$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_g95_h = gfortran$(pkg_ver)-for-host
+ p_g95_b = gfortran$(pkg_ver)-for-build
+ p_g95	= gfortran$(pkg_ver)
+ p_g95_m	= gfortran$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -54,7 +53,6 @@
+ p_flib	= libgfortran$(FORTRAN_SONAME)$(cross_lib_arch)
+
+ d_g95_n = debian/$(p_g95_n)
+-d_g95_h = debian/$(p_g95_h)
+ d_g95_b = debian/$(p_g95_b)
+ d_g95	= debian/$(p_g95)
+ d_g95_m	= debian/$(p_g95_m)
+@@ -204,15 +202,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-fdev-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_g95_h)
+-	debian/dh_doclink -p$(p_g95_h) $(p_xbase)
+-	echo $(p_g95_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-fdev-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-gcc.mk
++++ b/debian/rules.d/binary-gcc.mk
+@@ -6,7 +6,7 @@
+     arch_binaries  := $(arch_binaries) gcc-plugindev
+   endif
+
+-  arch_binaries  := $(arch_binaries) gcc-nat gcc-host
++  arch_binaries  := $(arch_binaries) gcc-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries  := $(arch_binaries) gcc
+     indep_binaries := $(indep_binaries) gcc-build
+@@ -32,13 +32,11 @@
+
+ p_gcc  = gcc$(pkg_ver)
+ p_gcc_n = gcc$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_gcc_h = gcc$(pkg_ver)-for-host
+ p_gcc_b = gcc$(pkg_ver)-for-build
+ p_gcc_d = gcc$(pkg_ver)-doc
+
+ d_gcc	= debian/$(p_gcc)
+ d_gcc_n = debian/$(p_gcc_n)
+-d_gcc_h = debian/$(p_gcc_h)
+ d_gcc_b = debian/$(p_gcc_b)
+ d_gcc_d	= debian/$(p_gcc_d)
+
+@@ -153,15 +151,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-gcc-host: $(install_dependencies)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_gcc_h)
+-	debian/dh_doclink -p$(p_gcc_h) $(p_xbase)
+-	echo $(p_gcc_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-gcc-build: $(install_dependencies)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-go.mk
++++ b/debian/rules.d/binary-go.mk
+@@ -30,7 +30,7 @@
+ endif
+
+ ifneq ($(DEB_STAGE),rtlibs)
+-  arch_binaries  := $(arch_binaries) gccgo-nat gccgo-host
++  arch_binaries  := $(arch_binaries) gccgo-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries  := $(arch_binaries) gccgo
+     indep_binaries := $(indep_binaries) gccgo-build
+@@ -46,7 +46,6 @@
+ endif
+
+ p_go_n  = gccgo$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_go_h  = gccgo$(pkg_ver)-for-host
+ p_go_b  = gccgo$(pkg_ver)-for-build
+ p_go	= gccgo$(pkg_ver)
+ p_go_m	= gccgo$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -54,7 +53,6 @@
+ p_golib	= libgo$(GO_SONAME)$(cross_lib_arch)
+
+ d_go_n  = debian/$(p_go_n)
+-d_go_h  = debian/$(p_go_h)
+ d_go_b  = debian/$(p_go_b)
+ d_go	= debian/$(p_go)
+ d_go_m	= debian/$(p_go_m)
+@@ -310,15 +308,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-gccgo-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_go_h)
+-	debian/dh_doclink -p$(p_go_h) $(p_xbase)
+-	echo $(p_go_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-gccgo-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-m2.mk
++++ b/debian/rules.d/binary-m2.mk
+@@ -4,7 +4,7 @@
+     arch_binaries  := $(arch_binaries) gm2-multi
+   endif
+   endif
+-  arch_binaries := $(arch_binaries) gm2-nat gm2-host
++  arch_binaries := $(arch_binaries) gm2-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries := $(arch_binaries) gm2
+     indep_binaries := $(indep_binaries) gm2-build
+@@ -51,7 +51,6 @@
+ endif
+
+ p_gm2_n		= gm2$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_gm2_h		= gm2$(pkg_ver)-for-host
+ p_gm2_b		= gm2$(pkg_ver)-for-build
+ p_gm2           = gm2$(pkg_ver)
+ p_gm2_m		= gm2$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -60,7 +59,6 @@
+ p_gm2d		= gm2$(pkg_ver)-doc
+
+ d_gm2_n		= debian/$(p_gm2_n)
+-d_gm2_h		= debian/$(p_gm2_h)
+ d_gm2_b		= debian/$(p_gm2_b)
+ d_gm2           = debian/$(p_gm2)
+ d_gm2_m		= debian/$(p_gm2_m)
+@@ -127,15 +125,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-gm2-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_gm2_h)
+-	debian/dh_doclink -p$(p_gm2_h) $(p_xbase)
+-	echo $(p_gm2_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-gm2-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-objc.mk
++++ b/debian/rules.d/binary-objc.mk
+@@ -2,7 +2,7 @@
+   ifneq (,$(filter yes, $(biarch64) $(biarch32) $(biarchn32) $(biarchx32)))
+     arch_binaries  := $(arch_binaries) objc-multi
+   endif
+-  arch_binaries := $(arch_binaries) objc-nat objc-host
++  arch_binaries := $(arch_binaries) objc-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries := $(arch_binaries) objc
+     indep_binaries := $(indep_binaries) objc-build
+@@ -12,9 +12,6 @@
+ p_objc_n = gobjc$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+ d_objc_n = debian/$(p_objc_n)
+
+-p_objc_h = gobjc$(pkg_ver)-for-host
+-d_objc_h = debian/$(p_objc_h)
+-
+ p_objc_b = gobjc$(pkg_ver)-for-build
+ d_objc_b = debian/$(p_objc_b)
+
+@@ -61,15 +58,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-objc-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_objc_h)
+-	debian/dh_doclink -p$(p_objc_h) $(p_xbase)
+-	echo $(p_objc_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-objc-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-objcxx.mk
++++ b/debian/rules.d/binary-objcxx.mk
+@@ -12,9 +12,6 @@
+ p_objcx_n	= gobjc++$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+ d_objcx_n	= debian/$(p_objcx_n)
+
+-p_objcx_h	= gobjc++$(pkg_ver)-for-host
+-d_objcx_h	= debian/$(p_objcx_h)
+-
+ p_objcx_b	= gobjc++$(pkg_ver)-for-build
+ d_objcx_b	= debian/$(p_objcx_b)
+
+@@ -61,15 +58,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-objcxx-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_objcx_h)
+-	debian/dh_doclink -p$(p_objcx_h) $(p_xbase)
+-	echo $(p_objcx_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-objcxx-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-rust.mk
++++ b/debian/rules.d/binary-rust.mk
+@@ -4,7 +4,7 @@
+   #  arch_binaries  := $(arch_binaries) grs-multi
+   #endif
+   endif
+-  arch_binaries := $(arch_binaries) grs-nat grs-host
++  arch_binaries := $(arch_binaries) grs-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries := $(arch_binaries) grs
+     indep_binaries := $(indep_binaries) grs-build
+@@ -51,7 +51,6 @@
+ endif
+
+ p_grs_n		= gccrs$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_grs_h		= gccrs$(pkg_ver)-for-host
+ p_grs_b		= gccrs$(pkg_ver)-for-build
+ p_grs           = gccrs$(pkg_ver)
+ p_grs_m		= gccrs$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -60,7 +59,6 @@
+ p_grsd		= grs$(pkg_ver)-doc
+
+ d_grs_n		= debian/$(p_grs_n)
+-d_grs_h		= debian/$(p_grs_h)
+ d_grs_b		= debian/$(p_grs_b)
+ d_grs           = debian/$(p_grs)
+ d_grs_m		= debian/$(p_grs_m)
+@@ -124,15 +122,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-grs-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_grs_h)
+-	debian/dh_doclink -p$(p_grs_h) $(p_xbase)
+-	echo $(p_grs_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-grs-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.defs
++++ b/debian/rules.defs
+@@ -712,6 +712,13 @@
+   with_dev := yes
+ endif
+
++ifeq ($(LS),)
++  with_forhost := yes
++endif
++ifeq ($(single_package),yes)
++  with_forhost := disbaled for single package
++endif
++
+ with_cpp := yes
+
+ # set lang when built from a different source package.
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -2437,6 +2437,10 @@
+   include debian/rules.d/binary-hppa64.mk
+ endif
+
++ifeq ($(with_forhost),yes)
++  include debian/rules.d/binary-forhost.mk
++endif
++
+ endif # with_base_only
+ endif # BACKPORT
+ endif # ($(single_package),yes)
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -1160,6 +2342,7 @@ patch_gcc_13() {
 	patch_gcc_wdotap
 }
 patch_gcc_14() {
+	patch_gcc_for_host_in_rtlibs
 	patch_gcc_wdotap
 }
 
