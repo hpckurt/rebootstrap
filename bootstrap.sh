@@ -2779,7 +2779,7 @@ name = '$kernel_arch'
   name = '$HOST_ARCH'
 EOF
 	fi
-	apt_get_install kernel-wedge python3-jinja2
+	apt_get_install kernel-wedge python3-jinja2 python3-dacite
 	# intentionally exits 1 to avoid being called automatically. we are doing it wrong
 	drop_privs sed -i -e '/^\s*exit 1$/d' debian/rules
 	drop_privs ./debian/rules debian/rules.gen
