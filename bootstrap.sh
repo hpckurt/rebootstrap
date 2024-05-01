@@ -2341,6 +2341,10 @@ patch_gcc_13() {
 	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
 }
+buildenv_gcc_13() {
+	# gcc-13 no longer builds libraries and no longer maintains symbol files
+	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+}
 patch_gcc_14() {
 	patch_gcc_for_host_in_rtlibs
 	patch_gcc_wdotap
@@ -3029,6 +3033,7 @@ else
 		export gcc_cv_libc_provides_ssp=yes
 		nolang=$(set_add "${GCC_NOLANG:-}" biarch)
 		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nostrap nolang=$(join_words , $nolang)"
+		hook=$(get_hook buildenv "gcc-$GCC_VER") && "$hook" "$(dpkg --print-architecture)"
 		drop_privs_exec dpkg-buildpackage -B -uc -us
 	)
 	cd ..
@@ -3149,6 +3154,7 @@ else
 		test "$ENABLE_MULTILIB" = yes || nolang=$(set_add "$nolang" biarch)
 		export DEB_STAGE=stage1
 		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS${nolang:+ nolang=$(join_words , $nolang)}"
+		hook=$(get_hook buildenv "gcc-$GCC_VER") && "$hook" "$HOST_ARCH"
 		drop_privs dpkg-buildpackage -d -T control
 		dpkg-checkbuilddeps || : # tell unmet build depends again after rewriting control
 		drop_privs_exec dpkg-buildpackage -d -b -uc -us
@@ -3298,6 +3304,7 @@ else
 		fi
 		export gcc_cv_libc_provides_ssp=yes
 		export gcc_cv_initfini_array=yes
+		hook=$(get_hook buildenv "gcc-$GCC_VER") && "$hook" "$HOST_ARCH"
 		drop_privs dpkg-buildpackage -d -T control
 		drop_privs dpkg-buildpackage -d -T clean
 		dpkg-checkbuilddeps || : # tell unmet build depends again after rewriting control
@@ -3353,6 +3360,7 @@ else
 		test "$ENABLE_MULTILIB" = yes || nolang=$(set_add "$nolang" biarch)
 		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS${nolang:+ nolang=$(join_words , $nolang)}"
 		export WITH_SYSROOT=/
+		hook=$(get_hook buildenv "gcc-$GCC_VER") && "$hook" "$HOST_ARCH"
 		drop_privs dpkg-buildpackage -d -T control
 		cat debian/control
 		dpkg-checkbuilddeps || : # tell unmet build depends again after rewriting control
