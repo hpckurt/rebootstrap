@@ -2509,6 +2509,14 @@ EOF
  endef
  
  # FIXME: We are having runtime issues with ifunc...
+--- a/debian/sysdeps/hurd-amd64.mk
++++ b/debian/sysdeps/hurd-amd64.mk
+@@ -18,5 +18,2 @@ endif
+ define libc_extra_install
+-mkdir -p $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/mach
+-mv $(debian-tmp)/usr/include/mach/x86_64 $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/mach/
+-ln -s ../$(DEB_HOST_MULTIARCH)/mach/x86_64 $(debian-tmp)/usr/include/mach/x86_64       
+ endef
 EOF
 }
 buildenv_glibc() {
