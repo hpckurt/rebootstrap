@@ -2207,7 +2207,7 @@ patch_gcc_wdotap() {
  debian_patches += hurd-multiarch
 --- a/debian/rules2
 +++ b/debian/rules2
-@@ -854,9 +854,12 @@
+@@ -854,9 +854,13 @@
  	--target=$(TARGET_ALIAS)
 
  ifeq ($(DEB_CROSS),yes)
@@ -2216,7 +2216,8 @@ patch_gcc_wdotap() {
 -	--includedir=/$(PFL)/include
 +  CONFARGS += --program-prefix=$(TARGET_ALIAS)-
 +  ifeq ($(LS),)
-+    CONFARGS += --with-gxx-include-dir='/$(PF)/include/c++/$(BASE_VERSION)'
++    # The build strips the sysroot (aka /) from the include gxx-include-dir.
++    CONFARGS += --with-gxx-include-dir='//$(PF)/include/c++/$(BASE_VERSION)'
 +  else
 +    CONFARGS += --includedir=/$(PFL)/include
 +  endif
