@@ -2881,7 +2881,9 @@ add_automatic p11-kit
 
 patch_pam() {
 	echo "fix FTCBFS #1057729"
-	drop_privs sed -i -e '/fix-autoreconf/d' debian/patches-applied/series
+	drop_privs quilt pop -a
+	drop_privs sed -i -e '/fix-autoreconf/d' debian/patches/series
+	drop_privs quilt push -a
 }
 
 add_automatic patch
