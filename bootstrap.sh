@@ -2335,6 +2335,7 @@ patch_gcc_14() {
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 }
 
+add_automatic gdbm
 buildenv_gdbm() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
 		export ac_cv_func_mmap_fixed_mapped=yes
@@ -3476,6 +3477,7 @@ add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by pam
 add_need fribidi # by newt
+add_need gdbm # by perl, python3.X
 add_need gnupg2 # for apt
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need gpm # by ncurses
 add_need groff # for man-db
@@ -3773,12 +3775,6 @@ automatically_cross_build_packages
 cross_build brotli nopython brotli_1
 mark_built brotli
 # needed by curl
-
-automatically_cross_build_packages
-
-cross_build gdbm pkg.gdbm.nodietlibc gdbm_1
-mark_built gdbm
-# needed by man-db, perl, python3.X
 
 automatically_cross_build_packages
 
