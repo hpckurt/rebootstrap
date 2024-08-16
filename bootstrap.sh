@@ -2927,6 +2927,58 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
+patch_systemd() {
+	echo "fix stage1 FTBFS #1078821"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -252,7 +252,7 @@
+ 	cp -a debian/extra/units-ubuntu/* debian/systemd/usr/lib/systemd/system/
+ endif
+
+-ifeq (, $(filter pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
++ifeq (,$(filter stage1 pkg.systemd.upstream, $(DEB_BUILD_PROFILES)))
+ ifeq ($(DEB_VENDOR),Debian)
+ ifneq ($(TEMPLATE_EFI_ARCH),)
+ 	debian/extra/gen-signing-template $(DEB_VERSION) $(DEB_HOST_ARCH) $(TEMPLATE_EFI_ARCH)
+--- a/debian/systemd.install
++++ b/debian/systemd.install
+@@ -237,7 +237,7 @@
+ usr/lib/systemd/system/sockets.target.wants/systemd-journald-dev-log.socket
+ usr/lib/systemd/system/sockets.target.wants/systemd-journald.socket
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/sockets.target.wants/systemd-pcrextend.socket
+-[amd64 i386 arm64 armhf riscv64] usr/lib/systemd/system/sockets.target.wants/systemd-pcrlock.socket
++[amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/sockets.target.wants/systemd-pcrlock.socket
+ usr/lib/systemd/system/sockets.target.wants/systemd-sysext.socket
+ usr/lib/systemd/system/soft-reboot.target
+ usr/lib/systemd/system/sound.target
+@@ -332,8 +332,8 @@
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrextend.socket
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrfs-root.service
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrfs@.service
+-[amd64 i386 arm64 armhf riscv64] usr/lib/systemd/system/systemd-pcrlock.socket
+-[amd64 i386 arm64 armhf riscv64] usr/lib/systemd/system/systemd-pcrlock@.service
++[amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrlock.socket
++[amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrlock@.service
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrlock-file-system.service
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrlock-firmware-code.service
+ [amd64 i386 arm64 armhf riscv64] <!stage1> usr/lib/systemd/system/systemd-pcrlock-firmware-config.service
+--- a/debian/systemd.manpages
++++ b/debian/systemd.manpages
+@@ -23,8 +23,7 @@
+ debian/tmp/usr/share/man/man1/systemd-id128.1
+ debian/tmp/usr/share/man/man1/systemd-inhibit.1
+ debian/tmp/usr/share/man/man1/systemd-machine-id-setup.1
+-[amd64 i386 arm64 armhf riscv64] <!stage1 !pkg.systemd.upstream> debian/tmp/usr/share/man/man1/systemd-measure.1
+-debian/tmp/usr/share/man/man1/systemd-measure.1
++<!stage1> debian/tmp/usr/share/man/man1/systemd-measure.1
+ debian/tmp/usr/share/man/man1/systemd-mount.1
+ debian/tmp/usr/share/man/man1/systemd-notify.1
+ debian/tmp/usr/share/man/man1/systemd-path.1
+EOF
+}
+
 add_automatic sysvinit
 
 add_automatic tar
