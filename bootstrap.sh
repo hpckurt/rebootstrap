@@ -2545,6 +2545,25 @@ patch_libbsd() {
 EOF
 }
 
+patch_libcap_ng() {
+	echo "fix nopython ftbfs #1078857"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -41,7 +41,9 @@
+ 	# each other at install time.
+ 	for V in $(PY3VERS); do \
+ 		dh_auto_install --builddir=build-py$$V; \
+-		mv ${CURDIR}/debian/tmp/usr/lib/python3 ${CURDIR}/debian/tmp/usr/lib/python$$V; \
++		if test "$$V" != dummy; then \
++			mv ${CURDIR}/debian/tmp/usr/lib/python3 ${CURDIR}/debian/tmp/usr/lib/python$$V; \
++		fi; \
+ 	done
+
+ 	find $(CURDIR)/debian/tmp -name *.la -delete
+EOF
+}
+
 add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
