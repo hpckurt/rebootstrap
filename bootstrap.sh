@@ -2784,9 +2784,8 @@ EOF
 		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
 		riscv32) kernel_arch=riscv; ;;
 		*-linux-*)
-			if ! test -d "debian/config/$HOST_ARCH"; then
-				kernel_arch=$(sed 's/^kernel-arch: //;t;d' < "debian/config/${HOST_ARCH#*-linux-}/defines")
-			fi
+			apt_get_install python3-toml
+			kernel_arch=$(drop_privs python3 -c "print(next(d['name'] for d in __import__('toml.decoder').load(open('debian/config/defines.toml'))['kernelarch'] if any(e['name'] == '${HOST_ARCH#*-linux-}' for e in d['debianarch'])))")
 		;;
 	esac
 	if test -n "$kernel_arch"; then
