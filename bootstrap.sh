@@ -735,13 +735,7 @@ buildenv_diffutils() {
 }
 
 add_automatic dpkg
-
 add_automatic e2fsprogs
-patch_e2fsprogs() {
-	echo "fix FTBFS #1053111"
-	drop_privs sed -i -e 's,lib/systemd/system,usr/&,' debian/e2fsprogs.install
-}
-
 add_automatic expat
 add_automatic file
 add_automatic findutils
