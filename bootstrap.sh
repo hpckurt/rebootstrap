@@ -743,7 +743,7 @@ add_automatic flex
 add_automatic fontconfig
 add_automatic freetype
 add_automatic fribidi
-add_automatic fuse
+add_automatic fuse3
 
 patch_gcc_default_pie_everywhere()
 {
