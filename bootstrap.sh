@@ -643,7 +643,25 @@ add_automatic() { automatic_packages=$(set_add "$automatic_packages" "$1"); }
 
 add_automatic acl
 add_automatic apt
+
 add_automatic attr
+patch_attr() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "fixing missing include #1070123"
+	drop_privs patch -p1 <<'EOF'
+--- a/tools/attr.c
++++ b/tools/attr.c
+@@ -18,6 +18,7 @@
+
+ #include "config.h"
+
++#include <libgen.h>
+ #include <sys/types.h>
+ #include <sys/param.h>
+ #include <sys/stat.h>
+EOF
+}
+
 add_automatic base-files
 add_automatic base-passwd
 
