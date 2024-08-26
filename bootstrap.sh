@@ -2615,6 +2615,10 @@ add_automatic libonig
 add_automatic libpipeline
 add_automatic libpng1.6
 
+patch_libprelude() {
+	echo "fix FTCBFS #1057733"
+	drop_privs sed -i -e '/_FOR_BUILD/s/\<CFLAGS\>/&_FOR_BUILD/' src/libprelude-error/Makefile.am
+}
 buildenv_libprelude() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
 		echo "glibc does not return NULL for malloc(0)"
