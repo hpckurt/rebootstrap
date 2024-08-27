@@ -2563,7 +2563,26 @@ builddep_gnu_efi() {
 }
 
 add_automatic gnupg2
+
 add_automatic gpm
+patch_gpm() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "fixing missing include #1070124"
+	drop_privs patch -p1 <<'EOF'
+--- a/src/daemon/old_main.c
++++ b/src/daemon/old_main.c
+@@ -19,6 +19,8 @@
+  *
+  ********/
+
++#include <string.h>                 /* str*              */
++#include <strings.h>                /* bzero             */
+ #include <sys/socket.h>             /* UNIX              */
+ #include <sys/un.h>                 /* SOCKET            */
+ #include <fcntl.h>                  /* open              */
+EOF
+}
+
 add_automatic grep
 add_automatic groff
 
