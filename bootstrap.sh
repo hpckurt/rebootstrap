@@ -2894,6 +2894,7 @@ EOF
 	drop_privs ./debian/rules debian/rules.gen
 }
 
+add_automatic lmdb
 add_automatic lz4
 
 patch_make_dfsg() {
