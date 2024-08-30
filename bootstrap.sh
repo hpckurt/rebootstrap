@@ -2752,35 +2752,9 @@ buildenv_libunistring() {
 		echo "setting malloc/realloc do not return 0"
 		export ac_cv_func_malloc_0_nonnull=yes
 		export ac_cv_func_realloc_0_nonnull=yes
+		echo "ignoring symbol errors due to pending symbol update for musl #1022846"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 	fi
-}
-patch_libunistring() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "update symbols for musl #1022846"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/libunistring2.symbols
-+++ b/debian/libunistring2.symbols
-@@ -162,10 +162,18 @@
-  libunistring_gl_uninorm_decomp_chars_table@Base 0.9.7
-  libunistring_gl_uninorm_decomp_index_table@Base 0.9.7
-  libunistring_gl_uninorm_decompose_merge_sort_inplace@Base 0.9.7
-- libunistring_glthread_once_multithreaded@Base 1.0
-+ (arch=gnu-any-any)libunistring_glthread_once_multithreaded@Base 1.0
-  libunistring_glthread_once_singlethreaded@Base 0.9.7
-+ (arch=musl-any-any)libunistring_glthread_recursive_lock_destroy_multithreaded@Base 1.0-2
-  libunistring_glthread_recursive_lock_init_multithreaded@Base 0.9.7
-+ (arch=musl-any-any)libunistring_glthread_recursive_lock_lock_multithreaded@Base 1.0-2
-+ (arch=musl-any-any)libunistring_glthread_recursive_lock_unlock_multithreaded@Base 1.0-2
-+ (arch=musl-any-any)libunistring_glthread_rwlock_destroy_multithreaded@Base 1.0-2
-  (arch=gnu-any-any)libunistring_glthread_rwlock_init_for_glibc@Base 0.9.8
-+ (arch=musl-any-any)libunistring_glthread_rwlock_init_multithreaded@Base 1.0-2
-+ (arch=musl-any-any)libunistring_glthread_rwlock_rdlock_multithreaded@Base 1.0-2
-+ (arch=musl-any-any)libunistring_glthread_rwlock_unlock_multithreaded@Base 1.0-2
-+ (arch=musl-any-any)libunistring_glthread_rwlock_wrlock_multithreaded@Base 1.0-2
-  libunistring_hard_locale@Base 0.9.7
-  libunistring_iconveh_close@Base 0.9.7
-  libunistring_iconveh_open@Base 0.9.7
-EOF
 }
 
 add_automatic libusb
