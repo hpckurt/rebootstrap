@@ -3775,6 +3775,12 @@ if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
+cross_build brotli nopython brotli_1
+mark_built brotli
+# needed by curl, freetype
+
+automatically_cross_build_packages
+
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built libselinux
 assert_built "ncurses zlib"
 cross_build util-linux "stage1 pkg.util-linux.noverity" util-linux_1
@@ -3918,12 +3924,6 @@ dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "audit libcap-ng li
 assert_built "ncurses zlib"
 cross_build util-linux "pkg.util-linux.noverity"
 # essential
-
-automatically_cross_build_packages
-
-cross_build brotli nopython brotli_1
-mark_built brotli
-# needed by curl
 
 automatically_cross_build_packages
 
