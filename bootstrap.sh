@@ -769,14 +769,50 @@ patch_e2fsprogs() {
  Rules-Requires-Root: no
  Standards-Version: 4.7.0
  Homepage: http://e2fsprogs.sourceforge.net
+--- a/configure
++++ b/configure
+@@ -13745,6 +13745,9 @@ then
+ 	try_libarchive=""
+ 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Disabling libarchive support" >&5
+ printf "%s\n" "Disabling libarchive support" >&6; }
++
++printf "%s\n" "#define CONFIG_DISABLE_LIBARCHIVE 1" >>confdefs.h
++
+ elif test "$withval" = "direct"
+ then
+ 	try_libarchive="direct"
+--- a/configure.ac
++++ b/configure.ac
+@@ -1307,6 +1307,8 @@ AS_HELP_STRING([--without-libarchive],[disable use of libarchive]),
+ then
+ 	try_libarchive=""
+ 	AC_MSG_RESULT([Disabling libarchive support])
++	AC_DEFINE(CONFIG_DISABLE_LIBARCHIVE, 1,
++		[Define to 1 to completely disable libarchive])
+ elif test "$withval" = "direct"
+ then
+ 	try_libarchive="direct"
+--- a/lib/config.h.in
++++ b/lib/config.h.in
+@@ -12,6 +12,9 @@
+ /* Define to 1 for features for use by ext4 developers */
+ #undef CONFIG_DEVELOPER_FEATURES
+
++/* Define to 1 to completely disable libarchive */
++#undef CONFIG_DISABLE_LIBARCHIVE
++
+ /* Define to 1 if using dlopen to access libarchive */
+ #undef CONFIG_DLOPEN_LIBARCHIVE
+
 --- a/misc/create_inode_libarchive.c
 +++ b/misc/create_inode_libarchive.c
-@@ -18,15 +18,23 @@
+@@ -18,15 +18,25 @@
  #include "create_inode_libarchive.h"
  #include "support/nls-enable.h"
 
 -#ifdef HAVE_ARCHIVE_H
--
++#ifndef CONFIG_DISABLE_LIBARCHIVE
+
  /* 64KiB is the minimum blksize to best minimize system call overhead. */
  //#define COPY_FILE_BUFLEN 65536
  //#define COPY_FILE_BUFLEN 1048576
@@ -796,34 +832,7 @@ patch_e2fsprogs() {
 +
  #include <libgen.h>
  #include <locale.h>
-
-@@ -541,7 +549,6 @@ static errcode_t handle_entry(ext2_filsy
- 	}
- 	return 0;
- }
--#endif
-
- errcode_t __populate_fs_from_tar(ext2_filsys fs, ext2_ino_t root_ino,
- 				 const char *source_tar, ext2_ino_t root,
-@@ -549,12 +556,6 @@ errcode_t __populate_fs_from_tar(ext2_fi
- 				 struct file_info *target,
- 				 struct fs_ops_callbacks *fs_callbacks)
- {
--#ifndef HAVE_ARCHIVE_H
--	com_err(__func__, 0,
--		_("you need to compile e2fsprogs with libarchive to "
--		  "be able to process tarballs"));
--	return 1;
--#else
- 	char *path2, *path3, *dir, *name;
- 	unsigned int dir_exists;
- 	struct archive *a;
-@@ -700,5 +701,4 @@ out:
- 	uselocale(old_locale);
- 	freelocale(archive_locale);
- 	return retval;
--#endif
- }
+ 
 EOF
 }
 
