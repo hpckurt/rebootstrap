@@ -2944,10 +2944,6 @@ buildenv_nss() {
 buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
 	export ac_cv_func_memcmp_working=yes
-	if test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_BITS)" = 32; then
-		echo "work around 32bit FTBFS #1078822"
-		export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -Wno-incompatible-pointer-types"
-	fi
 }
 
 add_automatic openssl
