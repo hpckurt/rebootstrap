@@ -3388,8 +3388,8 @@ if test -f "$REPODIR/stamps/gnumach_1"; then
 	echo "skipping rebuild of gnumach stage1"
 else
 	cross_build_setup gnumach gnumach_1
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pstage1 ./
-	drop_privs dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage1 -uc -us
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -Pstage1,nocheck ./
+	drop_privs dpkg-buildpackage -B "-a$HOST_ARCH" -Pstage1,nocheck -uc -us
 	cd ..
 	pickup_packages ./*.deb
 	touch "$REPODIR/stamps/gnumach_1"
