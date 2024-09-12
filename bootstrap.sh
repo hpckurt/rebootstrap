@@ -3537,7 +3537,6 @@ for pkg in $(discover_essential); do
 done
 add_need acl # by coreutils, systemd
 add_need apt # almost essential
-add_need attr # by coreutils, libcap-ng
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by perl
