@@ -3796,7 +3796,7 @@ fi
 
 
 assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
-if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]${HOST_ARCH}[] ]" debian/control; then
+if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
 	assert_built libseccomp
 fi
 cross_build systemd stage1 systemd_1
