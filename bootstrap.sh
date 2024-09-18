@@ -215,6 +215,9 @@ obtain_source_package() {
 		gcc-[0-9]*)
 			test -n "$(apt-cache showsrc "$1")" || use_experimental=yes
 		;;
+		glib2.0)
+			use_experimental=yes
+		;;
 	esac
 	if test "$use_experimental" = yes; then
 		echo "deb-src $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
@@ -2437,7 +2440,6 @@ buildenv_gdbm() {
 	fi
 }
 
-add_automatic glib2.0
 patch_glib2_0() {
 	dpkg-architecture "-a$HOST_ARCH" -ix32-any-any-any || return 0
 	# https://github.com/mesonbuild/meson/issues/9845
@@ -3858,6 +3860,14 @@ automatically_cross_build_packages
 cross_build e2fsprogs
 mark_built e2fsprogs
 # needed by krb5
+
+automatically_cross_build_packages
+
+assert_built "elfutils libffi"
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "util-linux libselinux"
+cross_build glib2.0 "nogir pkg.glib2.0.nosysprof" glib2.0_1
+mark_built glib2.0
+# needed by libverto
 
 automatically_cross_build_packages
 
