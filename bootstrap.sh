@@ -3863,6 +3863,12 @@ mark_built e2fsprogs
 
 automatically_cross_build_packages
 
+cross_build libxt
+mark_built libxt
+# temporarily manual for #1078927
+
+automatically_cross_build_packages
+
 assert_built "elfutils libffi"
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "util-linux libselinux"
 cross_build glib2.0 "nogir pkg.glib2.0.nosysprof" glib2.0_1
