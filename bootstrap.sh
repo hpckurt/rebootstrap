@@ -2639,7 +2639,7 @@ patch_libbsd() {
  usr/lib/*/pkgconfig/*.pc
 --- a/debian/rules
 +++ b/debian/rules
-@@ -6,8 +6,15 @@
+@@ -6,6 +6,8 @@
  export DEB_BUILD_MAINT_OPTIONS = hardening=+all
  export DEB_CFLAGS_MAINT_PREPEND = -Wall
 
@@ -2647,6 +2647,8 @@ patch_libbsd() {
 +
  %:
  	dh $@
+
+@@ -14,3 +16,8 @@
 
  override_dh_installchangelogs:
  	dh_installchangelogs --no-trim
