@@ -2859,7 +2859,7 @@ EOF
 	drop_privs tee debian/changelog.new >/dev/null
 	drop_privs mv debian/changelog.new debian/changelog
 	case "$HOST_ARCH" in
-		arc|csky|nios2)
+		arc|csky|nios2|sparc)
 			kernel_arch=$HOST_ARCH
 		;;
 		loong64) kernel_arch=loongarch ;;
