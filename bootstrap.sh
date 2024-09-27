@@ -2769,35 +2769,6 @@ buildenv_libxext() {
 	export xorg_cv_malloc0_returns_null=no
 }
 
-patch_libxml2() {
-	echo "fix nopython FTBFS #1078673"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -16,7 +16,7 @@
-  libpython3-all-dev <!nopython>,
-  pkgconf,
-  python3-all-dev:any (>= 3.5) <!nopython>,
-- python3-setuptools,
-+ python3-setuptools <!nopython>,
-  rename,
-  zlib1g-dev | libz-dev,
- Standards-Version: 4.6.2
---- a/debian/rules
-+++ b/debian/rules
-@@ -68,7 +68,9 @@
-
- override_dh_auto_install-arch: $(TARGETS:%=doinstall-%)
- 	find debian/tmp -name *.la -delete
-+ifneq ($(PY3VERS),)
- 	rm -r debian/tmp/usr/lib/python*/site-packages/__pycache__
-+endif
-
- doinstall-python%:
- 	dh_auto_install --builddirectory=builddir/main/python$(*)
-EOF
-}
-
 add_automatic libxmu
 add_automatic libxpm
 
