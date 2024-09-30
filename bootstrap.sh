@@ -739,6 +739,30 @@ builddep_build_essential() {
 
 add_automatic bzip2
 add_automatic c-ares
+
+patch_cdebconf() {
+	echo "removing libglib2.0-dev depencency #1078936"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -9,12 +9,13 @@
+  libtextwrap-dev,
+  libreadline-dev (>= 8.1.2-1.1),
+  libdebian-installer4-dev | libdebian-installer-dev,
+- libglib2.0-dev,
++ libglib2.0-dev <!pkg.cdebconf.nogtk>,
+  libgtk2.0-dev <!pkg.cdebconf.nogtk>,
+  libcairo2-dev <!pkg.cdebconf.nogtk>,
+  libselinux1-dev [linux-any] | libselinux-dev [linux-any],
+  dh-autoreconf,
+  dh-exec,
++ pkgconf,
+ Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
+ Uploaders:
+  Colin Watson <cjwatson@debian.org>,
+EOF
+}
+
 add_automatic coreutils
 add_automatic curl
 add_automatic dash
