@@ -2861,6 +2861,7 @@ EOF
 		powerpcel) kernel_arch=powerpc; ;;
 		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
 		riscv32) kernel_arch=riscv; ;;
+		sh3) kernel_arch=sh; ;;
 		*-linux-*)
 			apt_get_install python3-toml
 			kernel_arch=$(drop_privs python3 -c "print(next(d['name'] for d in __import__('toml.decoder').load(open('debian/config/defines.toml'))['kernelarch'] if any(e['name'] == '${HOST_ARCH#*-linux-}' for e in d['debianarch'])))")
