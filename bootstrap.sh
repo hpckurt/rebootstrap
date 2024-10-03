@@ -3716,6 +3716,7 @@ add_need groff # for man-db
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need kmod # by systemd
 add_need icu # by libxml2
 add_need isl # by gcc-VER
+add_need jansson # by binutils
 add_need krb5 # by audit
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
