@@ -4062,9 +4062,9 @@ if test -f "$REPODIR/stamps/binutils_2"; then
 	echo "skipping cross rebuild of binutils"
 else
 	cross_build_setup binutils binutils_2
-	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck ./
+	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck,pkg.binutils.nojava ./
 	check_binNMU
-	DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult" drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck -B -uc -us
+	DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult" drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck,pkg.binutils.nojava -B -uc -us
 	rm -Rf /tmp/nodebugedit
 	cd ..
 	ls -l
