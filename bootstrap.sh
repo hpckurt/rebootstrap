@@ -2648,42 +2648,7 @@ buildenv_krb5() {
 
 add_automatic libassuan
 add_automatic libatomic-ops
-
 add_automatic libbsd
-patch_libbsd() {
-	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
-	echo "fix musl FTBFS #1032159"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/libbsd-dev.install
-+++ b/debian/libbsd-dev.install
-@@ -1,4 +1,3 @@
--usr/lib/*/libbsd-ctor.a
- usr/lib/*/libbsd.a
- usr/lib/*/libbsd.so
- usr/lib/*/pkgconfig/*.pc
---- a/debian/rules
-+++ b/debian/rules
-@@ -6,6 +6,8 @@
- export DEB_BUILD_MAINT_OPTIONS = hardening=+all
- export DEB_CFLAGS_MAINT_PREPEND = -Wall
-
-+include /usr/share/dpkg/architecture.mk
-+
- %:
- 	dh $@
-
-@@ -14,3 +16,8 @@
-
- override_dh_installchangelogs:
- 	dh_installchangelogs --no-trim
-+
-+ifneq ($(DEB_HOST_ARCH_LIBC),musl)
-+execute_after_dh_install:
-+	dh_install -plibbsd-dev usr/lib/*/libbsd-ctor.a
-+endif
-EOF
-}
-
 add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
