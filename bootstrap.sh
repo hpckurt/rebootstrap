@@ -2824,6 +2824,7 @@ EOF
 			kernel_arch=$HOST_ARCH
 		;;
 		loong64) kernel_arch=loongarch ;;
+		mipsr6el) kernel_arch=mips; ;;
 		powerpcel) kernel_arch=powerpc; ;;
 		# https://salsa.debian.org/kernel-team/linux/-/merge_requests/703/diffs
 		riscv32) kernel_arch=riscv; ;;
