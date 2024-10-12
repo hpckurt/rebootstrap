@@ -778,7 +778,6 @@ buildenv_diffutils() {
 
 add_automatic dpkg
 
-add_automatic e2fsprogs
 patch_e2fsprogs() {
 	echo "fix libarchive loop #1078693"
 	drop_privs patch -p1 <<'EOF'
