@@ -3311,6 +3311,16 @@ else
 		cd ..
 		drop_privs rm -Rf linux
 	fi
+	if test "$ENABLE_MULTIARCH_GCC" = no; then
+		cd /tmp/buildd
+		drop_privs mkdir linux
+		cd linux
+		drop_privs apt-get download linux-libc-dev
+		drop_privs dpkg-cross -a "$HOST_ARCH" -M -b ./linux-libc-dev_*_all.deb
+		pickup_additional_packages ./linux-libc-dev-*-cross_*_all.deb
+		cd ..
+		drop_privs rm -Rf linux
+	fi
 	touch "$REPODIR/stamps/linux_1"
 	progress_mark "linux-libc-dev build"
 fi
@@ -3458,6 +3468,7 @@ else
 				drop_privs dpkg-cross -M -a "$HOST_ARCH" -X tzdata -X libc-bin -X libc-dev-bin -X multiarch-support -b "$pkg"
 			done
 			pickup_packages *.changes ./*-cross_*.deb
+			apt_get_install "linux-libc-dev-$HOST_ARCH-cross"
 			dpkg -i libc[0-9]*-cross_*.deb
 		fi
 	fi
