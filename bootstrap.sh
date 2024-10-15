@@ -2451,6 +2451,10 @@ patch_gcc_14() {
 	patch_gcc_default_pie_everywhere
 	patch_gcc_wdotap
 }
+buildenv_gcc_14() {
+	echo "ignoring symbol differences #1085155"
+	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+}
 
 add_automatic gdbm
 buildenv_gdbm() {
