@@ -341,6 +341,12 @@ if test "$HOST_ARCH" = nios2; then
 	sed -i -e 's/\*os2\*/*-os2*/' /usr/share/libtool/build-aux/ltmain.sh
 fi
 
+if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+	echo "disabling symbol checking for musl architectures for all builds, as the musl linker does no support symbol versioning"
+	# https://wiki.musl-libc.org/functional-differences-from-glibc.html#Symbol-versioning
+	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+fi
+
 # removing libc*-dev conflict with each other
 LIBC_DEV_PKG=$(apt-cache showpkg libc-dev | sed '1,/^Reverse Provides:/d;s/ .*//;q')
 if test "$(apt-cache show "$LIBC_DEV_PKG" | sed -n 's/^Source: //;T;p;q')" = glibc; then
@@ -2659,10 +2665,6 @@ add_automatic libffi
 
 add_automatic libgc
 buildenv_libgc() {
-	if dpkg-architecture "-a$1" -imusl-linux-any; then
-		echo "ignoring symbol differences for musl for now"
-		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
-	fi
 	if test "$1" = arc; then
 		echo "ignoring symbol differences for arc #994211"
 		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
@@ -2730,8 +2732,6 @@ buildenv_libunistring() {
 		echo "setting malloc/realloc do not return 0"
 		export ac_cv_func_malloc_0_nonnull=yes
 		export ac_cv_func_realloc_0_nonnull=yes
-		echo "ignoring symbol errors due to pending symbol update for musl #1022846"
-		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 	fi
 }
 
@@ -3168,14 +3168,7 @@ buildenv_util_linux() {
 
 add_automatic xft
 add_automatic xxhash
-
 add_automatic xz-utils
-buildenv_xz_utils() {
-	if dpkg-architecture "-a$1" -imusl-linux-any; then
-		echo "ignoring symbol differences for musl for now"
-		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
-	fi
-}
 
 builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
