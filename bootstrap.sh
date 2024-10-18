@@ -335,12 +335,6 @@ path-exclude=/usr/share/doc/*/changelog.gz
 path-exclude=/usr/share/doc/*/NEWS.Debian.gz
 EOF
 
-if test "$HOST_ARCH" = nios2; then
-	echo "fixing libtool's nios2 misdetection as os2 #851253"
-	apt_get_install libtool
-	sed -i -e 's/\*os2\*/*-os2*/' /usr/share/libtool/build-aux/ltmain.sh
-fi
-
 if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
 	echo "disabling symbol checking for musl architectures for all builds, as the musl linker does no support symbol versioning"
 	# https://wiki.musl-libc.org/functional-differences-from-glibc.html#Symbol-versioning
@@ -725,7 +719,7 @@ EOF
 	fi
 	echo "fix honouring of nocheck option #990794"
 	drop_privs sed -i -e 's/ifeq (\(,$(filter $(DEB_HOST_ARCH),\)/ifneq ($(DEB_BUILD_ARCH)\1/' debian/rules
-	case "$HOST_ARCH" in nios2|sparc)
+	case "$HOST_ARCH" in sparc)
 		echo "enabling uncommon architectures in debian/control"
 		drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
 		drop_privs ./debian/rules ./stamps/control
@@ -2821,7 +2815,7 @@ EOF
 	drop_privs tee debian/changelog.new >/dev/null
 	drop_privs mv debian/changelog.new debian/changelog
 	case "$HOST_ARCH" in
-		arc|csky|nios2|sparc)
+		arc|csky|sparc)
 			kernel_arch=$HOST_ARCH
 		;;
 		loong64) kernel_arch=loongarch ;;
