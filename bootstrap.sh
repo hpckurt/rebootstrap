@@ -2690,6 +2690,10 @@ buildenv_libprelude() {
 		echo "glibc does not return NULL for malloc(0)"
 		export ac_cv_func_malloc_0_nonnull=yes
 	fi
+	if test "$(dpkg-architecture "-a$1" -qDEB_HOST_ARCH_BITS)" = 32; then
+		echo "ignoring symbol differences on 32bit architectures due to #1085492"
+		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+	fi
 }
 
 add_automatic libpsl
