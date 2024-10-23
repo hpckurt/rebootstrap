@@ -3035,23 +3035,6 @@ add_automatic nspr
 
 add_automatic nss
 patch_nss() {
-	if dpkg-architecture "-a$HOST_ARCH" -iany-ppc64el; then
-		echo "fix FTCBFS for ppc64el #948523"
-		drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -40,7 +40,8 @@
- ifeq ($(origin RANLIB),default)
- TOOLCHAIN += RANLIB=$(DEB_HOST_GNU_TYPE)-ranlib
- endif
--TOOLCHAIN += OS_TEST=$(DEB_HOST_GNU_CPU)
-+OS_TYPE_map_powerpc64le = ppc64le
-+TOOLCHAIN += OS_TEST=$(or $(OS_TYPE_map_$(DEB_HOST_GNU_CPU)),$(DEB_HOST_GNU_CPU))
- TOOLCHAIN += KERNEL=$(DEB_HOST_ARCH_OS)
- endif
-
-EOF
-	fi
 	echo "support building without -Werror #1036211"
 	drop_privs patch -p1 <<'EOF'
 --- a/debian/rules
