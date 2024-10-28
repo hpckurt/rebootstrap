@@ -2992,6 +2992,11 @@ patch_newt() {
  override_dh_auto_build:
 EOF
 }
+buildenv_newt() {
+	test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_BITS)" = 32 || return 0
+	echo "work around 32bit signed char FTBFS #1086133"
+	export DEB_CFLAGS_APPEND=-Wno-error=incompatible-pointer-types
+}
 
 add_automatic nghttp2
 add_automatic npth
