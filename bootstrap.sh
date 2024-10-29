@@ -694,7 +694,54 @@ EOF
 }
 
 add_automatic blt
+
 add_automatic bsdmainutils
+patch_bsdmainutils() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "there is no sys/cdefs.h on musl #1086236"
+	drop_privs patch -p1 <<'EOF'
+--- /dev/null
++++ b/debian/patches/musl.patch
+@@ -0,0 +1,30 @@
++--- a/usr.bin/ncal/calendar.c
+++++ b/usr.bin/ncal/calendar.c
++@@ -26,7 +26,6 @@
++  * SUCH DAMAGE.
++  */
++
++-#include <sys/cdefs.h>
++ #include <langinfo.h>
++ __FBSDID("$FreeBSD: head/lib/libcalendar/calendar.c 326219 2017-11-26 02:00:33Z pfg $");
++
++--- bsdmainutils-12.1.8.orig/usr.bin/ncal/easter.c
+++++ bsdmainutils-12.1.8/usr.bin/ncal/easter.c
++@@ -26,7 +26,6 @@
++  * SUCH DAMAGE.
++  */
++
++-#include <sys/cdefs.h>
++ __FBSDID("$FreeBSD: head/lib/libcalendar/easter.c 326219 2017-11-26 02:00:33Z pfg $");
++
++ #include "calendar.h"
++--- bsdmainutils-12.1.8.orig/usr.bin/ncal/ncal.c
+++++ bsdmainutils-12.1.8/usr.bin/ncal/ncal.c
++@@ -26,7 +26,6 @@
++  * SUCH DAMAGE.
++  */
++
++-#include <sys/cdefs.h>
++ __FBSDID("$FreeBSD: head/usr.bin/ncal/ncal.c 359419 2020-03-29 04:18:27Z grog $");
++
++ #include "calendar.h"
+--- a/debian/patches/series
++++ b/debian/patches/series
+@@ -17,3 +17,4 @@
+ fix-big-1stweek.patch
+ cal_highlight.diff
+ ncal_input.diff
++musl.patch
+EOF
+}
 
 builddep_build_essential() {
 	# g++ dependency needs cross translation
