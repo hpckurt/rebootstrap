@@ -2736,6 +2736,28 @@ buildenv_libprelude() {
 
 add_automatic libpsl
 add_automatic libpthread-stubs
+
+patch_libselinux() {
+	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
+	echo "fix largefile access #1087016"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -28,6 +28,11 @@
+
+ BUILT_USING=$(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W "libsepol-dev")
+
++ifeq ($(DEB_HOST_ARCH_BITS),32)
++# Use of lstat64 requires this macro.
++export DEB_CPPFLAGS_MAINT_APPEND += -D_LARGEFILE64_SOURCE
++endif
++
+ # Upstream recommends using this flag
+ export DEB_CFLAGS_MAINT_APPEND = -fno-semantic-interposition
+ ## The build system doesn't use CPPFLAGS, pass them to CFLAGS to enable the
+EOF
+}
+
 add_automatic libsepol
 add_automatic libsm
 add_automatic libsodium
