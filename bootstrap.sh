@@ -2714,10 +2714,6 @@ patch_libpng1_6() {
  	dh_auto_test
 EOF
 }
-buildenv_libpng1_6() {
-	echo "patching cmake to recognize musl as non-gnu #1085507"
-	sed -i -e s/gnu// /usr/share/cmake-*/Modules/Platform/Linux-Initialize.cmake
-}
 
 patch_libprelude() {
 	echo "fix FTCBFS #1057733"
