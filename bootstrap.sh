@@ -939,61 +939,7 @@ patch_gcc_limits_h_test() {
  	  chmod a+rx $${include_dir} || true; \
  	  $(SHELL) $(srcdir)/../move-if-change \
 EOF
-	if test "$GCC_VER" -le 12; then
-		drop_privs sed -i -e 's/include_dir=include/fix_dir=include-fixed/' -e 's/{include_dir}/{fix_dir}/' debian/patches/limits-h-test.diff
-	fi
 	echo "debian_patches += limits-h-test" | drop_privs tee -a debian/rules.patch >/dev/null
-}
-patch_gcc_unapplicable_ada() {
-	echo "fix patch application failure #993205"
-	drop_privs sed -i -e /ada-armel-libatomic/d debian/rules.patch
-}
-patch_gcc_crypt_h() {
-	echo "fix libsanitizer failing to find crypt.h #1014375"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules2
-+++ b/debian/rules2
-@@ -1251,6 +1251,13 @@
- 	  mkdir -p $(builddir)/sys-include; \
- 	  ln -sf /usr/include/$(DEB_TARGET_MULTIARCH)/asm $(builddir)/sys-include/asm; \
- 	fi
-+	: # Fall back to the host crypt.h when target is unavailable as the sizeof(struct crypt_data) is unlikely to change, needed by libsanitizer.
-+	if [ ! -f /usr/include/crypt.h ] && \
-+		[ ! -f /usr/include/$(DEB_TARGET_MULTIARCH)/crypt.h ] && \
-+		[ -f /usr/include/$(DEB_HOST_MULTIARCH)/crypt.h ]; then \
-+	  mkdir -p $(builddir)/sys-include; \
-+	  ln -sf /usr/include/$(DEB_HOST_MULTIARCH)/crypt.h $(builddir)/sys-include/crypt.h; \
-+	fi
-
- 	touch $(configure_stamp)
-
-EOF
-}
-patch_gcc_has_include_next() {
-	echo "fix __has_include_next https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80755"
-	drop_privs tee debian/patches/has_include_next.diff >/dev/null <<EOF
---- a/src/libcpp/files.cc
-+++ b/src/libcpp/files.cc
-@@ -1042,7 +1042,7 @@
-      path use the normal search logic.  */
-   if (type == IT_INCLUDE_NEXT && file->dir
-       && file->dir != &pfile->no_search_path)
--    dir = file->dir->next;
-+    return file->dir->next;
-   else if (angle_brackets)
-     dir = pfile->bracket_include;
-   else if (type == IT_CMDLINE)
-@@ -2145,6 +2145,8 @@
- 		 enum include_type type)
- {
-   cpp_dir *start_dir = search_path_head (pfile, fname, angle_brackets, type);
-+  if (!start_dir)
-+    return false;
-   _cpp_file *file = _cpp_find_file (pfile, fname, start_dir, angle_brackets,
- 				    _cpp_FFK_HAS_INCLUDE, 0);
-   return file->err_no != ENOENT;
-EOF
-	echo "debian_patches += has_include_next" | drop_privs tee -a debian/rules.patch >/dev/null
 }
 patch_gcc_for_host_in_rtlibs() {
 	echo "moving -for-host packages to rlibs build #1069065"
@@ -2437,15 +2383,6 @@ patch_gcc_wdotap() {
  	set -x; \
 EOF
 	fi
-}
-patch_gcc_12() {
-	patch_gcc_limits_h_test
-	patch_gcc_default_pie_everywhere
-	patch_gcc_unapplicable_ada
-	patch_gcc_crypt_h
-	patch_gcc_has_include_next
-	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
-	patch_gcc_wdotap
 }
 patch_gcc_13() {
 	patch_gcc_limits_h_test
