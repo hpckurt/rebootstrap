@@ -2384,15 +2384,6 @@ patch_gcc_wdotap() {
 EOF
 	fi
 }
-patch_gcc_13() {
-	patch_gcc_limits_h_test
-	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
-	patch_gcc_wdotap
-}
-buildenv_gcc_13() {
-	# gcc-13 no longer builds libraries and no longer maintains symbol files
-	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
-}
 patch_gcc_14() {
 	patch_gcc_limits_h_test
 	patch_gcc_for_host_in_rtlibs
