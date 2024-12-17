@@ -2559,11 +2559,6 @@ add_automatic grep
 add_automatic groff
 
 add_automatic gzip
-patch_gzip() {
-	test "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_BITS)" = 32 || return 0
-	echo "fixing time_t ftcbfs #1009893"
-	drop_privs sed -i -e '/CONFIGURE_ARGS.*--host/s/$/ --build=${DEB_BUILD_GNU_TYPE}/' debian/rules
-}
 buildenv_gzip() {
 	dpkg-architecture "-a$1" -imusl-linux-any || return 0
 	# this avoids replacing fseeko with a variant that is broken
