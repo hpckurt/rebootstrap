@@ -788,88 +788,7 @@ buildenv_diffutils() {
 }
 
 add_automatic dpkg
-
-patch_e2fsprogs() {
-	echo "fix libarchive loop #1078693"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -2,7 +2,7 @@
- Section: admin
- Priority: required
- Maintainer: Theodore Y. Ts'o <tytso@mit.edu>
--Build-Depends: dpkg-dev (>= 1.22.5), gettext, texinfo, pkgconf, libarchive-dev, libfuse3-dev [linux-any kfreebsd-any] <!pkg.e2fsprogs.no-fuse2fs>, debhelper-compat (= 12), dh-exec, libblkid-dev, uuid-dev, m4, udev [linux-any], systemd [linux-any], systemd-dev [linux-any], cron [linux-any], dh-sequence-movetousr
-+Build-Depends: dpkg-dev (>= 1.22.5), gettext, texinfo, pkgconf, libarchive-dev <!nocheck>, libfuse3-dev [linux-any kfreebsd-any] <!pkg.e2fsprogs.no-fuse2fs>, debhelper-compat (= 12), dh-exec, libblkid-dev, uuid-dev, m4, udev [linux-any], systemd [linux-any], systemd-dev [linux-any], cron [linux-any], dh-sequence-movetousr
- Rules-Requires-Root: no
- Standards-Version: 4.7.0
- Homepage: http://e2fsprogs.sourceforge.net
---- a/configure
-+++ b/configure
-@@ -13745,6 +13745,9 @@ then
- 	try_libarchive=""
- 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: Disabling libarchive support" >&5
- printf "%s\n" "Disabling libarchive support" >&6; }
-+
-+printf "%s\n" "#define CONFIG_DISABLE_LIBARCHIVE 1" >>confdefs.h
-+
- elif test "$withval" = "direct"
- then
- 	try_libarchive="direct"
---- a/configure.ac
-+++ b/configure.ac
-@@ -1307,6 +1307,8 @@ AS_HELP_STRING([--without-libarchive],[disable use of libarchive]),
- then
- 	try_libarchive=""
- 	AC_MSG_RESULT([Disabling libarchive support])
-+	AC_DEFINE(CONFIG_DISABLE_LIBARCHIVE, 1,
-+		[Define to 1 to completely disable libarchive])
- elif test "$withval" = "direct"
- then
- 	try_libarchive="direct"
---- a/lib/config.h.in
-+++ b/lib/config.h.in
-@@ -12,6 +12,9 @@
- /* Define to 1 for features for use by ext4 developers */
- #undef CONFIG_DEVELOPER_FEATURES
-
-+/* Define to 1 to completely disable libarchive */
-+#undef CONFIG_DISABLE_LIBARCHIVE
-+
- /* Define to 1 if using dlopen to access libarchive */
- #undef CONFIG_DLOPEN_LIBARCHIVE
-
---- a/misc/create_inode_libarchive.c
-+++ b/misc/create_inode_libarchive.c
-@@ -18,15 +18,25 @@
- #include "create_inode_libarchive.h"
- #include "support/nls-enable.h"
-
--#ifdef HAVE_ARCHIVE_H
-+#ifndef CONFIG_DISABLE_LIBARCHIVE
-
- /* 64KiB is the minimum blksize to best minimize system call overhead. */
- //#define COPY_FILE_BUFLEN 65536
- //#define COPY_FILE_BUFLEN 1048576
- #define COPY_FILE_BUFLEN 16777216
-
-+#ifdef HAVE_ARCHIVE_H
- #include <archive.h>
- #include <archive_entry.h>
-+#else
-+struct archive;
-+struct archive_entry;
-+#define	ARCHIVE_EOF	  1	/* Found end of archive. */
-+#define	ARCHIVE_OK	  0	/* Operation was successful. */
-+#include <unistd.h>  /* ssize_t */
-+typedef ssize_t la_ssize_t;
-+#endif
-+
- #include <libgen.h>
- #include <locale.h>
- 
-EOF
-}
-
+add_automatic e2fsprogs
 add_automatic expat
 add_automatic file
 add_automatic findutils
@@ -3505,7 +3424,6 @@ add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by pam
 add_need fribidi # by newt
-dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need fuse3 # by e2fsprogs
 add_need gdbm # by perl, python3.X
 add_need gnupg2 # for apt
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need gpm # by ncurses
@@ -3540,7 +3458,6 @@ add_need openssl # by cyrus-sasl2
 add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
-add_need pkgconf # by e2fsprogs
 add_need popt # by newt
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python3.X
@@ -3784,14 +3701,6 @@ assert_built "zlib bzip2 xz-utils"
 cross_build elfutils pkg.elfutils.nodebuginfod
 mark_built elfutils
 # needed by glib2.0
-
-automatically_cross_build_packages
-
-# It's automatic, but it cannot solve the loop with libarchive-dev.
-# The loop is solved via patch_e2fsprogs.
-cross_build e2fsprogs
-mark_built e2fsprogs
-# needed by krb5
 
 automatically_cross_build_packages
 
