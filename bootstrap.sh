@@ -2531,30 +2531,7 @@ add_automatic libmd
 add_automatic libnsl
 add_automatic libonig
 add_automatic libpipeline
-
 add_automatic libpng1.6
-patch_libpng1_6() {
-	dpkg-architecture "-a$HOST_ARCH" -iany-powerpc || dpkg-architecture "-a$HOST_ARCH" -iany-ppc64 || return 0
-	echo "disabling altivec/vsx on powerpc/ppc #1086389"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -14,6 +14,13 @@
-
- include /usr/share/dpkg/architecture.mk
-
-+ifneq (,$(filter $(DEB_HOST_ARCH_CPU),powerpc ppc64))
-+# VSX is an extension of AltiVec, which is not part of the baseline.
-+# see https://wiki.debian.org/ArchitectureSpecificsMemo
-+override_dh_auto_configure:
-+	dh_auto_configure -- -DPNG_POWERPC_VSX=off
-+endif
-+
- override_dh_auto_test:
- ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
- 	dh_auto_test
-EOF
-}
 
 patch_libprelude() {
 	echo "fix FTCBFS #1057733"
