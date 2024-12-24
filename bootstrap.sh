@@ -2447,12 +2447,6 @@ buildenv_glibc() {
 }
 
 add_automatic gmp
-
-builddep_gnu_efi() {
-	# binutils dependency needs cross translation
-	apt_get_install debhelper
-}
-
 add_automatic gnupg2
 
 add_automatic gpm
@@ -3619,14 +3613,6 @@ mark_built openldap
 # needed by curl
 
 automatically_cross_build_packages
-
-if apt-cache showsrc systemd | grep -q "^Build-Depends:.*gnu-efi[^,]*[[ ]${HOST_ARCH}[] ]"; then
-cross_build gnu-efi
-mark_built gnu-efi
-# needed by systemd
-
-automatically_cross_build_packages
-fi
 
 if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]${HOST_ARCH}[] ]"; then
