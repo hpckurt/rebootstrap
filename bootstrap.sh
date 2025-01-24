@@ -2870,7 +2870,25 @@ buildenv_util_linux() {
 }
 
 add_automatic xft
+
 add_automatic xxhash
+patch_xxhash() {
+	echo "fix FTCBFS #1094015"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -4,6 +4,8 @@
+ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+ include /usr/share/dpkg/architecture.mk
++include /usr/share/dpkg/buildtools.mk
++export CC  # used in make install
+
+ ifneq (,$(filter $(DEB_HOST_ARCH_CPU),i386 amd64))
+ 	export LIBXXH_DISPATCH=1
+EOF
+}
+
 add_automatic xz-utils
 
 builddep_zlib() {
