@@ -2830,7 +2830,12 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
 add_automatic sysvinit
+patch_sysvinit() {
+	echo "missing Build-Depends: libcrypt-dev #1094247"
+	drop_privs sed -i -e '/^Build-Depends:/s/$/ libcrypt-dev,/' debian/control
+}
 
 add_automatic tar
 buildenv_tar() {
