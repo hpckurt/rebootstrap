@@ -694,22 +694,6 @@ EOF
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
 	;; esac
-	echo "fix targeted cross binutils #1093841"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -468,8 +468,9 @@
-
- stamps/control: debian/control.in debian/control.cross.in
- ifneq (,$(TARGET))
--	sed -n -e 's/@dpkg_dev@/$(DPKG_DEV)/;/^Package: binutils-for-build$$/q;p' \
-+	sed -n -e 's/@dpkg_dev@/$(DPKG_DEV)/' \
- 	    -e 's/@gold_archs@/$(gold_targets)/' \
-+	    -e '/^Package: binutils-for-build$$/q;p' \
- 		< debian/control.in > debian/control
- 	sed -e "s/@target@/$(subst _,-,$(DEB_TARGET_GNU_TYPE))/g" \
- 		-e "s/@host_archs@/any/" \
-EOF
 }
 
 add_automatic blt
