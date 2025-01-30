@@ -2844,12 +2844,7 @@ buildenv_tcl8_6() {
 }
 
 add_automatic tcltk-defaults
-
 add_automatic tcp-wrappers
-patch_tcp_wrappers() {
-	echo "work around FTBFS #1091028"
-	drop_privs sed -i -e 's/dh_auto_build /&--no-parallel /' debian/rules
-}
 
 add_automatic tk8.6
 buildenv_tk8_6() {
