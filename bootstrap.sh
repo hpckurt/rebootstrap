@@ -2767,6 +2767,11 @@ buildenv_openldap() {
 add_automatic openssl
 add_automatic p11-kit
 
+builddep_pam() {
+	echo "work around #1094853"
+	apt_get_purge bison
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
 patch_pam() {
 	echo "fix FTCBFS #1057729"
 	drop_privs quilt pop -a
