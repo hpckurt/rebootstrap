@@ -2765,7 +2765,7 @@ buildenv_openldap() {
 }
 patch_openldap() {
 	echo "FTCBFS #1094386"
-	drop_privs sed -i -e 's/AC_PATH_PROGS/AC_PATH_TOOLS/' configure.ac
+	drop_privs sed -i -e 's/AC_CHECK_PROGS/AC_CHECK_TOOLS/' configure.ac
 }
 
 add_automatic openssl
