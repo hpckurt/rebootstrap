@@ -2316,6 +2316,9 @@ buildenv_gcc_14() {
 	echo "ignoring symbol differences #1085155"
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 }
+patch_gcc_15() {
+	patch_gcc_for_host_in_rtlibs
+}
 
 add_automatic gdbm
 buildenv_gdbm() {
