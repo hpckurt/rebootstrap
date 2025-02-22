@@ -646,12 +646,7 @@ add_automatic apt
 add_automatic attr
 add_automatic base-files
 add_automatic base-passwd
-
 add_automatic bash
-patch_bash() {
-	echo "work around FTBFS #1092374"
-	drop_privs sed -i -e '1iRules-Requires-Root: binary-targets' debian/control
-}
 
 patch_binutils() {
 	echo "patching binutils to discard ldscripts"
