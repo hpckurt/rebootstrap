@@ -689,6 +689,20 @@ EOF
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
 	;; esac
+	echo "fix FTCBFS #1098728"
+	drop_privs patch -p1 <<'EOF'
+--- a/gprofng/configure
++++ b/gprofng/configure
+@@ -16787,7 +16787,7 @@
+ # Generate manpages, if possible.
+ build_man=false
+ build_doc=false
+-if test $cross_compiling = no; then
++if :; then
+   for ac_prog in makeinfo
+ do
+   # Extract the first word of "$ac_prog", so it can be a program name with args.
+EOF
 }
 
 add_automatic blt
