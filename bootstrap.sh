@@ -17,7 +17,7 @@ REPODIR=/tmp/repo
 APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o Debug::pkgDepCache::Marker=1 -o Debug::pkgDepCache::AutoInstall=1 -o Acquire::Languages=none"
 DEFAULT_PROFILES="cross nocheck noinsttest noudeb"
 DROP_PRIVS=buildd
-GCC_NOLANG="ada asan brig cobol d gcn go itm java jit hppa64 lsan m2 nvptx objc obj-c++ rust tsan ubsan"
+GCC_NOLANG="ada algol asan brig cobol d gcn go itm java jit hppa64 lsan m2 nvptx objc obj-c++ rust tsan ubsan"
 ENABLE_DIFFOSCOPE=no
 
 if df -t tmpfs /var/cache/apt/archives >/dev/null 2>&1; then
