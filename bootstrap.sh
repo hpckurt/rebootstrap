@@ -2327,6 +2327,7 @@ buildenv_gcc_14() {
 }
 patch_gcc_15() {
 	patch_gcc_for_host_in_rtlibs
+	patch_gcc_wdotap
 }
 
 add_automatic gdbm
