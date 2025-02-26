@@ -804,7 +804,26 @@ add_automatic e2fsprogs
 add_automatic expat
 add_automatic file
 add_automatic findutils
+
 add_automatic flex
+patch_flex() {
+	test "$GCC_VER" -lt 15 && return 0
+	echo "fix FTCBFS with gcc-15 #1098516"
+	drop_privs patch -p1 <<'EOF'
+--- a/lib/malloc.c
++++ b/lib/malloc.c
+@@ -3,7 +3,7 @@
+      
+      #include <sys/types.h>
+      
+-     void *malloc ();
++     void *malloc (size_t);
+      
+      /* Allocate an N-byte block of memory from the heap.
+         If N is zero, allocate a 1-byte block.  */
+EOF
+}
+
 add_automatic fontconfig
 add_automatic freetype
 add_automatic fribidi
