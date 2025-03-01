@@ -2460,6 +2460,8 @@ EOF
  
  # FIXME: We are having runtime issues with ifunc...
 EOF
+	echo "work around coinstallation failure #1099166"
+	drop_privs sed -i -e '/\/.*\.\*libm\\\..*\/d/d' debian/rules.d/debhelper.mk
 }
 buildenv_glibc() {
 	export DEB_GCC_VERSION="-$GCC_VER"
