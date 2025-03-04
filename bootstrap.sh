@@ -2471,6 +2471,13 @@ add_automatic gmp
 add_automatic gnupg2
 
 add_automatic gpm
+buildenv_gpm() {
+	if test "$GCC_VER" -ge 15; then
+		echo "work around FTBFS with gcc-15 #1096759"
+		export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+		export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+	fi
+}
 patch_gpm() {
 	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
 	echo "fixing missing include #1070124"
