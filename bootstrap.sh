@@ -683,26 +683,12 @@ EOF
 	fi
 	echo "fix honouring of nocheck option #990794"
 	drop_privs sed -i -e 's/ifeq (\(,$(filter $(DEB_HOST_ARCH),\)/ifneq ($(DEB_BUILD_ARCH)\1/' debian/rules
-	case "$HOST_ARCH" in sparc)
+	case "$HOST_ARCH" in loong64|sparc)
 		echo "enabling uncommon architectures in debian/control"
 		drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
 	;; esac
-	echo "fix FTCBFS #1098728"
-	drop_privs patch -p1 <<'EOF'
---- a/gprofng/configure
-+++ b/gprofng/configure
-@@ -16787,7 +16787,7 @@
- # Generate manpages, if possible.
- build_man=false
- build_doc=false
--if test $cross_compiling = no; then
-+if :; then
-   for ac_prog in makeinfo
- do
-   # Extract the first word of "$ac_prog", so it can be a program name with args.
-EOF
 }
 
 add_automatic blt
