@@ -2533,7 +2533,37 @@ buildenv_libgcrypt20() {
 add_automatic libgpg-error
 add_automatic libice
 add_automatic libidn
+
 add_automatic libidn2
+patch_libidn2() {
+	echo "fix FTCBFS #1100478"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -1,5 +1,6 @@
+ #! /usr/bin/make -f
+
++include /usr/share/dpkg/architecture.mk
+ include /usr/share/dpkg/pkg-info.mk
+ include /usr/share/gnulib/debian/gnulib-dpkg.mk
+
+@@ -17,6 +18,13 @@
+ 	./bootstrap --gnulib-srcdir=$(GNULIB_DEB_DEBIAN_GNULIB) --gen
+
+ execute_before_dh_auto_configure: dh_gnulib_clone pull dh_gnulib_patch gen
++ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_configure --reload-all-buildenv-variables --builddirectory=build-native -- --disable-gtk-doc
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_build --builddirectory=build-native
++	mkdir -p build/lib build/doc
++	cp build-native/lib/data.c build-native/lib/tr46map_data.c build/lib/
++	cp build-native/doc/idn2.1 build-native/doc/idn2-help.texi build/doc/
++endif
+
+ CONFIGURE_FLAGS = \
+ 	--disable-rpath \
+EOF
+}
+
 add_automatic libksba
 add_automatic libmd
 add_automatic libnsl
