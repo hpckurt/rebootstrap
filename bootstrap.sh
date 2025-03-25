@@ -774,6 +774,12 @@ EOF
 
 add_automatic coreutils
 add_automatic curl
+
+patch_cyrus_sasl2() {
+	echo "fix FTCBFS #1101329"
+	sed -i -e 's/python3-sphinx /python3-sphinx:native /' debian/control
+}
+
 add_automatic dash
 add_automatic db-defaults
 add_automatic debianutils
