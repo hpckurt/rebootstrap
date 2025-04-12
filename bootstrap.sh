@@ -2785,12 +2785,6 @@ builddep_pam() {
 	apt_get_purge bison
 	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
 }
-patch_pam() {
-	echo "fix FTCBFS #1057729"
-	drop_privs quilt pop -a
-	drop_privs sed -i -e '/fix-autoreconf/d' debian/patches/series
-	drop_privs quilt push -a
-}
 
 add_automatic patch
 add_automatic pcre2
