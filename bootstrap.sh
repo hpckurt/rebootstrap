@@ -3639,12 +3639,6 @@ mark_built cracklib2
 
 automatically_cross_build_packages
 
-cross_build libcap2
-mark_built libcap2
-# needed by systemd
-
-automatically_cross_build_packages
-
 cross_build build-essential
 mark_built build-essential
 # build-essential
@@ -3654,6 +3648,12 @@ automatically_cross_build_packages
 cross_build pam stage1 pam_1
 mark_built pam
 # needed by shadow
+
+automatically_cross_build_packages
+
+cross_build libcap2
+mark_built libcap2
+# needed by systemd
 
 automatically_cross_build_packages
 
