@@ -2641,6 +2641,8 @@ builddep_libtool() {
 	apt_get_install debhelper file "gfortran-$GCC_VER$HOST_ARCH_SUFFIX" automake autoconf autotools-dev help2man texinfo "zlib1g-dev:$HOST_ARCH" gnulib
 }
 
+add_automatic libtpms
+
 add_automatic libunistring
 buildenv_libunistring() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
