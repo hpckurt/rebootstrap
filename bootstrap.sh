@@ -2460,6 +2460,13 @@ buildenv_glibc() {
 }
 
 add_automatic gmp
+buildenv_gmp() {
+	if test "$GCC_VER" -ge 15; then
+		echo "work around FTBFS with gcc-15 #1096730"
+		export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+		export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+	fi
+}
 add_automatic gnupg2
 
 add_automatic gpm
