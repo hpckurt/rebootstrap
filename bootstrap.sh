@@ -2467,7 +2467,189 @@ buildenv_gmp() {
 		export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
 	fi
 }
-add_automatic gnupg2
+
+patch_gnupg2() {
+	echo "add build profile #1104210"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/control
++++ b/debian/control
+@@ -23,13 +23,13 @@
+  libgnutls28-dev (>= 3.2),
+  libgpg-error-dev (>= 1.46),
+  libksba-dev (>= 1.6.3),
+- libldap2-dev,
++ libldap2-dev <!pkg.gnupg2.gpgvonly>,
+  libnpth0-dev (>= 1.2),
+- libreadline-dev,
++ libreadline-dev <!pkg.gnupg2.gpgvonly>,
+  librsvg2-bin <!nodoc>,
+- libsqlite3-dev,
+- libtss2-dev,
+- libusb-1.0-0-dev [!hurd-any],
++ libsqlite3-dev <!pkg.gnupg2.gpgvonly>,
++ libtss2-dev <!pkg.gnupg2.gpgvonly>,
++ libusb-1.0-0-dev [!hurd-any] <!pkg.gnupg2.gpgvonly>,
+  openssh-client <!nocheck>,
+  pkgconf,
+  swtpm [amd64 arm64 armel armhf i386 mips64el ppc64el riscv64 s390x] <!nocheck>,
+@@ -53,6 +53,7 @@
+ Package: gpgconf
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  ${misc:Depends},
+  ${shlibs:Depends},
+@@ -88,6 +90,7 @@
+ Package: gpg-agent
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  gpgconf (= ${binary:Version}),
+  pinentry-curses | pinentry,
+@@ -124,6 +127,7 @@
+ Package: gpg-wks-server
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  default-mta | mail-transport-agent,
+  gpg (= ${binary:Version}),
+@@ -151,6 +155,7 @@
+ Package: gpg-wks-client
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  dirmngr (= ${binary:Version}),
+  gpg (= ${binary:Version}),
+@@ -178,6 +183,7 @@
+ Package: scdaemon
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  gpg-agent (= ${binary:Version}),
+  ${misc:Depends},
+@@ -196,6 +202,7 @@
+ Package: gpgsm
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  gpgconf (= ${binary:Version}),
+  ${misc:Depends},
+@@ -216,6 +223,7 @@
+ Package: gpg
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  gpgconf (= ${binary:Version}),
+  ${misc:Depends},
+@@ -331,6 +341,7 @@
+ Package: dirmngr
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  adduser,
+  gpgconf (= ${binary:Version}),
+@@ -364,6 +375,7 @@
+ Package: tpm2daemon
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  gpgconf (= ${binary:Version}),
+  ${misc:Depends},
+@@ -405,6 +417,7 @@
+ Package: gpgv-static
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Depends:
+  ${misc:Depends},
+  ${shlibs:Depends},
+@@ -466,6 +481,7 @@
+ Package: gnupg-utils
+ Architecture: any
+ Multi-Arch: foreign
++Build-Profiles: <!pkg.gnupg2.gpgvonly>
+ Replaces:
+  gnupg (<< 2.1.21-4),
+  gnupg-agent (<< 2.1.21-4),
+--- a/debian/rules
++++ b/debian/rules
+@@ -39,11 +39,13 @@
+ %:
+ 	dh $@ --with=autoreconf --builddirectory=build
+
++GPGV_UNNEEDED = gpgtar gpgsm scdaemon dirmngr tofu exec ldap gnutls sqlite libdns keyboxd tpm2d npth
+ GPGV_UDEB_UNNEEDED = gpgtar bzip2 gpgsm scdaemon dirmngr doc tofu exec ldap gnutls sqlite libdns keyboxd tpm2d npth
+
+ WIN32_FLAGS=LDFLAGS="-Xlinker --no-insert-timestamp -static" CFLAGS="-g -Os" CPPFLAGS=
+
+ execute_after_dh_auto_configure:
++ifeq ($(filter pkg.gnupg2.gpgvonly,$(DEB_BUILD_PROFILES)),)
+ 	dh_auto_configure --builddirectory=build --verbose -- \
+ 		--libexecdir=\$${prefix}/lib/gnupg \
+ 		--enable-wks-tools \
+@@ -53,6 +55,13 @@
+ 		--with-mailprog=/usr/sbin/sendmail \
+ 		--enable-maintainer-mode \
+ 		$(NODOC)
++else
++	dh_auto_configure --builddirectory=build --verbose -- \
++		--libexecdir=\$${prefix}/lib/gnupg \
++		--enable-maintainer-mode \
++		$(NODOC) \
++		$(foreach x, $(GPGV_UNNEEDED), --disable-$(x))
++endif
+ 	# win32 uses hand-written *FLAGS
+ 	# mkdefsinc is built with *_FOR_BUILD
+ 	# gpgscm is also not shipped
+@@ -61,9 +70,11 @@
+ 	@echo 'blhc: ignore-line-regexp: .*-o gpgscm .*'
+
+ override_dh_auto_configure-arch:
++ifeq ($(filter pkg.gnupg2.gpgvonly,$(DEB_BUILD_PROFILES)),)
+ 	dh_auto_configure --builddirectory=build-gpgv-udeb -- \
+ 		$(NODOC) \
+ 		$(foreach x, $(GPGV_UDEB_UNNEEDED), --disable-$(x))
++endif
+
+ override_dh_auto_configure-indep:
+ 	# nothing to do
+@@ -71,6 +82,7 @@
+ execute_after_dh_auto_build:
+ 	dh_auto_build --builddirectory=build
+
++ifeq ($(filter pkg.gnupg2.gpgvonly,$(DEB_BUILD_PROFILES)),)
+ override_dh_auto_build-arch:
+ 	dh_auto_build --builddirectory=build-gpgv-udeb
+ 	cp -a build-gpgv-udeb build-gpgv-static
+@@ -103,14 +115,17 @@
+ 	rm -vf \
+ 		debian/gnupg/usr/share/doc/gnupg/examples/systemd-user/*.service \
+ 		debian/gnupg/usr/share/doc/gnupg/examples/systemd-user/*.socket
++endif
+
+ override_dh_auto_test:
++ifeq ($(filter nocheck pkg.gnupg2.gpgvonly,$(DEB_BUILD_PROFILES)),)
+ 	dh_auto_test --builddirectory=build -- verbose=3 TESTFLAGS=$(AUTOTEST_FLAGS)
+
+ override_dh_shlibdeps:
+ # Make ldap a recommends rather than a hard dependency.
+ 	dpkg-shlibdeps -Tdebian/dirmngr.substvars -dRecommends debian/dirmngr/usr/lib/gnupg/dirmngr_ldap -dDepends debian/dirmngr/usr/bin/dirmngr*
+ 	dh_shlibdeps -Ndirmngr
++endif
+
+ execute_before_dh_autoreconf:
+ 	echo "Developer change history can be found in the source tarball. See NEWS for high-level changes." > ChangeLog
+EOF
+}
 
 add_automatic gpm
 buildenv_gpm() {
@@ -2589,8 +2771,6 @@ builddep_libtool() {
 	# gnulib dependency lacks M-A:foreign
 	apt_get_install debhelper file "gfortran-$GCC_VER$HOST_ARCH_SUFFIX" automake autoconf autotools-dev help2man texinfo "zlib1g-dev:$HOST_ARCH" gnulib
 }
-
-add_automatic libtpms
 
 add_automatic libunistring
 buildenv_libunistring() {
@@ -3401,14 +3581,14 @@ add_need acl # by coreutils, systemd
 add_need apt # almost essential
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
-add_need bzip2 # by perl
+add_need bzip2 # by gnupg2, perl
 add_need db-defaults # by perl, python3.X
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by pam
 add_need fribidi # by newt
 add_need gdbm # by perl, python3.X
-add_need gnupg2 # for apt
+add_need gnutls28 # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need gpm # by ncurses
 add_need groff # for man-db
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need kmod # by systemd
@@ -3416,11 +3596,14 @@ add_need icu # by libxml2
 add_need isl # by gcc-VER
 add_need jansson # by binutils
 add_need krb5 # by audit
+add_need libassuan # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
+add_need libgcrypt20 # by gnupg2, libprelude
+add_need libgpg-error # by gnupg2
 add_need libidn2 # by gnutls28
-add_need libgcrypt20 # by libprelude, cryptsetup
+add_need libksba # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
@@ -3437,10 +3620,12 @@ add_need mawk # for base-files (alternatively: gawk)
 add_need mpclib3 # by gcc-VER
 add_need mpfr4 # by gcc-VER
 add_need nettle # by unbound, gnutls28
+add_need npth # by gnupg2
 add_need openssl # by cyrus-sasl2
 add_need p11-kit # by gnutls28
 add_need patch # for dpkg-dev
 add_need pcre2 # by libselinux
+add_need pkgconf # by gnupg2
 add_need popt # by newt
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python3.X
@@ -3759,6 +3944,12 @@ fi
 progress_mark "cross build binutils"
 mark_built binutils
 # needed for build-essential
+
+automatically_cross_build_packages
+
+cross_build gnupg2 pkg.gnupg2.gpgvonly gnupg2_1
+mark_built gnupg2
+# needed for apt
 
 automatically_cross_build_packages
 
