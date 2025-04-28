@@ -2525,58 +2525,7 @@ add_automatic libassuan
 add_automatic libatomic-ops
 add_automatic libbsd
 
-patch_libcap2() {
-	echo "fixing FTCBFS #1103808"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -4,11 +4,11 @@
- Maintainer: Christian Kastner <ckk@debian.org>
- Build-Depends: patchelf,
-                debhelper-compat (= 13),
--               dh-golang,
--               golang-any,
-                gperf (>= 3.1),
-                indent,
-                libpam0g-dev,
-+Build-Depends-Indep: dh-golang,
-+                     golang-any,
- Rules-Requires-Root: no
- Standards-Version: 4.7.0
- Homepage: https://sites.google.com/site/fullycapable/
---- a/debian/rules
-+++ b/debian/rules
-@@ -37,8 +37,10 @@
- 	dh_auto_clean -- $(MAKE_ASSIGNMENTS)
- 	# The Golang build system does not appear to fully honor -B, so we need
- 	# two cleans
--	dh_auto_clean -B_build -O--buildsystem=golang
--	dh_auto_clean O--buildsystem=golang
-+	set -e; if test -d _build; then \
-+		dh_auto_clean -B_build -O--buildsystem=golang; \
-+		dh_auto_clean O--buildsystem=golang; \
-+	fi
- 	# Undo change of lookup (see override_dh_auto_build)
- 	sed -i -e 's,\./tcapsh-static,../progs/tcapsh-static,g' tests/libcap_launch_test.c
-
-@@ -110,11 +112,11 @@
- 	kernel.org/pub/linux/libs/security/libcap/cap \
- 	kernel.org/pub/linux/libs/security/libcap/psx
-
--execute_after_dh_auto_configure:
-+execute_after_dh_auto_configure-indep:
- 	dh_auto_configure -B_build -O--buildsystem=golang
-
--execute_after_dh_auto_install:
-+execute_after_dh_auto_install-indep:
- 	dh_auto_install -B_build -O--buildsystem=golang
-
--execute_after_dh_auto_build:
-+execute_after_dh_auto_build-indep:
- 	dh_auto_build -B_build -O--buildsystem=golang
-EOF
-}
-
+add_automatic libcap2
 add_automatic libdebian-installer
 add_automatic libev
 add_automatic libevent
@@ -3657,12 +3606,6 @@ automatically_cross_build_packages
 cross_build pam stage1 pam_1
 mark_built pam
 # needed by shadow
-
-automatically_cross_build_packages
-
-cross_build libcap2
-mark_built libcap2
-# needed by systemd
 
 automatically_cross_build_packages
 
