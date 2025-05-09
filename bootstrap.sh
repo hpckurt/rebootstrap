@@ -2729,6 +2729,28 @@ add_automatic mawk
 add_automatic mpclib3
 add_automatic mpfr4
 
+patch_musl() {
+	echo "adding renameat2 to musl #1105007 https://git.musl-libc.org/cgit/musl/commit/include/stdio.h?id=05ce67fea99ca09cd4b6625cff7aec9cc222dd5a"
+	drop_privs patch -p1 <<'EOF'
+--- a/include/stdio.h
++++ b/include/stdio.h
+@@ -158,6 +158,13 @@ char *ctermid(char *);
+ #define L_ctermid 20
+ #endif
+
++#if defined(_GNU_SOURCE)
++#define RENAME_NOREPLACE (1 << 0)
++#define RENAME_EXCHANGE  (1 << 1)
++#define RENAME_WHITEOUT  (1 << 2)
++
++int renameat2(int, const char *, int, const char *, unsigned);
++#endif
+
+ #if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) \
+  || defined(_BSD_SOURCE)
+EOF
+}
+
 builddep_ncurses() {
 	if dpkg-architecture "-a$1" -ilinux-any; then
 		assert_built gpm
