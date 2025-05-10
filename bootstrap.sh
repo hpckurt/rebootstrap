@@ -649,6 +649,7 @@ add_automatic base-passwd
 add_automatic bash
 
 patch_binutils() {
+	regenerate_control=0
 	echo "patching binutils to discard ldscripts"
 	# They cause file conflicts with binutils and the in-archive cross
 	# binutils discard ldscripts as well.
@@ -683,12 +684,22 @@ EOF
 	fi
 	echo "fix honouring of nocheck option #990794"
 	drop_privs sed -i -e 's/ifeq (\(,$(filter $(DEB_HOST_ARCH),\)/ifneq ($(DEB_BUILD_ARCH)\1/' debian/rules
-	case "$HOST_ARCH" in loong64|sparc)
-		echo "enabling uncommon architectures in debian/control"
-		drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
+	case "$HOST_ARCH" in
+		loong64|sparc)
+			echo "enabling uncommon architectures in debian/control"
+			drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
+			regenerate_control=1
+		;;
+		armel|armhf)
+			echo "fixing build-depends for cross compilation #1105026"
+			drop_privs sed -i -e 's/g++-14 /g++-14-for-host /' debian/control.in
+			regenerate_control=1
+		;;
+	esac
+	if test "$regenerate_control" = 1; then
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
-	;; esac
+	fi
 }
 
 add_automatic blt
