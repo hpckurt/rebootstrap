@@ -830,7 +830,16 @@ EOF
 add_automatic fontconfig
 add_automatic freetype
 add_automatic fribidi
+
 add_automatic fuse3
+buildenv_fuse3() {
+	case "$(dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_ARCH_CPU)" in
+		arc|mips|mipsel|sh3|sh4|sparc)
+			echo "enabling -latomic #1105150"
+			export DEB_LDFLAGS_APPEND="-Wl,--as-needed -latomic"
+		;;
+	esac
+}
 
 patch_gcc_default_pie_everywhere()
 {
