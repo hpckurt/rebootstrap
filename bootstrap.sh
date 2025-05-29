@@ -646,7 +646,35 @@ add_automatic apt
 add_automatic attr
 add_automatic base-files
 add_automatic base-passwd
+
 add_automatic bash
+patch_bash() {
+	test "$GCC_VER" -ge 15 || return 0
+	echo "work around FTBFS with gcc-15 #1098911"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -41,8 +41,9 @@
+ endif
+
+
+-dpkg_buildflags = DEB_BUILD_MAINT_OPTIONS="hardening=+all" DEB_CFLAGS_MAINT_APPEND="-Wall" dpkg-buildflags
++dpkg_buildflags = DEB_BUILD_MAINT_OPTIONS="hardening=+all" DEB_CFLAGS_MAINT_APPEND="-Wall -std=gnu17" DEB_CFLAGS_FOR_BUILD_MAINT_APPEND="-Wall -std=gnu17" dpkg-buildflags
+ CFLAGS := $(shell $(dpkg_buildflags) --get CFLAGS)
++CFLAGS_FOR_BUILD := $(shell $(dpkg_buildflags) --get CFLAGS_FOR_BUILD)
+ CPPFLAGS := $(shell $(dpkg_buildflags) --get CPPFLAGS)
+ LDFLAGS := $(shell $(dpkg_buildflags) --get LDFLAGS)
+
+@@ -408,6 +409,7 @@
+ 	cd build-$(build) && \
+ 	    CC="$(CC)" \
+ 	    CFLAGS="$(CFLAGS)" CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
++	    CFLAGS_FOR_BUILD='$(CFLAGS_FOR_BUILD)' \
+ 	    YACC="$(YACC)" \
+ 		../$(bash_src)/configure $(configure_args)
+ 	if ! grep -q '#define HAVE_DEV_STDIN 1' build-$(build)/config.h; then \
+EOF
+}
 
 patch_binutils() {
 	regenerate_control=0
