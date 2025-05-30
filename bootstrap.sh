@@ -2760,6 +2760,23 @@ add_automatic libpthread-stubs
 
 patch_libselinux() {
 	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "fix largefile access #1104987"
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -28,11 +28,9 @@
+
+ BUILT_USING=$(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W "libsepol-dev")
+
+-ifeq ($(DEB_HOST_ARCH_BITS),32)
+ # Use of lstat64 requires this macro.
+ export DEB_CPPFLAGS_MAINT_APPEND += -D_LARGEFILE64_SOURCE
+-endif
+
+ # Upstream recommends using this flag
+ export DEB_CFLAGS_MAINT_APPEND = -fno-semantic-interposition
+ ## The build system doesn't use CPPFLAGS, pass them to CFLAGS to enable the
+EOF
 		echo "work around time64 abi duality build failure https://github.com/SELinuxProject/selinux/issues/476"
 		drop_privs sed -i -e '/^static_assert.*__ino_t/d' src/matchpathcon.c
 	fi
