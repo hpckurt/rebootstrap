@@ -2394,6 +2394,11 @@ buildenv_gdbm() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
 		export ac_cv_func_mmap_fixed_mapped=yes
 	fi
+	if test "$GCC_VER" -ge 15; then
+		echo "work around FTBFS with gcc-15 #1096759"
+		export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+		export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+	fi
 }
 
 patch_glib2_0() {
