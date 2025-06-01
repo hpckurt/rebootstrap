@@ -2963,6 +2963,36 @@ builddep_ncurses() {
 }
 
 add_automatic nettle
+patch_nettle() {
+	test "$GCC_VER" -le 14 && return 0
+	dpkg-architecture "-a$HOST_ARCH" -ignu-any-any && return 0
+	echo "fix gcc-15 + non-glibc FTBFS #1107059"
+	drop_privs patch -p1 <<'EOF'
+--- a/getopt.h
++++ b/getopt.h
+@@ -166,7 +166,7 @@
+ #  endif
+ # endif
+ #else /* not __GNU_LIBRARY__ */
+-extern int getopt ();
++extern int getopt (int, char *const *, const char *);
+ #endif /* __GNU_LIBRARY__ */
+
+ #ifndef __need_getopt
+--- a/getopt.c
++++ b/getopt.c
+@@ -136,7 +136,7 @@
+    whose names are inconsistent.  */
+
+ #ifndef getenv
+-extern char *getenv ();
++extern char *getenv (const char *);
+ #endif
+
+ #endif /* not __GNU_LIBRARY__ */
+EOF
+}
+
 add_automatic nghttp2
 add_automatic npth
 add_automatic nspr
