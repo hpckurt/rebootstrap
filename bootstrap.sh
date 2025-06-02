@@ -821,6 +821,14 @@ patch_cyrus_sasl2() {
 
 add_automatic dash
 add_automatic db-defaults
+
+buildenv_db5_3() {
+	test "$GCC_VER" -lt 15 && return 0
+	echo "working around FTBFS with gcc-15 #1107059"
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+}
+
 add_automatic debianutils
 
 add_automatic diffutils
