@@ -2790,6 +2790,8 @@ patch_libselinux() {
  export DEB_CFLAGS_MAINT_APPEND = -fno-semantic-interposition
  ## The build system doesn't use CPPFLAGS, pass them to CFLAGS to enable the
 EOF
+	fi
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || dpkg-architecture "-a$HOST_ARCH" -iany-arc; then
 		echo "work around time64 abi duality build failure https://github.com/SELinuxProject/selinux/issues/476"
 		drop_privs sed -i -e '/^static_assert.*__ino_t/d' src/matchpathcon.c
 	fi
