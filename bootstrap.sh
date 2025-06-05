@@ -4004,7 +4004,6 @@ else
 	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck,pkg.binutils.nojava ./
 	check_binNMU
 	DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult" drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck,pkg.binutils.nojava -B -uc -us
-	rm -Rf /tmp/nodebugedit
 	cd ..
 	ls -l
 	drop_privs sed -i -e '/^ .* binutils-for-host_.*deb$/d' ./*.changes
