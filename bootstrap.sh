@@ -818,6 +818,12 @@ patch_cyrus_sasl2() {
 	echo "fix FTCBFS #1101329"
 	sed -i -e 's/python3-sphinx /python3-sphinx:native /' debian/control
 }
+buildenv_cyrus_sasl2() {
+	test "$GCC_VER" -lt 15 && return 0
+	echo "working around FTBFS with gcc-15 #1096495"
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+}
 
 add_automatic dash
 add_automatic db-defaults
