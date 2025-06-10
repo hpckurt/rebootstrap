@@ -3128,6 +3128,86 @@ buildenv_tk8_6() {
 }
 
 add_automatic uchardet
+
+patch_unbound() {
+	echo "allow disabling malloc wrapping #1107614"
+	drop_privs patch -p1 <<'EOF'
+--- a/acx_nlnetlabs.m4
++++ b/acx_nlnetlabs.m4
+@@ -1190,8 +1190,9 @@
+ dnl $1: unique name for compat code
+ AC_DEFUN([ACX_FUNC_MALLOC],
+ [
+-	AC_MSG_CHECKING([for GNU libc compatible malloc])
+-	AC_RUN_IFELSE([AC_LANG_PROGRAM(
++	AC_CACHE_CHECK([for GNU libc compatible malloc],[ac_cv_func_malloc_0_nonnull],
++	[
++		AC_RUN_IFELSE([AC_LANG_PROGRAM(
+ [[#if defined STDC_HEADERS || defined HAVE_STDLIB_H
+ #include <stdlib.h>
+ #else
+@@ -1199,14 +1200,16 @@
+ #endif
+ ]], [ if(malloc(0) != 0) return 1;])
+ ],
+-	[AC_MSG_RESULT([no])
+-	AC_LIBOBJ(malloc)
+-	AC_DEFINE_UNQUOTED([malloc], [rpl_malloc_$1], [Define if  replacement function should be used.])] ,
+-	[AC_MSG_RESULT([yes])
+-	AC_DEFINE([HAVE_MALLOC], 1, [If have GNU libc compatible malloc])],
+-	[AC_MSG_RESULT([no (crosscompile)])
+-	AC_LIBOBJ(malloc)
+-	AC_DEFINE_UNQUOTED([malloc], [rpl_malloc_$1], [Define if  replacement function should be used.])] )
++		[ac_cv_func_malloc_0_nonnull=no],
++		[ac_cv_func_malloc_0_nonnull=yes],
++		[ac_cv_func_malloc_0_nonnull="no (crosscompile)"])
++	])
++	AS_IF([test "$ac_cv_func_malloc_0_nonnull" = yes],
++		[AC_DEFINE([HAVE_MALLOC], 1, [If have GNU libc compatible malloc])],
++	[
++		AC_LIBOBJ(malloc)
++		AC_DEFINE_UNQUOTED([malloc], [rpl_malloc_$1], [Define if  replacement function should be used.])
++	])
+ ])
+
+ dnl Define fallback for fseeko and ftello if needed.
+--- a/configure.ac
++++ b/configure.ac
+@@ -628,19 +628,19 @@
+ if test x_$enable_alloc_nonregional = x_yes; then
+ 	AC_DEFINE(UNBOUND_ALLOC_NONREGIONAL, 1, [use malloc not regions, for debug use])
+ fi
+-if test x_$enable_alloc_checks = x_yes; then
++AS_IF([test x_$enable_alloc_checks = x_yes],[
+ 	AC_DEFINE(UNBOUND_ALLOC_STATS, 1, [use statistics for allocs and frees, for debug use])
+ 	SLDNS_ALLOCCHECK_EXTRA_OBJ="alloc.lo log.lo"
+ 	AC_SUBST(SLDNS_ALLOCCHECK_EXTRA_OBJ)
+ 	ASYNCLOOK_ALLOCCHECK_EXTRA_OBJ="alloc.lo"
+ 	AC_SUBST(ASYNCLOOK_ALLOCCHECK_EXTRA_OBJ)
+-else
+-	if test x_$enable_alloc_lite = x_yes; then
++],[
++	AS_IF([test x_$enable_alloc_lite = x_yes],[
+ 		AC_DEFINE(UNBOUND_ALLOC_LITE, 1, [use to enable lightweight alloc assertions, for debug use])
+-	else
++	],[
+ 		ACX_FUNC_MALLOC([unbound])
+-	fi
+-fi
++	])
++])
+
+ # check windows threads (we use them, not pthreads, on windows).
+ if test "$on_mingw" = "yes"; then
+EOF
+}
+buildenv_unbound() {
+	if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any || dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "setting malloc/realloc cache variables"
+		export ac_cv_func_malloc_0_nonnull=yes
+	fi
+}
+
 add_automatic ustr
 
 buildenv_util_linux() {
