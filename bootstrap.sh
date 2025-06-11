@@ -3041,10 +3041,6 @@ buildenv_openldap() {
 	export ol_cv_pthread_select_yields=yes
 	export ac_cv_func_memcmp_working=yes
 }
-patch_openldap() {
-	echo "FTCBFS #1094386"
-	drop_privs sed -i -e 's/AC_CHECK_PROGS/AC_CHECK_TOOLS/' configure.ac
-}
 
 add_automatic openssl
 add_automatic p11-kit
