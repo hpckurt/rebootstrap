@@ -19,6 +19,7 @@ DEFAULT_PROFILES="cross nocheck noinsttest noudeb"
 DROP_PRIVS=buildd
 GCC_NOLANG="ada algol asan brig cobol d gcn go itm java jit hppa64 lsan m2 nvptx objc obj-c++ rust tsan ubsan"
 ENABLE_DIFFOSCOPE=no
+DIST=sid
 
 if df -t tmpfs /var/cache/apt/archives >/dev/null 2>&1; then
 	APT_GET="$APT_GET -o APT::Keep-Downloaded-Packages=false"
@@ -230,7 +231,7 @@ fi
 
 # ensure that the rebootstrap list comes first
 test -f /etc/apt/sources.list && mv -v /etc/apt/sources.list /etc/apt/sources.list.d/local.list
-grep -q '^deb-src .*sid' /etc/apt/sources.list.d/*.list || echo "deb-src $MIRROR sid main" >> /etc/apt/sources.list.d/sid-source.list
+grep -q '^deb-src .*'"$DIST" /etc/apt/sources.list.d/*.list || echo "deb-src $MIRROR $DIST main" >> /etc/apt/sources.list.d/$DIST-source.list
 
 dpkg --add-architecture "$HOST_ARCH"
 $APT_GET update
@@ -298,7 +299,7 @@ Pin-Priority: 1002
 
 Explanation: do not use archive cross toolchain
 Package: *-$HOST_ARCH-cross *$HOST_ARCH_SUFFIX gcc-*$HOST_ARCH_SUFFIX-base
-Pin: release a=unstable
+Pin: release l=debian
 Pin-Priority: -1
 EOF
 $APT_GET update
@@ -383,7 +384,7 @@ chdist_native() {
 
 if test "$ENABLE_DIFFOSCOPE" = yes; then
 	apt_get_install devscripts
-	chdist_native create "$MIRROR" sid main
+	chdist_native create "$MIRROR" "$DIST" main
 	if ! chdist_native apt-get update; then
 		echo "rebootstrap-warning: not comparing packages to native builds"
 		rm -Rf /tmp/chdist_native
@@ -529,7 +530,7 @@ cross_build_setup() {
 # $2 is reason
 add_binNMU_changelog() {
 	cat - debian/changelog <<EOF |
-$(dpkg-parsechangelog -SSource) ($(dpkg-parsechangelog -SVersion)+b$1) sid; urgency=medium, binary-only=yes
+$(dpkg-parsechangelog -SSource) ($(dpkg-parsechangelog -SVersion)+b$1) $DIST; urgency=medium, binary-only=yes
 
   * Binary-only non-maintainer upload for $HOST_ARCH; no source changes.
   * $2
@@ -2874,7 +2875,7 @@ patch_linux() {
 	local kernel_arch
 	kernel_arch=
 	cat - debian/changelog <<EOF |
-linux ($(dpkg-parsechangelog -SVersion)+rebootstrap1) sid; urgency=medium
+linux ($(dpkg-parsechangelog -SVersion)+rebootstrap1) $DIST; urgency=medium
 
   * Update for $HOST_ARCH
 
