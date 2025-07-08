@@ -2853,7 +2853,53 @@ buildenv_libx11() {
 
 add_automatic libxau
 add_automatic libxaw
+
 add_automatic libxcb
+patch_libxcb() {
+	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
+	echo "Fix PATH_MAX https://gitlab.freedesktop.org/xorg/lib/libxcb/-/merge_requests/65"
+	drop_privs patch -p1 <<'EOF'
+Index: libxcb-1.17.0/src/xcb_util.c
+===================================================================
+--- libxcb-1.17.0.orig/src/xcb_util.c
++++ libxcb-1.17.0/src/xcb_util.c
+@@ -104,14 +104,12 @@ static int _xcb_parse_display_path_to_so
+                                              int *displayp, int *screenp)
+ {
+     struct stat sbuf;
+-    char path[PATH_MAX];
+-    size_t len;
++    char *path;
+     int _screen = 0, res;
+ 
+-    len = strlen(name);
+-    if (len >= sizeof(path))
++    path = strdup(name);
++    if (!path)
+         return 0;
+-    memcpy(path, name, len + 1);
+     res = stat(path, &sbuf);
+     if (0 != res) {
+         unsigned long lscreen;
+@@ -131,11 +129,10 @@ static int _xcb_parse_display_path_to_so
+         _screen = (int)lscreen;
+     }
+ 
+-    if (host) {
+-        *host = strdup(path);
+-        if (!*host)
+-            return 0;
+-    }
++    if (host)
++        *host = path;
++    else
++        free(path);
+ 
+     if (protocol) {
+         *protocol = strdup("unix");
+EOF
+}
+
 add_automatic libxcrypt
 add_automatic libxdmcp
 
