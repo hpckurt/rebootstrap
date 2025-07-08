@@ -3139,6 +3139,35 @@ add_automatic sqlite3
 add_automatic sysvinit
 
 add_automatic tar
+patch_tar() {
+	test "$HOST_ARCH" = hurd-i386 || return 0
+	echo "avoid hurd-i386 y2038 concern #1078002"
+	drop_privs patch -p0 <<'EOF'
+--- debian/rules.original	2024-08-05 20:11:02.000000000 +0200
++++ debian/rules	2024-08-05 20:11:15.000000000 +0200
+@@ -5,6 +5,10 @@
+ export DEB_BUILD_MAINT_OPTIONS = future=+lfs
+ export DEB_CFLAGS_MAINT_APPEND = -Wall -Wno-analyzer-null-argument
+ 
++ifeq ($(DEB_HOST_ARCH),hurd-i386)
++  Y2038 = --disable-year2038
++endif
++
+ %:
+ 	dh $@
+ 
+@@ -18,7 +22,8 @@
+ 		--libexecdir=/usr/sbin \
+ 		--enable-backup-scripts \
+ 		--with-lzma=xz \
+-		--disable-silent-rules
++		--disable-silent-rules \
++		$(Y2038)
+ 
+ override_dh_auto_test:
+ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+EOF
+}
 buildenv_tar() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
 		echo "struct dirent contains working d_ino on glibc systems"
