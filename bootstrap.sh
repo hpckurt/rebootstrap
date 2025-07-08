@@ -3806,7 +3806,7 @@ for pkg in $(discover_essential); do
 		echo "rebootstrap-debug: not scheduling essential package $pkg"
 	fi
 done
-add_need acl # by coreutils, systemd
+add_need acl # by elfutils, systemd
 add_need apt # almost essential
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
@@ -3840,15 +3840,15 @@ fi
 add_need libtasn1-6 # by gnutls28
 add_need libtextwrap # by cdebconf
 add_need libunistring # by gnutls28
-add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd
+add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd, util-linux
 add_need libxrender # by cairo
 add_need libzstd # by systemd
-add_need lz4 # by systemd
+add_need lz4 # by elfutils, systemd
 add_need man-db # for debhelper
 add_need mawk # for base-files (alternatively: gawk)
 add_need mpclib3 # by gcc-VER
 add_need mpfr4 # by gcc-VER
-add_need nettle # by unbound, gnutls28
+add_need nettle # by gnutls28
 add_need npth # by gnupg2
 add_need openssl # by cyrus-sasl2
 add_need p11-kit # by gnutls28
