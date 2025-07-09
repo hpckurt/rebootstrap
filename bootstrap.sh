@@ -3307,6 +3307,23 @@ buildenv_unbound() {
 
 add_automatic ustr
 
+patch_util_linux() {
+	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
+	echo "Fix uuid_time64 symbol #1108994"
+	drop_privs patch -p0 <<'EOF'
+--- debian/libuuid1.symbols.original
++++ debian/libuuid1.symbols
+@@ -26,7 +26,7 @@
+  uuid_parse@UUID_1.0 2.16
+  uuid_parse_range@UUID_2.36 2.36
+  uuid_time@UUID_1.0 2.16
+- (arch=gnu-any-any)uuid_time64@UUID_2.40 2.40
++ (arch=gnu-linux-any)uuid_time64@UUID_2.40 2.40
+  uuid_type@UUID_1.0 2.16
+  uuid_unparse@UUID_1.0 2.16
+  uuid_unparse_lower@UUID_1.0 2.16
+EOF
+}
 buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
 }
