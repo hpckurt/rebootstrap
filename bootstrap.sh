@@ -2561,6 +2561,33 @@ EOF
 }
 
 add_automatic grep
+patch_grep() {
+	test "$HOST_ARCH" = hurd-amd64 || return 0
+	echo "Fix ucontext https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63334 https://lists.gnu.org/archive/html/bug-gnulib/2023-05/msg00048.html"
+	drop_privs patch -p1 <<'EOF'
+--- ./lib/sigsegv.c.original	2023-05-05 10:45:54.673751100 +0000
++++ ./lib/sigsegv.c	2023-05-05 10:48:47.903577554 +0000
+@@ -351,6 +351,17 @@
+    "old esp, if trapped from user".  */
+ #  define SIGSEGV_FAULT_STACKPOINTER  scp->sc_uesp
+ 
++# elif defined __x86_64__
++
++/* scp points to a 'struct sigcontext' (defined in
++   glibc/sysdeps/mach/hurd/x86_64/bits/sigcontext.h).
++   The registers of this struct get pushed on the stack through
++   gnumach/x86_64/i386/locore.S:trapall.  */
++/* Both sc_rsp and sc_ursp appear to have the same value.
++   It appears more reliable to use sc_ursp because it is labelled as
++   "old rsp, if trapped from user".  */
++#  define SIGSEGV_FAULT_STACKPOINTER  scp->sc_ursp
++
+ # endif
+ 
+ #endif
+EOF
+}
+
 add_automatic groff
 
 add_automatic gzip
