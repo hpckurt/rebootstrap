@@ -3136,6 +3136,149 @@ buildenv_openldap() {
 add_automatic openssl
 add_automatic p11-kit
 
+patch_pam() {
+	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
+	echo "fixing hurd build #1109006"
+	drop_privs patch -p0 <<'EOF'
+--- debian/libpam-modules-bin.install.original
++++ debian/libpam-modules-bin.install
+@@ -1,8 +1,9 @@
++#!/usr/bin/dh-exec
+ usr/sbin/unix_chkpwd
+-usr/sbin/unix_update
++[linux-any] usr/sbin/unix_update
+ usr/sbin/mkhomedir_helper
+-usr/sbin/pam_namespace_helper
++[linux-any] usr/sbin/pam_namespace_helper
+ usr/sbin/pwhistory_helper
+ usr/sbin/pam_timestamp_check
+ usr/sbin/faillock
+-usr/lib/systemd/system/pam_namespace.service
++[linux-any] usr/lib/systemd/system/pam_namespace.service
+EOF
+	chmod +x debian/libpam-modules-bin.install
+	echo "fixing hurd build #1109006 https://github.com/linux-pam/linux-pam/pull/917"
+	drop_privs patch -p1 <<'EOF'
+--- a/libpam/pam_modutil_priv.c
++++ b/libpam/pam_modutil_priv.c
+@@ -14,7 +14,9 @@
+ #include <syslog.h>
+ #include <pwd.h>
+ #include <grp.h>
++#ifdef HAVE_SYS_FSUID_H
+ #include <sys/fsuid.h>
++#endif /* HAVE_SYS_FSUID_H */
+ 
+ /*
+  * Two setfsuid() calls in a row are necessary to check
+@@ -22,17 +24,35 @@
+  */
+ static int change_uid(uid_t uid, uid_t *save)
+ {
++#ifdef HAVE_SYS_FSUID_H
+ 	uid_t tmp = setfsuid(uid);
+ 	if (save)
+ 		*save = tmp;
+ 	return (uid_t) setfsuid(uid) == uid ? 0 : -1;
++#else
++	uid_t tmp = geteuid();
++	if (save)
++		*save = tmp;
++	if (setresuid(-1, uid, tmp) < 0)
++		return -1;
++	return 0;
++#endif
+ }
+ static int change_gid(gid_t gid, gid_t *save)
+ {
++#ifdef HAVE_SYS_FSUID_H
+ 	gid_t tmp = setfsgid(gid);
+ 	if (save)
+ 		*save = tmp;
+ 	return (gid_t) setfsgid(gid) == gid ? 0 : -1;
++#else
++	uid_t tmp = getegid();
++	if (save)
++		*save = tmp;
++	if (setresgid(-1, gid, tmp) < 0)
++		return -1;
++	return 0;
++#endif
+ }
+ 
+ static int cleanup(struct pam_modutil_privs *p)
+diff --git a/meson.build b/meson.build
+index 0827a53e..943bf8d5 100644
+--- a/meson.build
++++ b/meson.build
+@@ -164,6 +164,7 @@ check_headers = [
+   'crypt.h',
+   'paths.h',
+   'sys/random.h',
++  'sys/fsuid.h',
+ ]
+ foreach h: check_headers
+   if cc.has_header(h)
+EOF
+	echo "fixing hurd build #1109006 https://github.com/linux-pam/linux-pam/pull/909"
+	drop_privs patch -p1 <<'EOF'
+commit 2311b4801401e567dffa4f70b6a9973b1762d8cd
+Author: Pino Toscano <toscano.pino@tiscali.it>
+Date:   Sun Jun 15 10:58:33 2025 +0200
+
+    pam_xauth: provide fallback HOST_NAME_MAX
+    
+    Followup of commit 2e375aad04d047e12468f93300ad7e42a8a03ff3 for OSes
+    that do not provide the optional HOST_NAME_MAX, in the same way as
+    currently done in pam_echo.
+
+--- a/modules/pam_xauth/pam_xauth.c
++++ b/modules/pam_xauth/pam_xauth.c
+@@ -83,6 +83,10 @@ static const char * const xauthpaths[] = {
+ 	"/usr/bin/X11/xauth"
+ };
+ 
++#ifndef HOST_NAME_MAX
++# define HOST_NAME_MAX 255
++#endif
++
+ /* Run a given command (with a NULL-terminated argument list), feeding it the
+  * given input on stdin, and storing any output it generates. */
+ static int
+EOF
+	echo "fixing hurd build #1109006 https://github.com/linux-pam/linux-pam/pull/918"
+	drop_privs patch -p1 <<'EOF'
+--- a/examples/tty_conv.c
++++ b/examples/tty_conv.c
+@@ -18,7 +18,7 @@
+ static void echoOff(int fd, int off)
+ {
+     struct termios tty;
+-    if (ioctl(fd, TCGETA, &tty) < 0)
++    if (tcgetattr(fd, &tty) < 0)
+     {
+         fprintf(stderr, "TCGETA failed: %s\n", strerror(errno));
+         return;
+@@ -27,7 +27,7 @@ static void echoOff(int fd, int off)
+     if (off)
+     {
+         tty.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);
+-        if (ioctl(fd, TCSETAF, &tty) < 0)
++        if (tcsetattr(fd, 0, &tty) < 0)
+         {
+             fprintf(stderr, "TCSETAF failed: %s\n", strerror(errno));
+         }
+@@ -35,7 +35,7 @@ static void echoOff(int fd, int off)
+     else
+     {
+         tty.c_lflag |= (ECHO | ECHOE | ECHOK | ECHONL);
+-        if (ioctl(fd, TCSETAW, &tty) < 0)
++        if (tcsetattr(fd, TCSADRAIN, &tty) < 0)
+         {
+             fprintf(stderr, "TCSETAW failed: %s\n", strerror(errno));
+         }
+EOF
+}
 builddep_pam() {
 	echo "work around #1094853"
 	apt_get_purge bison
