@@ -3027,7 +3027,26 @@ EOF
 }
 
 add_automatic lmdb
+
 add_automatic lz4
+patch_lz4() {
+	dpkg-architecture "-a$HOST_ARCH" -ihurd-any || return 0
+	echo "Fix link against libpthread #1108995"
+	drop_privs patch -p0 <<'EOF'
+--- debian/rules.original
++++ debian/rules
+@@ -5,7 +5,7 @@
+ CPPFLAGS:= $(shell dpkg-buildflags --get CPPFLAGS) -fvisibility=hidden -DLZ4F_PUBLISH_STATIC_FUNCTIONS -DLZ4IO_MULTITHREAD
+ CFLAGS:= $(shell dpkg-buildflags --get CFLAGS) $(CPPFLAGS)
+ CXXFLAGS:= $(shell dpkg-buildflags --get CXXFLAGS) $(CPPFLAGS)
+-LDFLAGS:= $(shell dpkg-buildflags --get LDFLAGS)
++LDFLAGS:= $(shell dpkg-buildflags --get LDFLAGS) -pthread
+ DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+ DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+ PREFIX:= /usr
+EOF
+}
+
 add_automatic man-db
 add_automatic mawk
 add_automatic mpclib3
