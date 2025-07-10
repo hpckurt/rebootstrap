@@ -4281,6 +4281,7 @@ mark_built libprelude
 # needed by audit
 
 automatically_cross_build_packages
+fi # $HOST_ARCH matches linux-any
 
 assert_built "zlib bzip2 xz-utils"
 cross_build elfutils pkg.elfutils.nodebuginfod
@@ -4309,6 +4310,7 @@ mark_built libverto
 
 automatically_cross_build_packages
 
+if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
 cross_build audit nopython audit_1
 mark_built audit
