@@ -4242,10 +4242,10 @@ mark_built unbound
 
 automatically_cross_build_packages
 
-assert_built "gmp libidn2 p11-kit libtasn1-6 unbound libunistring nettle"
-cross_build gnutls28 noguile gnutls28_1
-mark_built gnutls28
-# needed by libprelude, openldap, curl
+assert_built "gnutls28 cyrus-sasl2"
+cross_build openldap pkg.openldap.noslapd openldap_1
+mark_built openldap
+# needed by curl
 
 automatically_cross_build_packages
 
@@ -4257,7 +4257,6 @@ if apt-cache showsrc man-db systemd | grep -q "^Build-Depends:.*libseccomp-dev[^
 
 	automatically_cross_build_packages
 fi
-
 
 assert_built "libcap2 pam libselinux acl xz-utils libgcrypt20 kmod util-linux libzstd"
 if apt-cache showsrc systemd | grep -q "^Build-Depends:.*libseccomp-dev[^,]*[[ ]$HOST_ARCH[] ]"; then
