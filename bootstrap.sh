@@ -2621,6 +2621,7 @@ add_automatic libbsd
 
 add_automatic libcap2
 add_automatic libdebian-installer
+add_automatic libedit
 add_automatic libev
 add_automatic libevent
 add_automatic libffi
@@ -3521,6 +3522,7 @@ buildenv_util_linux() {
 	export scanf_cv_type_modifier=ms
 }
 
+add_automatic wtmpdb
 add_automatic xft
 
 add_automatic xxhash
