@@ -4071,6 +4071,7 @@ add_need libevent # by unbound
 add_need libgcrypt20 # by gnupg2, libprelude
 add_need libgpg-error # by gnupg2
 add_need libksba # by gnupg2
+add_need libev # by libverto
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
