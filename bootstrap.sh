@@ -6,12 +6,13 @@ set -u
 
 export DEB_BUILD_OPTIONS="nocheck noddebs parallel=1"
 export DH_VERBOSE=1
+export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
 HOST_ARCH=undefined
 # select gcc version from gcc-defaults package unless set
-GCC_VER=
+GCC_VER=14
 : "${MIRROR:=http://deb.debian.org/debian}"
 ENABLE_MULTILIB=no
-ENABLE_MULTIARCH_GCC=yes
+ENABLE_MULTIARCH_GCC=no
 REPODIR=/tmp/repo
 # https://salsa.debian.org/apt-team/apt#debugging
 APT_GET="apt-get --no-install-recommends -y -o Debug::pkgProblemResolver=true -o Debug::pkgDepCache::Marker=1 -o Debug::pkgDepCache::AutoInstall=1 -o Acquire::Languages=none"
@@ -873,6 +874,448 @@ add_automatic fontconfig
 add_automatic freetype
 add_automatic fribidi
 add_automatic fuse3
+
+patch_gcc_espresso()
+{
+	echo "Enabling espresso SMP support"
+	drop_privs cat <<'EOF' > debian/patches/gcc-espresso.diff
+--- a/src/gcc/config/rs6000/7xx.md
++++ b/src/gcc/config/rs6000/7xx.md
+@@ -47,79 +47,79 @@
+
+ (define_insn_reservation "ppc750-load" 2
+   (and (eq_attr "type" "load,fpload,vecload,load_l")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,lsu_7xx")
+
+ (define_insn_reservation "ppc750-store" 2
+   (and (eq_attr "type" "store,fpstore,vecstore")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,lsu_7xx")
+
+ (define_insn_reservation "ppc750-storec" 8
+   (and (eq_attr "type" "store_c")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,lsu_7xx")
+
+ (define_insn_reservation "ppc750-integer" 1
+   (and (ior (eq_attr "type" "integer,insert,trap,cntlz,isel")
+ 	    (and (eq_attr "type" "add,logical,shift,exts")
+ 		 (eq_attr "dot" "no")))
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx|iu2_7xx")
+
+ (define_insn_reservation "ppc750-two" 1
+   (and (eq_attr "type" "two")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx|iu2_7xx,iu1_7xx|iu2_7xx")
+
+ (define_insn_reservation "ppc750-three" 1
+   (and (eq_attr "type" "three")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx|iu2_7xx,iu1_7xx|iu2_7xx,iu1_7xx|iu2_7xx")
+
+ (define_insn_reservation "ppc750-imul" 4
+   (and (eq_attr "type" "mul")
+        (eq_attr "size" "32")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx*4")
+
+ (define_insn_reservation "ppc750-imul2" 3
+   (and (eq_attr "type" "mul")
+        (eq_attr "size" "16")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx*2")
+
+ (define_insn_reservation "ppc750-imul3" 2
+   (and (eq_attr "type" "mul")
+        (eq_attr "size" "8")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx")
+
+ (define_insn_reservation "ppc750-idiv" 19
+   (and (eq_attr "type" "div")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx*19")
+
+ (define_insn_reservation "ppc750-compare" 2
+   (and (ior (eq_attr "type" "cmp")
+ 	    (and (eq_attr "type" "add,logical,shift,exts")
+ 		 (eq_attr "dot" "yes")))
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,(iu1_7xx|iu2_7xx)")
+
+ (define_insn_reservation "ppc750-fpcompare" 2
+   (and (eq_attr "type" "fpcompare")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,fpu_7xx")
+
+ (define_insn_reservation "ppc750-fp" 3
+   (and (eq_attr "type" "fp,fpsimple")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,fpu_7xx")
+
+ (define_insn_reservation "ppc750-dmul" 4
+   (and (eq_attr "type" "dmul")
+-       (eq_attr "cpu" "ppc750"))
++       (eq_attr "cpu" "ppc750,espresso"))
+   "ppc750_du,fpu_7xx*2")
+
+ (define_insn_reservation "ppc7400-dmul" 3
+@@ -130,37 +130,37 @@
+ ; Divides are not pipelined
+ (define_insn_reservation "ppc750-sdiv" 17
+   (and (eq_attr "type" "sdiv")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,fpu_7xx*17")
+
+ (define_insn_reservation "ppc750-ddiv" 31
+   (and (eq_attr "type" "ddiv")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,fpu_7xx*31")
+
+ (define_insn_reservation "ppc750-mfcr" 2
+   (and (eq_attr "type" "mfcr,mtcr")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "ppc750_du,iu1_7xx")
+
+ (define_insn_reservation "ppc750-crlogical" 3
+   (and (eq_attr "type" "cr_logical")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "nothing,sru_7xx*2")
+
+ (define_insn_reservation "ppc750-mtjmpr" 2
+   (and (eq_attr "type" "mtjmpr,isync,sync")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "nothing,sru_7xx*2")
+
+ (define_insn_reservation "ppc750-mfjmpr" 3
+   (and (eq_attr "type" "mfjmpr")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "nothing,sru_7xx*2")
+
+ (define_insn_reservation "ppc750-jmpreg" 1
+   (and (eq_attr "type" "jmpreg,branch,isync")
+-       (eq_attr "cpu" "ppc750,ppc7400"))
++       (eq_attr "cpu" "ppc750,ppc7400,espresso"))
+   "nothing,bpu_7xx")
+
+ ;; Altivec
+--- a/src/gcc/config/rs6000/driver-rs6000.cc
++++ b/src/gcc/config/rs6000/driver-rs6000.cc
+@@ -508,6 +508,7 @@ static const struct asm_name asm_names[]
+   { "630",	"-mppc64" },
+   { "740",	"-mppc" },
+   { "750",	"-mppc" },
++  { "espresso", "-mppc" },
+   { "G3",	"-mppc" },
+   { "7400",	"-mppc %{!mvsx:%{!maltivec:-maltivec}}" },
+   { "7450",	"-mppc %{!mvsx:%{!maltivec:-maltivec}}" },
+--- a/src/gcc/config/rs6000/rs6000-c.cc
++++ b/src/gcc/config/rs6000/rs6000-c.cc
+@@ -649,6 +649,8 @@ rs6000_cpu_cpp_builtins (cpp_reader *pfi
+   /* Used by lwarx/stwcx. errata work-around.  */
+   if (rs6000_cpu == PROCESSOR_PPC405)
+     builtin_define ("__PPC405__");
++  if (rs6000_cpu == PROCESSOR_ESPRESSO)
++    builtin_define ("__ESPRESSO__");
+   /* Used by libstdc++.  */
+   if (TARGET_NO_LWSYNC)
+     builtin_define ("__NO_LWSYNC__");
+--- a/src/gcc/config/rs6000/rs6000-cpus.def
++++ b/src/gcc/config/rs6000/rs6000-cpus.def
+@@ -203,6 +203,7 @@ RS6000_CPU ("740", PROCESSOR_PPC750, OPT
+ RS6000_CPU ("7400", PROCESSOR_PPC7400, POWERPC_7400_MASK)
+ RS6000_CPU ("7450", PROCESSOR_PPC7450, POWERPC_7400_MASK)
+ RS6000_CPU ("750", PROCESSOR_PPC750, OPTION_MASK_PPC_GFXOPT)
++RS6000_CPU ("espresso", PROCESSOR_ESPRESSO, OPTION_MASK_PPC_GFXOPT)
+ RS6000_CPU ("801", PROCESSOR_MPCCORE, OPTION_MASK_SOFT_FLOAT)
+ RS6000_CPU ("821", PROCESSOR_MPCCORE, OPTION_MASK_SOFT_FLOAT)
+ RS6000_CPU ("823", PROCESSOR_MPCCORE, OPTION_MASK_SOFT_FLOAT)
+--- a/src/gcc/config/rs6000/rs6000-logue.cc
++++ b/src/gcc/config/rs6000/rs6000-logue.cc
+@@ -4318,6 +4318,7 @@ rs6000_emit_epilogue (enum epilogue_type
+   bool using_mtcr_multiple = (rs6000_tune == PROCESSOR_PPC601
+ 			      || rs6000_tune == PROCESSOR_PPC603
+ 			      || rs6000_tune == PROCESSOR_PPC750
++			      || rs6000_tune == PROCESSOR_ESPRESSO
+ 			      || optimize_size);
+
+   /* Restore via the backchain when we have a large frame, since this
+--- a/src/gcc/config/rs6000/rs6000-opts.h
++++ b/src/gcc/config/rs6000/rs6000-opts.h
+@@ -40,6 +40,7 @@ enum processor_type
+    PROCESSOR_PPC750,
+    PROCESSOR_PPC7400,
+    PROCESSOR_PPC7450,
++   PROCESSOR_ESPRESSO,
+
+    PROCESSOR_PPC403,
+    PROCESSOR_PPC405,
+--- a/src/gcc/config/rs6000/rs6000-tables.opt
++++ b/src/gcc/config/rs6000/rs6000-tables.opt
+@@ -96,107 +96,110 @@ EnumValue
+ Enum(rs6000_cpu_opt_value) String(750) Value(22)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(801) Value(23)
++Enum(rs6000_cpu_opt_value) String(espresso) Value(23)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(821) Value(24)
++Enum(rs6000_cpu_opt_value) String(801) Value(24)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(823) Value(25)
++Enum(rs6000_cpu_opt_value) String(821) Value(25)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(8540) Value(26)
++Enum(rs6000_cpu_opt_value) String(823) Value(26)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(8548) Value(27)
++Enum(rs6000_cpu_opt_value) String(8540) Value(27)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(a2) Value(28)
++Enum(rs6000_cpu_opt_value) String(8548) Value(28)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e300c2) Value(29)
++Enum(rs6000_cpu_opt_value) String(a2) Value(29)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e300c3) Value(30)
++Enum(rs6000_cpu_opt_value) String(e300c2) Value(30)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e500mc) Value(31)
++Enum(rs6000_cpu_opt_value) String(e300c3) Value(31)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e500mc64) Value(32)
++Enum(rs6000_cpu_opt_value) String(e500mc) Value(32)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e5500) Value(33)
++Enum(rs6000_cpu_opt_value) String(e500mc64) Value(33)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(e6500) Value(34)
++Enum(rs6000_cpu_opt_value) String(e5500) Value(34)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(860) Value(35)
++Enum(rs6000_cpu_opt_value) String(e6500) Value(35)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(970) Value(36)
++Enum(rs6000_cpu_opt_value) String(860) Value(36)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(cell) Value(37)
++Enum(rs6000_cpu_opt_value) String(970) Value(37)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(ec603e) Value(38)
++Enum(rs6000_cpu_opt_value) String(cell) Value(38)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(G3) Value(39)
++Enum(rs6000_cpu_opt_value) String(ec603e) Value(39)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(G4) Value(40)
++Enum(rs6000_cpu_opt_value) String(G3) Value(40)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(G5) Value(41)
++Enum(rs6000_cpu_opt_value) String(G4) Value(41)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(titan) Value(42)
++Enum(rs6000_cpu_opt_value) String(G5) Value(42)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power3) Value(43)
++Enum(rs6000_cpu_opt_value) String(titan) Value(43)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power4) Value(44)
++Enum(rs6000_cpu_opt_value) String(power3) Value(44)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power5) Value(45)
++Enum(rs6000_cpu_opt_value) String(power4) Value(45)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power5+) Value(46)
++Enum(rs6000_cpu_opt_value) String(power5) Value(46)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power6) Value(47)
++Enum(rs6000_cpu_opt_value) String(power5+) Value(47)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power6x) Value(48)
++Enum(rs6000_cpu_opt_value) String(power6) Value(48)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power7) Value(49)
++Enum(rs6000_cpu_opt_value) String(power6x) Value(49)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power8) Value(50)
++Enum(rs6000_cpu_opt_value) String(power7) Value(50)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power9) Value(51)
++Enum(rs6000_cpu_opt_value) String(power8) Value(51)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power10) Value(52)
++Enum(rs6000_cpu_opt_value) String(power9) Value(52)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(power11) Value(53)
++Enum(rs6000_cpu_opt_value) String(power10) Value(53)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(powerpc) Value(54)
++Enum(rs6000_cpu_opt_value) String(power11) Value(54)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(powerpc64) Value(55)
++Enum(rs6000_cpu_opt_value) String(powerpc) Value(55)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(powerpc64le) Value(56)
++Enum(rs6000_cpu_opt_value) String(powerpc64) Value(56)
+
+ EnumValue
+-Enum(rs6000_cpu_opt_value) String(rs64) Value(57)
++Enum(rs6000_cpu_opt_value) String(powerpc64le) Value(57)
++
++EnumValue
++Enum(rs6000_cpu_opt_value) String(rs64) Value(58)
+
+--- a/src/gcc/config/rs6000/rs6000.cc
++++ b/src/gcc/config/rs6000/rs6000.cc
+@@ -4652,6 +4652,7 @@ rs6000_option_override_internal (bool gl
+
+       case PROCESSOR_PPC750:
+       case PROCESSOR_PPC7400:
++      case PROCESSOR_ESPRESSO:
+ 	rs6000_cost = &ppc750_cost;
+ 	break;
+
+@@ -16826,6 +16827,10 @@ emit_store_conditional (machine_mode mod
+   if (PPC405_ERRATUM77)
+     emit_insn (gen_hwsync ());
+
++  /* Emit dcbst before stwcx. to address Espresso erratum */
++  if (ESPRESSO_ERRATUM)
++    emit_insn (gen_rs6000_dcbst (mem));
++
+   emit_insn (fn (res, mem, val));
+ }
+
+@@ -18246,6 +18251,7 @@ rs6000_adjust_cost (rtx_insn *insn, int
+                  || rs6000_tune == PROCESSOR_PPC620
+                  || rs6000_tune == PROCESSOR_PPC630
+                  || rs6000_tune == PROCESSOR_PPC750
++                 || rs6000_tune == PROCESSOR_ESPRESSO
+                  || rs6000_tune == PROCESSOR_PPC7400
+                  || rs6000_tune == PROCESSOR_PPC7450
+                  || rs6000_tune == PROCESSOR_PPCE5500
+@@ -18803,6 +18809,7 @@ rs6000_issue_rate (void)
+   case PROCESSOR_PPC440:
+   case PROCESSOR_PPC603:
+   case PROCESSOR_PPC750:
++  case PROCESSOR_ESPRESSO:
+   case PROCESSOR_PPC7400:
+   case PROCESSOR_PPC8540:
+   case PROCESSOR_PPC8548:
+--- a/src/gcc/config/rs6000/rs6000.h
++++ b/src/gcc/config/rs6000/rs6000.h
+@@ -77,6 +77,9 @@
+ #define PPC405_ERRATUM77 0
+ #endif
+
++/* Support Espresso stwcx erratum. */
++#define ESPRESSO_ERRATUM (rs6000_cpu == PROCESSOR_ESPRESSO)
++
+ #ifndef SUBTARGET_DRIVER_SELF_SPECS
+ # define SUBTARGET_DRIVER_SELF_SPECS ""
+ #endif
+@@ -144,6 +147,7 @@
+   mcpu=630: -mppc64; \
+   mcpu=740: -mppc; \
+   mcpu=750: -mppc; \
++  mcpu=espresso: -mppc; \
+   mcpu=G3: -mppc; \
+   mcpu=7400: -mppc %{!mvsx:%{!maltivec:-maltivec}}; \
+   mcpu=7450: -mppc %{!mvsx:%{!maltivec:-maltivec}}; \
+--- a/src/gcc/config/rs6000/rs6000.md
++++ b/src/gcc/config/rs6000/rs6000.md
+@@ -347,7 +347,7 @@
+ ;; enumeration in rs6000-opts.h.
+ (define_attr "cpu"
+   "ppc601,ppc603,ppc604,ppc604e,ppc620,ppc630,
+-   ppc750,ppc7400,ppc7450,
++   ppc750,ppc7400,ppc7450,espresso,
+    ppc403,ppc405,ppc440,ppc476,
+    ppc8540,ppc8548,ppce300c2,ppce300c3,ppce500mc,ppce500mc64,ppce5500,ppce6500,
+    power4,power5,power6,power7,power8,power9,power10,power11,
+--- a/src/gcc/config/rs6000/sync.md
++++ b/src/gcc/config/rs6000/sync.md
+@@ -347,6 +347,13 @@
+   "<stcx> %2,%y1"
+   [(set_attr "type" "store_c")])
+
++;; I am pretty sure VOID is correct since this actually affects a cache-block sized
++;; chunk of memory
++(define_insn "rs6000_dcbst"
++  [(match_operand:VOID 0 "memory_operand" "=Z")]
++  ""
++  "dcbst %y0")
++
+ ;; Use a temporary register to force getting an even register for the
+ ;; lqarx/stqcrx. instructions.  Normal optimizations will eliminate this extra
+ ;; copy on big endian systems.
+--- a/src/gcc/config.gcc
++++ b/src/gcc/config.gcc
+@@ -5604,7 +5604,7 @@ case "${target}" in
+ 			| rs64 \
+ 			| 401 | 403 | 405 | 405fp | 440 | 440fp | 464 | 464fp \
+ 			| 476 | 476fp | 505 | 601 | 602 | 603 | 603e | ec603e \
+-			| 604 | 604e | 620 | 630 | 740 | 750 | 7400 | 7450 \
++			| 604 | 604e | 620 | 630 | 740 | 750 | 7400 | 7450 | espresso \
+ 			| a2 | e300c[23] | 854[08] | e500mc | e500mc64 | e5500 | e6500 \
+ 			| titan | 801 | 821 | 823 | 860 | 970 | G3 | G4 | G5 | cell)
+ 				# OK
+EOF
+}
 
 patch_gcc_default_pie_everywhere()
 {
@@ -2384,6 +2827,7 @@ patch_gcc_14() {
 	patch_gcc_for_host_in_rtlibs
 	patch_gcc_default_pie_everywhere
 	patch_gcc_wdotap
+	patch_gcc_espresso
 }
 buildenv_gcc_14() {
 	echo "ignoring symbol differences #1085155"
@@ -2517,6 +2961,148 @@ EOF
 -mv $(debian-tmp)/usr/include/mach/x86_64 $(debian-tmp)/usr/include/$(DEB_HOST_MULTIARCH)/mach/
 -ln -s ../$(DEB_HOST_MULTIARCH)/mach/x86_64 $(debian-tmp)/usr/include/mach/x86_64
  endef
+--- a/sysdeps/powerpc/atomic-machine.h
++++ b/sysdeps/powerpc/atomic-machine.h
+@@ -47,6 +47,10 @@
+ # define MUTEX_HINT_REL
+ #endif
+
++#ifndef DCBST
++# define DCBST(x)
++#endif
++
+ #define atomic_full_barrier()	__asm ("sync" ::: "memory")
+
+ #define __arch_compare_and_exchange_val_32_acq(mem, newval, oldval)	      \
+@@ -57,6 +61,7 @@
+ 		        "1:	lwarx	%0,0,%1" MUTEX_HINT_ACQ "\n"	      \
+ 		        "	cmpw	%0,%2\n"			      \
+ 		        "	bne	2f\n"				      \
++		        DCBST("%1")					      \
+ 		        "	stwcx.	%3,0,%1\n"			      \
+ 		        "	bne-	1b\n"				      \
+ 		        "2:	" __ARCH_ACQ_INSTR			      \
+@@ -74,6 +79,7 @@
+ 		        "1:	lwarx	%0,0,%1" MUTEX_HINT_REL "\n"	      \
+ 		        "	cmpw	%0,%2\n"			      \
+ 		        "	bne	2f\n"				      \
++		        DCBST("%1")					      \
+ 		        "	stwcx.	%3,0,%1\n"			      \
+ 		        "	bne-	1b\n"				      \
+ 		        "2:	"					      \
+@@ -88,6 +94,7 @@
+     __typeof (*mem) __val;						      \
+     __asm __volatile (							      \
+ 		      "1:	lwarx	%0,0,%2" MUTEX_HINT_ACQ "\n"	      \
++		      DCBST("%2")					      \
+ 		      "		stwcx.	%3,0,%2\n"			      \
+ 		      "		bne-	1b\n"				      \
+ 		      "   " __ARCH_ACQ_INSTR				      \
+@@ -102,6 +109,7 @@
+     __typeof (*mem) __val;						      \
+     __asm __volatile (__ARCH_REL_INSTR "\n"				      \
+ 		      "1:	lwarx	%0,0,%2" MUTEX_HINT_REL "\n"	      \
++		      DCBST("%2")					      \
+ 		      "		stwcx.	%3,0,%2\n"			      \
+ 		      "		bne-	1b"				      \
+ 		      : "=&r" (__val), "=m" (*mem)			      \
+@@ -115,6 +123,7 @@
+     __typeof (*mem) __val, __tmp;					      \
+     __asm __volatile ("1:	lwarx	%0,0,%3\n"			      \
+ 		      "		add	%1,%0,%4\n"			      \
++		      DCBST("%3")					      \
+ 		      "		stwcx.	%1,0,%3\n"			      \
+ 		      "		bne-	1b"				      \
+ 		      : "=&b" (__val), "=&r" (__tmp), "=m" (*mem)	      \
+@@ -128,6 +137,7 @@
+     __typeof (*mem) __val, __tmp;					      \
+     __asm __volatile ("1:	lwarx	%0,0,%3" MUTEX_HINT_ACQ "\n"	      \
+ 		      "		add	%1,%0,%4\n"			      \
++		      DCBST("%3")					      \
+ 		      "		stwcx.	%1,0,%3\n"			      \
+ 		      "		bne-	1b\n"				      \
+ 		      __ARCH_ACQ_INSTR					      \
+@@ -143,6 +153,7 @@
+     __asm __volatile (__ARCH_REL_INSTR "\n"				      \
+ 		      "1:	lwarx	%0,0,%3" MUTEX_HINT_REL "\n"	      \
+ 		      "		add	%1,%0,%4\n"			      \
++		      DCBST("%3")					      \
+ 		      "		stwcx.	%1,0,%3\n"			      \
+ 		      "		bne-	1b"				      \
+ 		      : "=&b" (__val), "=&r" (__tmp), "=m" (*mem)	      \
+@@ -156,6 +167,7 @@
+     __typeof (*(mem)) __val;						      \
+     __asm __volatile ("1:	lwarx	%0,0,%2\n"			      \
+ 		      "		addi	%0,%0,1\n"			      \
++		      DCBST("%2")					      \
+ 		      "		stwcx.	%0,0,%2\n"			      \
+ 		      "		bne-	1b"				      \
+ 		      : "=&b" (__val), "=m" (*mem)			      \
+@@ -169,6 +181,7 @@
+     __typeof (*(mem)) __val;						      \
+     __asm __volatile ("1:	lwarx	%0,0,%2\n"			      \
+ 		      "		subi	%0,%0,1\n"			      \
++		      DCBST("%2")					      \
+ 		      "		stwcx.	%0,0,%2\n"			      \
+ 		      "		bne-	1b"				      \
+ 		      : "=&b" (__val), "=m" (*mem)			      \
+@@ -183,6 +196,7 @@
+ 		       "	cmpwi	0,%0,0\n"			      \
+ 		       "	addi	%1,%0,-1\n"			      \
+ 		       "	ble	2f\n"				      \
++		       DCBST("%3")					      \
+ 		       "	stwcx.	%1,0,%3\n"			      \
+ 		       "	bne-	1b\n"				      \
+ 		       "2:	" __ARCH_ACQ_INSTR			      \
+--- a/sysdeps/powerpc/nptl/pthread_spin_lock.c
++++ b/sysdeps/powerpc/nptl/pthread_spin_lock.c
+@@ -27,6 +27,9 @@ __pthread_spin_lock (pthread_spinlock_t
+        "1:	lwarx	%0,0,%1" MUTEX_HINT_ACQ "\n"
+        "	cmpwi	0,%0,0\n"
+        "	bne-	2f\n"
++#ifdef __ESPRESSO__
++       "	dcbst	0,%1\n"
++#endif
+        "	stwcx.	%2,0,%1\n"
+        "	bne-	2f\n"
+                 __ARCH_ACQ_INSTR "\n"
+--- a/sysdeps/powerpc/nptl/pthread_spin_trylock.c
++++ b/sysdeps/powerpc/nptl/pthread_spin_trylock.c
+@@ -28,6 +28,9 @@ __pthread_spin_trylock (pthread_spinlock
+   asm ("1:	lwarx	%0,0,%2" MUTEX_HINT_ACQ "\n"
+        "	cmpwi	0,%0,0\n"
+        "	bne	2f\n"
++#ifdef __ESPRESSO__
++       "	dcbst	0,%2\n"
++#endif
+        "	stwcx.	%3,0,%2\n"
+        "	bne-	1b\n"
+        "	li	%1,0\n"
+--- a/sysdeps/powerpc/powerpc32/atomic-machine.h
++++ b/sysdeps/powerpc/powerpc32/atomic-machine.h
+@@ -36,6 +36,14 @@
+ #define USE_ATOMIC_COMPILER_BUILTINS 0
+ #define ATOMIC_EXCHANGE_USES_CAS 1
+
++// Espresso processors found in the Nintendo Wii U require a dcbst before
++// stwcx due to an errata.
++#ifdef __ESPRESSO__
++# define DCBST(x) "dcbst 0," x "\n"
++#else
++# define DCBST(x)
++#endif
++
+ /*
+  * The 32-bit exchange_bool is different on powerpc64 because the subf
+  * does signed 64-bit arithmetic while the lwarx is 32-bit unsigned
+@@ -49,6 +57,7 @@
+ 		    "1:	lwarx	%0,0,%1" MUTEX_HINT_ACQ "\n"		      \
+ 		    "	subf.	%0,%2,%0\n"				      \
+ 		    "	bne	2f\n"					      \
++		    DCBST("%1")						      \
+ 		    "	stwcx.	%3,0,%1\n"				      \
+ 		    "	bne-	1b\n"					      \
+ 		    "2:	" __ARCH_ACQ_INSTR				      \
 EOF
 }
 buildenv_glibc() {
