@@ -220,7 +220,7 @@ obtain_source_package() {
 		echo "deb-src $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
 		$APT_GET update
 	fi
-	drop_privs apt-get source "$1"
+	drop_privs apt-get --only-source source "$1"
 	if test -f /etc/apt/sources.list.d/tmp-experimental.list; then
 		rm /etc/apt/sources.list.d/tmp-experimental.list
 		$APT_GET update
