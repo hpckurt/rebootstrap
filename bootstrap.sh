@@ -3363,7 +3363,6 @@ builddep_pam() {
 
 add_automatic patch
 add_automatic pcre2
-add_automatic pcre3
 add_automatic pkgconf
 add_automatic popt
 
