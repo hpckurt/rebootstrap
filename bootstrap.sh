@@ -341,6 +341,25 @@ if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 fi
 
+# https://git.dpkg.org/cgit/dpkg/dpkg.git/commit/?id=a081eb9d9ea73f03a78e5b47d12457b08f3270e4
+patch /usr/share/perl5/Dpkg/Shlibs.pm <<'EOF'
+--- Shlibs.pm
++++ Shlibs.pm
+@@ -114,12 +114,6 @@
+     # cross-build or a build of a cross-compiler.
+     my $multiarch;
+
+-    # Detect cross compiler builds.
+-    if ($ENV{DEB_TARGET_GNU_TYPE} and
+-        ($ENV{DEB_TARGET_GNU_TYPE} ne $ENV{DEB_BUILD_GNU_TYPE}))
+-    {
+-        $multiarch = gnutriplet_to_multiarch($ENV{DEB_TARGET_GNU_TYPE});
+-    }
+     # Host for normal cross builds.
+     if (get_build_arch() ne get_host_arch()) {
+         $multiarch = debarch_to_multiarch(get_host_arch());
+EOF
+
 # removing libc*-dev conflict with each other
 LIBC_DEV_PKG=$(apt-cache showpkg libc-dev | sed '1,/^Reverse Provides:/d;s/ .*//;q')
 if test "$(apt-cache show "$LIBC_DEV_PKG" | sed -n 's/^Source: //;T;p;q')" = glibc; then
