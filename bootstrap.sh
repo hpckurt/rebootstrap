@@ -4140,7 +4140,6 @@ if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 fi
 add_need libtextwrap # by cdebconf
 add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd, util-linux
-add_need libxrender # by cairo
 add_need libzstd # by systemd
 add_need lz4 # by elfutils, systemd
 add_need m4 # for debhelper
