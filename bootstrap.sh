@@ -3037,6 +3037,10 @@ EOF
 }
 buildenv_libxt() {
 	export xorg_cv_malloc0_returns_null=no
+	test "$GCC_VER" -lt 15 && return 0
+	echo "working around FTBFS with gcc-15 #1097293"
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
 }
 
 add_automatic libzstd
