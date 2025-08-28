@@ -737,11 +737,6 @@ EOF
 			drop_privs sed -i -e "/^#NATIVE_ARCHS +=/aNATIVE_ARCHS += $HOST_ARCH" debian/rules
 			regenerate_control=1
 		;;
-		armel|armhf)
-			echo "fixing build-depends for cross compilation #1105026"
-			drop_privs sed -i -e 's/g++-14 /g++-14-for-host /' debian/control.in
-			regenerate_control=1
-		;;
 	esac
 	if test "$regenerate_control" = 1; then
 		drop_privs ./debian/rules ./stamps/control
