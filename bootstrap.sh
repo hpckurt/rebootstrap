@@ -2645,10 +2645,6 @@ buildenv_libgc() {
 add_automatic libgcrypt20
 buildenv_libgcrypt20() {
 	export ac_cv_sys_symbol_underscore=no
-	test "$GCC_VER" -lt 15 && return 0
-	echo "working around FTBFS with gcc-15 #1109071"
-	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
-	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
 }
 
 add_automatic libgpg-error
