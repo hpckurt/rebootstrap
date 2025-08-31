@@ -2862,14 +2862,7 @@ add_automatic libsystemd-dummy
 add_automatic libtasn1-6
 add_automatic libtextwrap
 add_automatic libtirpc
-
-builddep_libtool() {
-	assert_built "zlib"
-	test "$1" = "$HOST_ARCH"
-	# gfortran dependency needs cross-translation
-	# gnulib dependency lacks M-A:foreign
-	apt_get_install debhelper file "gfortran-$GCC_VER$HOST_ARCH_SUFFIX" automake autoconf autotools-dev help2man texinfo "zlib1g-dev:$HOST_ARCH" gnulib
-}
+add_automatic libtool
 
 add_automatic libunistring
 buildenv_libunistring() {
@@ -4100,6 +4093,7 @@ if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
 add_need libtextwrap # by cdebconf
+add_need libtool # by libprelude
 add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd, util-linux
 add_need libzstd # by systemd
 add_need lz4 # by elfutils, systemd
@@ -4208,12 +4202,6 @@ automatically_cross_build_packages
 cross_build zlib "$(if test "$ENABLE_MULTILIB" != yes; then echo stage1; fi)"
 mark_built zlib
 # needed by dpkg, file, gnutls28, libpng1.6, libtool, libxml2, perl, slang2, tcl8.6, util-linux
-
-automatically_cross_build_packages
-
-cross_build libtool
-mark_built libtool
-# needed libffi
 
 automatically_cross_build_packages
 
