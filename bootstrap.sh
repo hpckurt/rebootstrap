@@ -3760,7 +3760,7 @@ else
 fi
 progress_mark "cross gcc stage1 build"
 
-# replacement for cross-gcc-defaults
+# emulate gcc-defaults until we can install it
 for prog in c++ cpp g++ gcc gcc-ar gcc-ranlib gfortran; do
 	ln -fs "`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-$prog-$GCC_VER" "/usr/bin/`dpkg-architecture "-a$HOST_ARCH" -qDEB_HOST_GNU_TYPE`-$prog"
 done
@@ -3956,8 +3956,15 @@ fi
 progress_mark "gcc cross rtlibs build"
 fi
 
+if test -f "$REPODIR/stamps/gcc-defaults"; then
+	echo "skipping rebuild of gcc-defaults"
+else
+	cross_build gcc-defaults
+	progress_mark "gcc-defaults cross build"
+fi
+
 # install something similar to crossbuild-essential
-apt_get_install "binutils$HOST_ARCH_SUFFIX" "gcc-$GCC_VER$HOST_ARCH_SUFFIX" "g++-$GCC_VER$HOST_ARCH_SUFFIX" "libc-dev:$HOST_ARCH"
+apt_get_install binutils-for-build "binutils-for-host:$HOST_ARCH" g++-for-build "g++-for-host:$HOST_ARCH" "libc-dev:$HOST_ARCH"
 
 apt_get_remove libc6-i386 # breaks cross builds
 
