@@ -204,9 +204,8 @@ drop_privs() {
 	( drop_privs_exec "$@" )
 }
 
-if test -z "$GCC_VER"; then
-	GCC_VER=`apt-cache depends gcc | sed 's/^ *Depends: gcc-\([0-9.]*\)$/\1/;t;d'`
-fi
+DEFAULT_GCC_VER=$(apt-cache depends gcc | sed 's/^ *Depends: gcc-\([0-9.]*\)$/\1/;t;d')
+: "${GCC_VER:="$DEFAULT_GCC_VER"}"
 
 obtain_source_package() {
 	local use_experimental
@@ -2412,6 +2411,16 @@ patch_gcc_15() {
 buildenv_gcc_15() {
 	echo "ignoring symbol differences #1112617"
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
+}
+
+patch_gcc_defaults() {
+	if ! test "$GCC_VER" = "$DEFAULT_GCC_VER"; then
+		echo "adapting the base dependency"
+		drop_privs sed -i -e 's/^\( \+gcc-\)[0-9]*-base (>= [^)]\+),$/\1'"$GCC_VER-base,/" debian/control
+		echo "changing the default gcc version"
+		drop_privs sed -i -e 's/^\(CV_[^=]*= \).*/\1'"$GCC_VER/" -e 's/^\(^REQV_[^=]*= \).*/\1(>= '"$GCC_VER)/" debian/rules
+		drop_privs ./debian/rules control
+	fi
 }
 
 add_automatic gdbm
