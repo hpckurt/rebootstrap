@@ -3082,33 +3082,6 @@ EOF
 }
 
 add_automatic m4
-patch_m4() {
-	test "$HOST_ARCH" = hurd-amd64 || return 0
-	echo "Fix ucontext https://debbugs.gnu.org/cgi/bugreport.cgi?bug=63334 https://lists.gnu.org/archive/html/bug-gnulib/2023-05/msg00048.html #1109129"
-	drop_privs patch -p1 <<'EOF'
---- a/lib/sigsegv.c.original
-+++ b/lib/sigsegv.c	
-@@ -351,6 +351,17 @@
-    "old esp, if trapped from user".  */
- #  define SIGSEGV_FAULT_STACKPOINTER  scp->sc_uesp
- 
-+# elif defined __x86_64__
-+
-+/* scp points to a 'struct sigcontext' (defined in
-+   glibc/sysdeps/mach/hurd/x86_64/bits/sigcontext.h).
-+   The registers of this struct get pushed on the stack through
-+   gnumach/x86_64/i386/locore.S:trapall.  */
-+/* Both sc_rsp and sc_ursp appear to have the same value.
-+   It appears more reliable to use sc_ursp because it is labelled as
-+   "old rsp, if trapped from user".  */
-+#  define SIGSEGV_FAULT_STACKPOINTER  scp->sc_ursp
-+
- # endif
- 
- #endif
-EOF
-}
-
 add_automatic man-db
 add_automatic mawk
 add_automatic mpclib3
