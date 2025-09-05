@@ -737,6 +737,9 @@ EOF
 			regenerate_control=1
 		;;
 	esac
+	echo "temporarily skipping binutils-common dependency on binutils-for-host #1094189"
+	drop_privs sed -i -e '/^Package: binutils-for-host/,/^$/s/binutils-common[^,]*,/,/' debian/control.in
+	regenerate_control=1
 	if test "$regenerate_control" = 1; then
 		drop_privs ./debian/rules ./stamps/control
 		drop_privs rm -f ./stamps/control
