@@ -2982,39 +2982,8 @@ buildenv_libxss() {
 }
 
 add_automatic libxt
-patch_libxt() {
-	echo "removing libglib2.0-dev dependency #1078927"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control
-+++ b/debian/control
-@@ -12,7 +12,7 @@
-  xutils-dev (>= 1:7.6+3),
-  quilt,
- # for unit tests
-- libglib2.0-dev (>= 2.16),
-+ libglib2.0-dev (>= 2.16) <!nocheck>,
- # specs
-  xmlto (>= 0.0.20),
-  xorg-sgml-doctools (>= 1:1.10),
---- a/debian/rules
-+++ b/debian/rules
-@@ -17,7 +17,7 @@
- 		--docdir=\$${datadir}/doc/libxt-dev \
- 		--with-appdefaultdir=/etc/X11/app-defaults \
- 		--with-xfile-search-path="/usr/lib/X11/%L/%T/%N%S:/usr/lib/X11/%l/%T/%N%S:/usr/lib/X11/%T/%N%S:/etc/X11/%L/%T/%N%C%S:/etc/X11/%l/%T/%N%C%S:/etc/X11/%T/%N%C%S:/etc/X11/%L/%T/%N%S:/etc/X11/%l/%T/%N%S:/etc/X11/%T/%N%S" \
--		--enable-unit-tests \
-+		--$(if $(filter nocheck,$(DEB_BUILD_OPTIONS) $(DEB_BUILD_PROFILES)),dis,en)able-unit-tests \
- 		--disable-silent-rules \
- 		$(docflags) \
- 		CFLAGS="$(CFLAGS)" \
-EOF
-}
 buildenv_libxt() {
 	export xorg_cv_malloc0_returns_null=no
-	test "$GCC_VER" -lt 15 && return 0
-	echo "working around FTBFS with gcc-15 #1097293"
-	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
-	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
 }
 
 add_automatic libzstd
@@ -4309,12 +4278,6 @@ assert_built "zlib bzip2 xz-utils"
 cross_build elfutils pkg.elfutils.nodebuginfod
 mark_built elfutils
 # needed by glib2.0
-
-automatically_cross_build_packages
-
-cross_build libxt
-mark_built libxt
-# temporarily manual for #1078927
 
 automatically_cross_build_packages
 
