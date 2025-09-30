@@ -133,9 +133,6 @@ check_arch() {
 			"csky:ELF 32-bit LSB relocatable, *unknown arch 0xfc* version 1 (SYSV)"*|"csky:ELF 32-bit LSB relocatable, C-SKY processor family, version 1 (SYSV)"*)
 				return 0
 			;;
-			"loong64:ELF 64-bit LSB relocatable, LoongArch, version 1 (SYSV)"*)
-				return 0
-			;;
 			"mips64r6el:ELF 32-bit LSB relocatable, MIPS, MIPS64 rel6 version 1 (SYSV)"*)
 				# elf-arch only recognizes some of the binaries but not others.
 				return 0
