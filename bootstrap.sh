@@ -803,6 +803,7 @@ buildenv_diffutils() {
 	if dpkg-architecture "-a$1" -ignu-any-any; then
 		export gl_cv_func_getopt_gnu=yes
 	fi
+	export gl_cv_func_strcasecmp_works=yes
 }
 
 add_automatic dpkg
