@@ -2654,6 +2654,8 @@ EOF
 		echo "work around time64 abi duality build failure https://github.com/SELinuxProject/selinux/issues/476"
 		drop_privs sed -i -e '/^static_assert.*__ino_t/d' src/matchpathcon.c
 	fi
+	echo "fixing FTCBFS #1119156"
+	drop_privs sed -i -e '1aDPKG_EXPORT_BUILDTOOLS := 1' debian/rules
 }
 
 add_automatic libsepol
