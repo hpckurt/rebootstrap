@@ -1091,9 +1091,9 @@ add_automatic fuse3
 patch_gcc_espresso()
 {
 	echo "SMP patching for Nintendo Wii U"
-	drop_privs cat <<'EOF' > debian/patches/gcc-espresso.diff
+	drop_privs tee debian/patches/gcc-espresso.diff >/dev/null <<'EOF'
 --- a/src/gcc/config/rs6000/7xx.md
---- b/src/gcc/config/rs6000/7xx.md
++++ b/src/gcc/config/rs6000/7xx.md
 @@ -47,79 +47,79 @@
  
  (define_insn_reservation "ppc750-load" 2
@@ -1431,6 +1431,7 @@ patch_gcc_espresso()
 +
 +EnumValue
 +Enum(rs6000_cpu_opt_value) String(rs64) Value(58)
+
 --- a/src/gcc/config/rs6000/rs6000.cc
 +++ b/src/gcc/config/rs6000/rs6000.cc
 @@ -4652,6 +4652,7 @@ rs6000_option_override_internal (bool gl
@@ -1527,6 +1528,7 @@ patch_gcc_espresso()
  			| titan | 801 | 821 | 823 | 860 | 970 | G3 | G4 | G5 | cell)
  				# OK
 EOF
+    echo "debian_patches += gcc-espresso" | drop_privs tee -a debian/rules.patch >/dev/null
 }
 
 patch_gcc_default_pie_everywhere()
