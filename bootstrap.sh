@@ -2363,11 +2363,23 @@ buildenv_gcc_15() {
 }
 
 patch_gcc_defaults() {
+	regenerate_control=0
 	if ! test "$GCC_VER" = "$DEFAULT_GCC_VER"; then
 		echo "adapting the base dependency"
 		drop_privs sed -i -e 's/^\( \+gcc-\)[0-9]*-base (>= [^)]\+),$/\1'"$GCC_VER-base,/" debian/control
 		echo "changing the default gcc version"
 		drop_privs sed -i -e 's/^\(CV_[^=]*= \).*/\1'"$GCC_VER/" -e 's/^\(^REQV_[^=]*= \).*/\1(>= '"$GCC_VER)/" debian/rules
+		regenerate_control=1
+	fi
+	case " $(printf 'display:\n\t@echo $(all_archs)\ninclude debian/rules\n' | make -f - 2>/dev/null) " in
+		*" $HOST_ARCH "*) ;;
+		*)
+			echo "adding support $HOST_ARCH to all_archs"
+			drop_privs sed -i -e 's/^\(all_archs\s*=\s*\)/\1'"$HOST_ARCH /" debian/rules
+			regenerate_control=1
+		;;
+	esac
+	if test "$regenerate_control" = 1; then
 		drop_privs ./debian/rules control
 	fi
 }
