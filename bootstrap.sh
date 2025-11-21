@@ -774,7 +774,7 @@ patch_cdebconf() {
 	drop_privs patch -p1 <<'EOF'
 --- a/debian/control
 +++ b/debian/control
-@@ -9,12 +9,13 @@
+@@ -9,11 +9,12 @@
   libtextwrap-dev,
   libreadline-dev (>= 8.1.2-1.1),
   libdebian-installer4-dev | libdebian-installer-dev,
@@ -783,7 +783,6 @@ patch_cdebconf() {
   libgtk2.0-dev <!pkg.cdebconf.nogtk>,
   libcairo2-dev <!pkg.cdebconf.nogtk>,
   libselinux1-dev [linux-any] | libselinux-dev [linux-any],
-  dh-autoreconf,
   dh-exec,
 + pkgconf,
  Maintainer: Debian Install System Team <debian-boot@lists.debian.org>
