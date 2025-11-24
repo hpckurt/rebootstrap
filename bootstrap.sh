@@ -2735,6 +2735,12 @@ buildenv_libxext() {
 	export xorg_cv_malloc0_returns_null=no
 }
 
+builddep_libxml2() {
+	echo "working around nopython FTBFS #1120104"
+	apt_get_install doxygen
+	apt_get_build_dep "-a$1" --arch-only -P "$2" ./
+}
+
 add_automatic libxmu
 add_automatic libxpm
 
