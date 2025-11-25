@@ -1444,10 +1444,10 @@ patch_gcc_for_host_in_rtlibs() {
  ifdef(`TARGET',`',`
  Package: ga68`'PV`'-for-build
  Architecture: all
-@@ -5025,6 +5041,24 @@
-  This is the GNU Algol 68 compiler, which compiles Algol 68 on platforms
-  supported by gcc.  It uses the gcc backend to generate optimised code.
- ')`'dnl TARGET
+@@ -5256,6 +5272,24 @@
+ Description: Documentation for the GNU Algol 68 compiler (ga68)
+  Documentation for the GNU Algol 68 compiler in HTML and info `format'.
+ ')`'dnl algol
 +
 +ifenabled(`ga68forhost',`dnl
 +Package: ga68`'PV`'-for-host
@@ -1467,11 +1467,11 @@ patch_gcc_for_host_in_rtlibs() {
 + This is a dependency package.
 +')`'dnl ga68forhost
 
- ifenabled(`multiga68lib',`
- Package: ga68`'PV-multilib`'TS
+
+ ifdef(`TARGET',`',`dnl
 --- a/debian/rules.conf
 +++ b/debian/rules.conf
-@@ -739,6 +739,9 @@
+@@ -772,6 +772,9 @@
  ifeq ($(with_gcclbase),yes)
    addons += gcclbase
  endif
@@ -1481,7 +1481,7 @@ patch_gcc_for_host_in_rtlibs() {
  ifneq ($(DEB_STAGE),rtlibs)
    addons += cdev c++dev source multilib
    ifeq ($(build_type),build-native)
-@@ -851,6 +854,9 @@
+@@ -884,6 +887,9 @@
      addons += libdevphobos libdevn32phobos
      addons += $(if $(findstring amd64,$(biarchx32archs)),libdevx32phobos)
    endif
@@ -1491,7 +1491,7 @@ patch_gcc_for_host_in_rtlibs() {
  endif
  ifeq ($(with_go),yes)
    addons += ggo godev
-@@ -858,6 +864,9 @@
+@@ -891,6 +897,9 @@
      addons += libggo lib32ggo lib64ggo libn32ggo
      addons += $(if $(findstring amd64,$(biarchx32archs)),libx32ggo)
    endif
@@ -1501,7 +1501,7 @@ patch_gcc_for_host_in_rtlibs() {
  endif
  ifeq ($(with_m2),yes)
    languages += m2
-@@ -866,6 +875,9 @@
+@@ -899,6 +908,9 @@
      addons += libgm2 # lib32gm2 lib64gm2 libn32gm2
      #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32gm2)
    endif
@@ -1509,29 +1509,9 @@ patch_gcc_for_host_in_rtlibs() {
 +    addons += m2forhost
 +  endif
  endif
- ifeq ($(with_rs),yes)
-   languages += rust
-@@ -874,6 +886,9 @@
-   #  addons += libgrs # lib32gm2 lib64gm2 libn32gm2
-   #  #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32gm2)
-   #endif
-+  ifeq ($(LS),)
-+    addons += rustforhost
-+  endif
- endif
- ifeq ($(with_ada),yes)
-   languages += ada
-@@ -881,6 +896,9 @@
-   ifeq ($(with_gnatsjlj),yes)
-     addons += adasjlj
-   endif
-+  ifeq ($(LS),)
-+    addons += adaforhost
-+  endif
- endif
- 
-   ifneq ($(DEB_CROSS),yes)
-@@ -915,6 +915,9 @@
+ ifeq ($(with_cobol),yes)
+   languages += cobol
+@@ -915,6 +927,9 @@
      addons += libga68 # lib32ga68 lib64ga68 libn32ga68
      #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32ga68)
    endif
@@ -1541,6 +1521,26 @@ patch_gcc_for_host_in_rtlibs() {
  endif
  ifeq ($(with_rs),yes)
    languages += rust
+@@ -923,6 +938,9 @@
+   #  addons += libgrs # lib32gm2 lib64gm2 libn32gm2
+   #  #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32gm2)
+   #endif
++  ifeq ($(LS),)
++    addons += rustforhost
++  endif
+ endif
+ ifeq ($(with_ada),yes)
+   languages += ada
+@@ -930,6 +948,9 @@
+   ifeq ($(with_gnatsjlj),yes)
+     addons += adasjlj
+   endif
++  ifeq ($(LS),)
++    addons += adaforhost
++  endif
+ endif
+ 
+   ifneq ($(DEB_CROSS),yes)
 --- a/debian/rules.d/binary-ada.mk
 +++ b/debian/rules.d/binary-ada.mk
 @@ -5,7 +5,7 @@
