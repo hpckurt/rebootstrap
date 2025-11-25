@@ -1418,9 +1418,57 @@ patch_gcc_for_host_in_rtlibs() {
 + This is a dependency package.
 +')`'dnl rustforhost
 +
- ifdef(`TARGET',`',`dnl
- ifenabled(`libs',`
- #Package: gcc`'PV-soft-float
+ ifenabled(`cobol ',`dnl
+ for_each_arch(`ifelse(index(` 'cobol_no_archs` ',` !'arch_deb` '),`-1',`
+ Package: gcobol`'PV`'arch_gnusuffix
+@@ -4985,22 +5017,6 @@
+  which compiles Algol 68 on platforms supported by gcc.  It uses the gcc
+  backend to generate optimised code.
+ ')')`'dnl for_each_arch
+-
+-Package: ga68`'PV`'-for-host
+-Architecture: ifdef(`TARGET',`TARGET',`any')
+-TARGET_PACKAGE`'dnl
+-Multi-Arch: same
+-Depends: BASEDEP, ga68`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
+-  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
+-BUILT_USING`'dnl
+-Description: GNU Algol 68 compiler for the host architecture
+- This is the GNU Algol 68 compiler for the host architecture,
+- which compiles Algol 68 on platforms supported by gcc.  It uses the gcc
+- backend to generate optimised code.
+- .
+- When using this package, tools must be invoked with an architecture prefix.
+- .
+- This is a dependency package.
+ ifdef(`TARGET',`',`
+ Package: ga68`'PV`'-for-build
+ Architecture: all
+@@ -5025,6 +5041,24 @@
+  This is the GNU Algol 68 compiler, which compiles Algol 68 on platforms
+  supported by gcc.  It uses the gcc backend to generate optimised code.
+ ')`'dnl TARGET
++
++ifenabled(`ga68forhost',`dnl
++Package: ga68`'PV`'-for-host
++Architecture: ifdef(`TARGET',`TARGET',`any')
++TARGET_PACKAGE`'dnl
++Multi-Arch: same
++Depends: BASEDEP, ga68`'PV`'${target:suffix} (>= ${gcc:SoftVersion}),
++  gcc`'PV`'-for-host (= ${gcc:Version}), ${misc:Depends}
++BUILT_USING`'dnl
++Description: GNU Algol 68 compiler for the host architecture
++ This is the GNU Algol 68 compiler for the host architecture,
++ which compiles Algol 68 on platforms supported by gcc.  It uses the gcc
++ backend to generate optimised code.
++ .
++ When using this package, tools must be invoked with an architecture prefix.
++ .
++ This is a dependency package.
++')`'dnl ga68forhost
+
+ ifenabled(`multiga68lib',`
+ Package: ga68`'PV-multilib`'TS
 --- a/debian/rules.conf
 +++ b/debian/rules.conf
 @@ -739,6 +739,9 @@
@@ -1483,6 +1531,16 @@ patch_gcc_for_host_in_rtlibs() {
  endif
  
    ifneq ($(DEB_CROSS),yes)
+@@ -915,6 +915,9 @@
+     addons += libga68 # lib32ga68 lib64ga68 libn32ga68
+     #addons += $(if $(findstring amd64,$(biarchx32archs)),libx32ga68)
+   endif
++  ifeq ($(LS),)
++    addons += ga68forhost
++  endif
+ endif
+ ifeq ($(with_rs),yes)
+   languages += rust
 --- a/debian/rules.d/binary-ada.mk
 +++ b/debian/rules.d/binary-ada.mk
 @@ -5,7 +5,7 @@
@@ -1524,6 +1582,49 @@ patch_gcc_for_host_in_rtlibs() {
 -	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
 -
  $(binary_stamp)-ada-build: $(install_stamp)
+ 	dh_testdir
+ 	dh_testroot
+--- a/debian/rules.d/binary-algol68.mk
++++ b/debian/rules.d/binary-algol68.mk
+@@ -4,7 +4,7 @@
+     arch_binaries  := $(arch_binaries) ga68-multi
+   endif
+   endif
+-  arch_binaries := $(arch_binaries) ga68-nat ga68-host
++  arch_binaries := $(arch_binaries) ga68-nat
+   ifeq ($(unprefixed_names),yes)
+     arch_binaries := $(arch_binaries) ga68
+     indep_binaries := $(indep_binaries) ga68-build
+@@ -51,7 +51,6 @@
+ endif
+
+ p_ga68_n	= ga68$(pkg_ver)-$(subst _,-,$(TARGET_ALIAS))
+-p_ga68_h	= ga68$(pkg_ver)-for-host
+ p_ga68_b	= ga68$(pkg_ver)-for-build
+ p_ga68	= ga68$(pkg_ver)
+ p_ga68_m	= ga68$(pkg_ver)-multilib$(cross_bin_arch)
+@@ -60,7 +60,6 @@
+ p_ga68d	= ga68$(pkg_ver)-doc
+
+ d_ga68_n	= debian/$(p_ga68_n)
+-d_ga68_h	= debian/$(p_ga68_h)
+ d_ga68_b	= debian/$(p_ga68_b)
+ d_ga68	= debian/$(p_ga68)
+ d_ga68_m	= debian/$(p_ga68_m)
+@@ -134,15 +134,6 @@
+
+ 	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+
+-$(binary_stamp)-ga68-host: $(install_stamp)
+-	dh_testdir
+-	dh_testroot
+-	mv $(install_stamp) $(install_stamp)-tmp
+-	rm -rf $(d_ga68_h)
+-	debian/dh_doclink -p$(p_ga68_h) $(p_xbase)
+-	echo $(p_ga68_h) >> debian/arch_binaries
+-	trap '' 1 2 3 15; touch $@; mv $(install_stamp)-tmp $(install_stamp)
+-
+ $(binary_stamp)-ga68-build: $(install_stamp)
  	dh_testdir
  	dh_testroot
 --- a/debian/rules.d/binary-cpp.mk
@@ -1649,7 +1750,7 @@ patch_gcc_for_host_in_rtlibs() {
  	dh_testroot
 --- /dev/null
 +++ b/debian/rules.d/binary-forhost.mk
-@@ -0,0 +1,97 @@
+@@ -0,0 +1,105 @@
 +ifeq ($(with_cdev),yes)
 +  arch_binaries := $(arch_binaries) cpp-host gcc-host
 +endif
@@ -1680,6 +1781,9 @@ patch_gcc_for_host_in_rtlibs() {
 +ifeq ($(with_ada),yes)
 +  arch_binaries  := $(arch_binaries) ada-host
 +endif
++ifeq ($(with_algol),yes)
++  arch_binaries  := $(arch_binaries) algol-host
++endif
 +
 +p_cpp_h = cpp$(pkg_ver)-for-host
 +p_gcc_h = gcc$(pkg_ver)-for-host
@@ -1692,6 +1796,7 @@ patch_gcc_for_host_in_rtlibs() {
 +p_gm2_h	= gm2$(pkg_ver)-for-host
 +p_grs_h = gccrs$(pkg_ver)-for-host
 +p_gnat_h = gnat-$(GNAT_VERSION)-for-host
++p_ga68_h = ga68$(pkg_ver)-for-host
 +
 +d_cpp_h = debian/$(p_cpp_h)
 +d_gcc_h = debian/$(p_gcc_h)
@@ -1704,6 +1809,7 @@ patch_gcc_for_host_in_rtlibs() {
 +d_gm2_h	= debian/$(p_gm2_h)
 +d_grs_h = debian/$(p_grs_h)
 +d_gnat_h = debian/$(p_gnat_h)
++d_ga68_h = debian/$(p_ga68_h)
 +
 +define do_for_host_package
 +	dh_testdir
@@ -1747,6 +1853,9 @@ patch_gcc_for_host_in_rtlibs() {
 +
 +$(binary_stamp)-ada-host: $(install_stamp)
 +	$(call do_for_host_package,gnat)
++
++$(binary_stamp)-algol-host: $(install_stamp)
++	$(call do_for_host_package,ga68)
 --- a/debian/rules.d/binary-fortran.mk
 +++ b/debian/rules.d/binary-fortran.mk
 @@ -33,7 +33,7 @@
