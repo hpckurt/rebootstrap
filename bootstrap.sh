@@ -2451,6 +2451,7 @@ buildenv_gcc_14() {
 }
 patch_gcc_15() {
 	patch_gcc_for_host_in_rtlibs
+	patch_gcc_default_pie_everywhere
 	patch_gcc_wdotap
 }
 buildenv_gcc_15() {
