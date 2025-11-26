@@ -297,9 +297,19 @@ Package: *
 Pin: release l=rebootstrap
 Pin-Priority: 1002
 
-Explanation: do not use archive cross toolchain
+Explanation: prevent the later -1 pin from matching
 Package: *-$HOST_ARCH-cross *$HOST_ARCH_SUFFIX gcc-*$HOST_ARCH_SUFFIX-base
-Pin: release l=debian
+Pin: release l=rebootstrap-native
+Pin-Priority: 1001
+
+Explanation: prevent the later -1 pin from matching
+Package: *-$HOST_ARCH-cross *$HOST_ARCH_SUFFIX gcc-*$HOST_ARCH_SUFFIX-base
+Pin: release l=rebootstrap
+Pin-Priority: 1002
+
+Explanation: do not use a cross toolchain from any other repository
+Package: *-$HOST_ARCH-cross *$HOST_ARCH_SUFFIX gcc-*$HOST_ARCH_SUFFIX-base
+Pin: version *
 Pin-Priority: -1
 EOF
 $APT_GET update
