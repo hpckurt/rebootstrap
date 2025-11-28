@@ -2720,22 +2720,6 @@ add_automatic libnsl
 add_automatic libonig
 add_automatic libpipeline
 add_automatic libpng1.6
-
-patch_libprelude() {
-	echo "fix FTCBFS #1057733"
-	drop_privs sed -i -e '/_FOR_BUILD/s/\<CFLAGS\>/&_FOR_BUILD/' src/libprelude-error/Makefile.am
-}
-buildenv_libprelude() {
-	if dpkg-architecture "-a$1" -ignu-any-any; then
-		echo "glibc does not return NULL for malloc(0)"
-		export ac_cv_func_malloc_0_nonnull=yes
-	fi
-	if test "$(dpkg-architecture "-a$1" -qDEB_HOST_ARCH_BITS)" = 32; then
-		echo "ignoring symbol differences on 32bit architectures due to #1085492"
-		export DPKG_GENSYMBOLS_CHECK_LEVEL=0
-	fi
-}
-
 add_automatic libpsl
 add_automatic libpthread-stubs
 
@@ -3877,7 +3861,7 @@ add_need libassuan # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
-add_need libgcrypt20 # by gnupg2, libprelude
+add_need libgcrypt20 # by gnupg2
 add_need libgpg-error # by gnupg2
 add_need libksba # by gnupg2
 add_need libev # by libverto
@@ -3886,7 +3870,6 @@ if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
 add_need libtextwrap # by cdebconf
-add_need libtool # by libprelude
 add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd, util-linux
 add_need libzstd # by systemd
 add_need lz4 # by elfutils, systemd
@@ -4110,13 +4093,6 @@ mark_built libcap-ng
 # needed by audit
 
 automatically_cross_build_packages
-
-assert_built "gnutls28 libgcrypt20 libtool"
-cross_build libprelude "nolua noperl nopython noruby" libprelude_1
-mark_built libprelude
-# needed by audit
-
-automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
 
 assert_built "zlib bzip2 xz-utils"
@@ -4141,7 +4117,7 @@ mark_built libverto
 automatically_cross_build_packages
 
 if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
-assert_built "libcap-ng krb5 openldap libprelude tcp-wrappers"
+assert_built "libcap-ng krb5 openldap tcp-wrappers"
 cross_build audit nopython audit_1
 mark_built audit
 # needed by libsemanage
