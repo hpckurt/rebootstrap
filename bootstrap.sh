@@ -772,9 +772,9 @@ patch_bsdmainutils() {
 EOF
 }
 
-builddep_build_essential() {
-	# g++ dependency needs cross translation
-	apt_get_install debhelper python3
+patch_build_essential() {
+	# g++ dependency needs cross translation #1086868
+	drop_privs sed -e '/^Build-Depends:/s/g++ /g++-for-host /' debian/control debian/control.in
 }
 
 add_automatic bzip2
