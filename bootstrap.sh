@@ -773,8 +773,8 @@ EOF
 }
 
 patch_build_essential() {
-	# g++ dependency needs cross translation #1086868
-	drop_privs sed -e '/^Build-Depends:/s/g++ /g++-for-host /' debian/control debian/control.in
+	echo "fixing unsatisfiable g++ dependency #1086868"
+	drop_privs sed -i -e '/^Build-Depends:/s/g++ /g++-for-host /' debian/control debian/control.in
 }
 
 add_automatic bzip2
