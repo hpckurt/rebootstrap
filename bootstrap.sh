@@ -2680,10 +2680,6 @@ buildenv_krb5() {
 	export krb5_cv_attr_constructor_destructor=yes,yes
 	export ac_cv_func_regcomp=yes
 	export ac_cv_printf_positional=yes
-	test "$GCC_VER" -lt 15 && return 0
-	echo "working around FTBFS with gcc-15 #1097099"
-	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
-	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
 }
 
 add_automatic libassuan
