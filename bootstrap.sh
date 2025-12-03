@@ -3901,6 +3901,7 @@ add_need libassuan # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
+add_need libffi # by glib2.0
 add_need libgcrypt20 # by gnupg2
 add_need libgpg-error # by gnupg2
 add_need libksba # by gnupg2
@@ -3922,8 +3923,8 @@ add_need nettle # by unbound
 add_need npth # by gnupg2
 add_need openssl # by cyrus-sasl2
 add_need patch # for dpkg-dev
-add_need pcre2 # by libselinux
-add_need pkgconf # by gnupg2
+add_need pcre2 # by glib2.0, libselinux
+add_need pkgconf # by glib2.0, gnupg2
 add_need popt # by newt
 add_need slang2 # by cdebconf, newt
 add_need sqlite3 # by python3.X
@@ -4017,7 +4018,7 @@ automatically_cross_build_packages
 
 cross_build zlib "$(if test "$ENABLE_MULTILIB" != yes; then echo stage1; fi)"
 mark_built zlib
-# needed by dpkg, file, gnutls28, libpng1.6, libtool, libxml2, perl, slang2, tcl8.6, util-linux
+# needed by dpkg, file, glib2.0, gnutls28, libpng1.6, libtool, libxml2, perl, slang2, tcl8.6, util-linux
 
 automatically_cross_build_packages
 
@@ -4037,7 +4038,7 @@ if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
 	assert_built "libsepol pcre2"
 	cross_build libselinux "nopython noruby" libselinux_1
 	mark_built libselinux
-# needed by coreutils, dpkg, findutils, glibc, sed, tar, util-linux
+# needed by coreutils, dpkg, findutils, glibc, glib2.0, sed, tar, util-linux
 
 automatically_cross_build_packages
 fi # $HOST_ARCH matches linux-any
@@ -4175,7 +4176,7 @@ fi # $HOST_ARCH matches linux-any
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "audit libcap-ng libselinux systemd"
 assert_built "ncurses zlib"
 cross_build util-linux "pkg.util-linux.noverity"
-# essential
+# essential, needed by glib2.0
 
 automatically_cross_build_packages
 
