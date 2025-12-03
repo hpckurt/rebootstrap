@@ -775,6 +775,111 @@ EOF
 patch_build_essential() {
 	echo "fixing unsatisfiable g++ dependency #1086868"
 	drop_privs sed -i -e '/^Build-Depends:/s/g++ /g++-for-host /' debian/control debian/control.in
+	echo "turning build-essential M-A:same #815172"
+	drop_privs patch -p1 <<'EOF'
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -4,7 +4,7 @@
+ 
+ pkgdata_DATA = \
+ 	list \
+-	essential-packages-list
++	essential-packages-list-@DEB_HOST_ARCH@
+ 
+ EXTRA_DIST = \
+ 	list
+@@ -12,11 +12,5 @@
+ 	make-esslist.sh \
+ 	essential-packages-list-*
+ 
+-essential-packages-list: essential-packages-list-@DEB_HOST_ARCH@
+-	ln -s $< $@
+-
+ essential-packages-list-@DEB_HOST_ARCH@:
+ 	echo "No essential packages list is available" > $@
+-
+-clean-local:
+-	rm -f essential-packages-list
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -236,7 +236,7 @@
+ top_srcdir = @top_srcdir@
+ pkgdata_DATA = \
+ 	list \
+-	essential-packages-list
++	essential-packages-list-@DEB_HOST_ARCH@
+ 
+ EXTRA_DIST = \
+ 	list
+@@ -595,15 +595,9 @@
+ 	make-esslist.sh \
+ 	essential-packages-list-*
+ 
+-essential-packages-list: essential-packages-list-@DEB_HOST_ARCH@
+-	ln -s $< $@
+-
+ essential-packages-list-@DEB_HOST_ARCH@:
+ 	echo "No essential packages list is available" > $@
+ 
+-clean-local:
+-	rm -f essential-packages-list
+-
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+ .NOEXPORT:
+--- a/debian/control
++++ b/debian/control
+@@ -7,7 +7,9 @@
+ 
+ Package: build-essential
+ Architecture: any
++Multi-Arch: same
+ Depends: ${build-essential}, ${misc:Depends}
++Breaks: dh-buildinfo (<<  0.11+nmu4~)
+ Description: Informational list of build-essential packages
+  If you do not plan to build Debian packages, you don't need this
+  package.  Starting with dpkg (>= 1.14.18) this package is required
+--- a/debian/control.native.in
++++ b/debian/control.native.in
+@@ -1,7 +1,9 @@
+ 
+ Package: build-essential
+ Architecture: any
++Multi-Arch: same
+ Depends: ${build-essential}, ${misc:Depends}
++Breaks: dh-buildinfo (<<  0.11+nmu4~)
+ Description: Informational list of build-essential packages
+  If you do not plan to build Debian packages, you don't need this
+  package.  Starting with dpkg (>= 1.14.18) this package is required
+--- a/debian/rules
++++ b/debian/rules
+@@ -59,7 +59,6 @@
+ 	  case $$f in list|list.cross) continue; esac; \
+ 	  rm -f $$f; \
+ 	done
+-	rm -f essential-packages-list
+ 	dh_clean
+ 
+ # Make it as clean as svn can make it.
+@@ -80,7 +79,7 @@
+ 
+ 	mkdir -p debian/build-essential/usr/share/doc/build-essential
+ 	ln -sf	../../build-essential/list \
+-		../../build-essential/essential-packages-list \
++		../../build-essential/essential-packages-list-$(DEB_HOST_ARCH) \
+ 		debian/build-essential/usr/share/doc/build-essential
+ endif
+ 
+@@ -89,7 +88,7 @@
+ 	for a in $(cross_archs); do \
+ 	  p=crossbuild-essential-$$a; \
+ 	  $(MAKE) prefix=$(CURDIR)/debian/$$p/usr install; \
+-	  rm -f debian/$$p/usr/share/build-essential/essential-packages-list; \
++	  rm -f debian/$$p/usr/share/build-essential/essential-packages-list-$(DEB_HOST_ARCH); \
+ 	  rm -rf debian/$$p/usr/share/$$p; \
+ 	  mv debian/$$p/usr/share/build-essential \
+ 		debian/$$p/usr/share/$$p; \
+EOF
 }
 
 add_automatic bzip2
@@ -3443,6 +3548,23 @@ else
 echo "host gcc version and build gcc version match. good for multiarch"
 fi
 
+if test -f "$REPODIR/stamps/build-essential_native"; then
+	echo "skipping rebuild of native build-essential"
+else
+	cross_build_setup build-essential build-essential_native
+	apt_get_build_dep --arch-only ./
+	drop_privs dpkg-buildpackage -B -uc -us
+	cd ..
+	ls -l
+	reprepro include rebootstrap-native ./*.changes
+	apt_get_install g++-for-build g++-for-host
+	dpkg -i ./*.deb
+	touch "$REPODIR/stamps/build-essential_native"
+	cd ..
+	drop_privs rm -Rf build-essential_native
+fi
+progress_mark "native build-essential"
+
 if test -f "$REPODIR/stamps/cross-binutils"; then
 	echo "skipping rebuild of binutils-target"
 else
@@ -3786,8 +3908,10 @@ else
 	progress_mark "gcc-defaults cross build"
 fi
 
-# install something similar to crossbuild-essential
-apt_get_install binutils-for-build "binutils-for-host:$HOST_ARCH" g++-for-build "g++-for-host:$HOST_ARCH" "libc-dev:$HOST_ARCH"
+cross_build build-essential
+progress_mark build-essential
+
+apt_get_install "build-essential:$HOST_ARCH"
 
 apt_get_remove libc6-i386 # breaks cross builds
 
@@ -3820,7 +3944,7 @@ Package: crossbuild-essential-$HOST_ARCH
 Version: 0
 Architecture: $HOST_ARCH
 Multi-Arch: foreign
-Depends: libc-dev
+Depends: build-essential:$HOST_ARCH
 Description: fake crossbuild-essential package for dose-builddebcheck
 
 EOF
@@ -4075,12 +4199,6 @@ mark_built cracklib2
 
 automatically_cross_build_packages
 
-cross_build build-essential
-mark_built build-essential
-# build-essential
-
-automatically_cross_build_packages
-
 cross_build pam stage1 pam_1
 mark_built pam
 # needed by shadow
@@ -4194,7 +4312,7 @@ automatically_cross_build_packages
 
 cross_build make-dfsg noguile make-dfsg_1
 mark_built make-dfsg
-# needed by build-essential
+# needed for build-essential
 
 automatically_cross_build_packages
 
