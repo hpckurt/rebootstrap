@@ -879,6 +879,27 @@ patch_build_essential() {
  	  rm -rf debian/$$p/usr/share/$$p; \
  	  mv debian/$$p/usr/share/build-essential \
  		debian/$$p/usr/share/$$p; \
+--- a/list
++++ b/list
+@@ -33,13 +33,15 @@
+ libc6-dev-sparc64 [sparc]
+   Used only on the sparc architecture.
+
+-gcc (>= 4:14.2)
+-g++ (>= 4:14.2)
++gcc-for-build (>= 4:14.2)
++gcc-for-host (>= 4:14.2)
++g++-for-build (>= 4:14.2)
++g++-for-host (>= 4:14.2)
+
+   NOTE:
+   The libstdc++ -dev library is not needed, as g++ depends on it
+
+-make
++make:any
+   Also depended on by dpkg-dev, but make does warrant its own
+   dependency since debian/rules will need it even if dpkg-dev
+   stopped depending on it
 EOF
 }
 
