@@ -4371,5 +4371,5 @@ echo "checking installability of build-essential with dose"
 apt_get_install botch
 package_list=$(mktemp -t packages.XXXXXXXXXX)
 grep-dctrl --exact --field Architecture '(' "$HOST_ARCH" --or all ')' /var/lib/apt/lists/*_Packages > "$package_list"
-botch-distcheck-more-problems "--deb-native-arch=$HOST_ARCH" --successes --failures --explain --checkonly "build-essential:$HOST_ARCH" "--bg=deb://$package_list" "--fg=deb://$package_list" || :
+botch-distcheck-more-problems "--deb-native-arch=$HOST_ARCH" --successes --failures --explain --checkonly "build-essential:$HOST_ARCH, debhelper:$HOST_ARCH" "--bg=deb://$package_list" "--fg=deb://$package_list" || :
 rm -f "$package_list"
