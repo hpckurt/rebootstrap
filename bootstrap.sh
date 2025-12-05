@@ -901,6 +901,16 @@ patch_build_essential() {
    dependency since debian/rules will need it even if dpkg-dev
    stopped depending on it
 EOF
+	cat - debian/changelog <<EOF |
+build-essential ($(dpkg-parsechangelog -SVersion)+rebootstrap1) $SUITE; urgency=medium
+
+  * Multi-Arch: same.
+
+ -- rebootstrap <invalid@invalid>  $(dpkg-parsechangelog -SDate)
+
+EOF
+	drop_privs tee debian/changelog.new >/dev/null
+	drop_privs mv debian/changelog.new debian/changelog
 }
 
 add_automatic bzip2
