@@ -918,6 +918,7 @@ add_automatic c-ares
 add_automatic coreutils
 add_automatic curl
 add_automatic dash
+add_automatic dwz
 add_automatic db-defaults
 add_automatic debianutils
 
@@ -4039,6 +4040,7 @@ add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by gnupg2, perl
 add_need db-defaults # by perl, python3.X
+add_need dwz # for debhelper
 add_need expat # by unbound
 add_need file # by gcc-6, for debhelper
 add_need flex # by pam
