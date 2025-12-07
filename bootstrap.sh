@@ -3933,15 +3933,9 @@ fi
 progress_mark "gcc cross rtlibs build"
 fi
 
-if test -f "$REPODIR/stamps/gcc-defaults"; then
-	echo "skipping rebuild of gcc-defaults"
-else
-	cross_build gcc-defaults
-	progress_mark "gcc-defaults cross build"
-fi
+cross_build gcc-defaults
 
 cross_build build-essential
-progress_mark build-essential
 
 apt_get_install "build-essential:$HOST_ARCH"
 
