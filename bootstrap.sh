@@ -4029,8 +4029,9 @@ for pkg in $(discover_essential); do
 		echo "rebootstrap-debug: not scheduling essential package $pkg"
 	fi
 done
-add_need acl # by elfutils, systemd
+add_need acl # by elfutils, gettext, systemd
 add_need apt # almost essential
+add_need attr # by gettext
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
 add_need bzip2 # by gnupg2, perl
@@ -4063,6 +4064,7 @@ if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
 fi
 add_need libtextwrap # by cdebconf
+add_need libunistring # by gettext
 add_need libxcrypt # by cyrus-sasl2, pam, shadow, systemd, util-linux
 add_need libzstd # by systemd
 add_need lz4 # by elfutils, systemd
@@ -4341,6 +4343,13 @@ automatically_cross_build_packages
 cross_build make-dfsg noguile make-dfsg_1
 mark_built make-dfsg
 # needed for build-essential
+
+automatically_cross_build_packages
+
+assert_built "acl attr ncurses libunistring libxml2"
+cross_build gettext nojava gettext_1
+mark_built gettext
+# needed for debhelper
 
 automatically_cross_build_packages
 
