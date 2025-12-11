@@ -2596,6 +2596,9 @@ buildenv_gcc_15() {
 	echo "ignoring symbol differences #1112617"
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 }
+patch_gcc_16() {
+	patch_gcc_for_host_in_rtlibs
+}
 
 patch_gcc_defaults() {
 	regenerate_control=0
