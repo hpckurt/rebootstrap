@@ -3288,54 +3288,8 @@ add_automatic spdylay
 add_automatic sqlite3
 
 patch_systemd() {
-	echo "patching systemd to match all 64bit architectures https://salsa.debian.org/systemd-team/systemd/-/merge_requests/298"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/rules
-+++ b/debian/rules
-@@ -255,6 +255,9 @@
- 	if [ -d debian/tmp/usr/lib/sysusers.d/ ]; then \
- 		debian/extra/make-sysusers-basic > debian/tmp/usr/lib/sysusers.d/basic.conf; \
- 	fi
-+ifeq ($(DEB_HOST_ARCH_BITS),64)
-+	dh_install -psystemd usr/lib/sysctl.d/50-pid-max.conf
-+endif
- 
- execute_after_dh_install-arch:
- 	# Ubuntu specific files
---- a/debian/systemd.install
-+++ b/debian/systemd.install
-@@ -66,7 +66,6 @@
- usr/lib/modprobe.d/systemd.conf
- [amd64 i386 arm64 armhf riscv64 loong64] <!stage1> usr/lib/nvpcr/hardware.nvpcr
- <!stage1> usr/lib/pcrlock.d/
--[alpha amd64 arm64 ia64 loong64 mips64el ppc64 ppc64el riscv64 loong64 s390x sparc64] usr/lib/sysctl.d/50-pid-max.conf
- usr/lib/systemd/catalog/
- usr/lib/systemd/network/80-6rd-tunnel.link
- usr/lib/systemd/network/80-6rd-tunnel.network
-EOF
-	echo "patching systemd to correctly match dmi_arches https://salsa.debian.org/systemd-team/systemd/-/merge_requests/299"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/udev.install
-+++ b/debian/udev.install
-@@ -21,7 +21,7 @@ usr/lib/systemd/system/systemd-udev-trigger.service
- usr/lib/tmpfiles.d/static-nodes-permissions.conf
- usr/lib/udev/ata_id
- usr/lib/udev/cdrom_id
--[amd64 arm64 armel armhf ia64 i386 loong64 riscv64 loong64 x32] usr/lib/udev/dmi_memory_id
-+[any-amd64 any-arm64 any-arm any-ia64 any-i386 any-loong64 any-mips any-riscv64] usr/lib/udev/dmi_memory_id
- usr/lib/udev/fido_id
- usr/lib/udev/iocost
- usr/lib/udev/mtd_probe
-@@ -51,7 +51,7 @@ usr/lib/udev/rules.d/60-serial.rules
- usr/lib/udev/rules.d/64-btrfs.rules
- usr/lib/udev/rules.d/70-camera.rules
- usr/lib/udev/rules.d/70-joystick.rules
--[amd64 arm64 armel armhf ia64 i386 loong64 riscv64 loong64 x32] usr/lib/udev/rules.d/70-memory.rules
-+[any-amd64 any-arm64 any-arm any-ia64 any-i386 any-loong64 any-mips any-riscv64] usr/lib/udev/rules.d/70-memory.rules
- usr/lib/udev/rules.d/70-mouse.rules
- usr/lib/udev/rules.d/70-power-switch.rules
- usr/lib/udev/rules.d/70-touchpad.rules
-EOF
+	echo "patching systemd to match all 64bit architectures https://salsa.debian.org/systemd-team/systemd/-/merge_requests/302"
+	drop_privs sed -i -e '/pid-max/s/\([^-]\)any-/\1base-any-any-/g' debian/systemd.install
 }
 
 add_automatic sysvinit
