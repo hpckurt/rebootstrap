@@ -2597,6 +2597,7 @@ buildenv_gcc_15() {
 	export DPKG_GENSYMBOLS_CHECK_LEVEL=0
 }
 patch_gcc_16() {
+	patch_gcc_limits_h_test
 	patch_gcc_for_host_in_rtlibs
 }
 
