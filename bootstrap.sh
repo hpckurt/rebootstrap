@@ -2642,7 +2642,7 @@ patch_gcc_defaults() {
 	regenerate_control=0
 	if ! test "$GCC_VER" = "$DEFAULT_GCC_VER"; then
 		echo "adapting the base dependency"
-		drop_privs sed -i -e 's/^\( \+gcc-\)[0-9]*-base (>= [^)]\+),$/\1'"$GCC_VER-base,/" debian/control
+		drop_privs sed -i -e 's/^\( \+gcc-\)[0-9]*-base (>= [^)]\+),/\1'"$GCC_VER-base,/" debian/control.source
 		echo "changing the default gcc version"
 		drop_privs sed -i -e 's/^\(CV_[^=]*= \).*/\1'"$GCC_VER/" -e 's/^\(^REQV_[^=]*= \).*/\1(>= '"$GCC_VER)/" debian/rules
 		regenerate_control=1
