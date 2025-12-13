@@ -957,7 +957,44 @@ EOF
 
 add_automatic fontconfig
 add_automatic freetype
+
 add_automatic fribidi
+patch_fribidi() {
+	echo "fix FTCBFS #1122850"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -3,6 +3,8 @@
+ # Uncomment this to turn on verbose mode.
+ #export DH_VERBOSE=1
+
++include /usr/share/dpkg/architecture.mk
++
+ export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+ FRIBIDI_UDEB=libfribidi0-udeb
+
+@@ -16,7 +18,18 @@
+ 	dh $@
+
+ override_dh_auto_configure:
++ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_configure --reload-all-buildenv-variables -- --enable-malloc --enable-static
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_build -- -C bin fribidi.1
++	dpkg-architecture -a$(DEB_BUILD_ARCH) -f -c dh_auto_clean
++endif
+ 	dh_auto_configure -- --enable-malloc --enable-static
+
++ifneq ($(DEB_BUILD_ARCH),$(DEB_HOST_ARCH))
++execute_before_dh_auto_build:
++	dh_auto_build -- -C bin fribidi
++	touch bin/fribidi.1
++endif
++
+ override_dh_makeshlibs:
+ 	dh_makeshlibs -V --add-udeb="$(FRIBIDI_UDEB)"
+EOF
+}
+
 add_automatic fuse3
 
 patch_gcc_default_pie_everywhere()
