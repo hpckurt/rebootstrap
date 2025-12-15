@@ -2636,6 +2636,7 @@ buildenv_gcc_15() {
 patch_gcc_16() {
 	patch_gcc_limits_h_test
 	patch_gcc_for_host_in_rtlibs
+	patch_gcc_wdotap
 }
 
 patch_gcc_defaults() {
