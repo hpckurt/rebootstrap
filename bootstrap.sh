@@ -2889,12 +2889,7 @@ buildenv_libunistring() {
 
 add_automatic libusb
 add_automatic libusb-1.0
-
 add_automatic libverto
-patch_libverto() {
-	echo "demoting libglib2.0-dev dependency to libgio-2.0-dev #1082732"
-	drop_privs sed -i -e 's/libglib2.0-dev/libgio-2.0-dev/' debian/control
-}
 
 add_automatic libx11
 buildenv_libx11() {
@@ -3998,7 +3993,6 @@ add_need libffi # by glib2.0
 add_need libgcrypt20 # by gnupg2
 add_need libgpg-error # by gnupg2
 add_need libksba # by gnupg2
-add_need libev # by libverto
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
 if dpkg-architecture "-a$HOST_ARCH" -ihurd-any; then
 	add_need libsystemd-dummy # by nghttp2
@@ -4236,12 +4230,6 @@ dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "util-linux libseli
 cross_build glib2.0 "nogir pkg.glib2.0.nosysprof" glib2.0_1
 mark_built glib2.0
 # needed by libverto
-
-automatically_cross_build_packages
-
-cross_build libverto
-mark_built libverto
-# needed by krb5
 
 automatically_cross_build_packages
 
