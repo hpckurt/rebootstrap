@@ -898,7 +898,46 @@ add_automatic bzip2
 add_automatic c-ares
 add_automatic coreutils
 add_automatic curl
+
 add_automatic dash
+patch_dash() {
+	echo "fix FTCBFS with updated dpkg #1123689"
+	drop_privs patch -p1 <<'EOF'
+--- a/configure.ac
++++ b/configure.ac
+@@ -17,15 +17,18 @@ if test "$cross_compiling" = yes; then
+ 	CC_FOR_BUILD=${CC_FOR_BUILD-cc}
+ 	CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-}
+ 	CPPFLAGS_FOR_BUILD=${CPPFLAGS_FOR_BUILD-}
++	LDFLAGS_FOR_BUILD=${LDFLAGS_FOR_BUILD-}
+ else
+ 	CC_FOR_BUILD=${CC}
+ 	CFLAGS_FOR_BUILD=${CFLAGS}
+ 	CPPFLAGS_FOR_BUILD=${CPPFLAGS}
++	LDFLAGS_FOR_BUILD=${LDFLAGS}
+ fi
+ AC_MSG_RESULT(${CC_FOR_BUILD})
+ AC_SUBST(CC_FOR_BUILD)
+ AC_SUBST(CFLAGS_FOR_BUILD)
+ AC_SUBST(CPPFLAGS_FOR_BUILD)
++AC_SUBST(LDFLAGS_FOR_BUILD)
+
+ AC_MSG_CHECKING([for __attribute__((__alias__()))])
+ dash_cv_have_attribute_alias=no
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -12,7 +12,7 @@ AM_CPPFLAGS_FOR_BUILD = $(COMMON_CPPFLAG
+ COMPILE_FOR_BUILD = \
+ 	$(CC_FOR_BUILD) $(DEFAULT_INCLUDES) $(AM_CPPFLAGS_FOR_BUILD) \
+ 	$(CPPFLAGS_FOR_BUILD) \
+-	$(LDFLAGS) \
++	$(LDFLAGS_FOR_BUILD) \
+ 	$(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) 
+
+ bin_PROGRAMS = dash
+EOF
+}
+
 add_automatic dwz
 add_automatic db-defaults
 add_automatic debianutils
