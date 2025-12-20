@@ -3306,12 +3306,6 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
-
-patch_systemd() {
-	echo "patching systemd to match all 64bit architectures https://salsa.debian.org/systemd-team/systemd/-/merge_requests/302"
-	drop_privs sed -i -e '/pid-max/s/\([^-]\)any-/\1base-any-any-/g' debian/systemd.install
-}
-
 add_automatic sysvinit
 
 add_automatic tar
