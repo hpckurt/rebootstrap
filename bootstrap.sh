@@ -3999,18 +3999,19 @@ for pkg in $(discover_essential); do
 done
 add_need acl # by elfutils, gettext, systemd
 add_need apt # almost essential
-add_need attr # by gettext
+add_need attr # by gettext, libcap-ng
 add_need blt # by pythonX.Y
 add_need bsdmainutils # for man-db
-add_need bzip2 # by gnupg2, perl
-add_need db-defaults # by perl, python3.X
+add_need bzip2 # by elfutils, gnupg2, libsemanage, perl
+add_need db-defaults # by cyrus-sasl2
+add_need db5.3 # by cyrus-sasl2
 add_need dwz # for debhelper
 add_need expat # by unbound
-add_need file # by gcc-6, for debhelper
+add_need file # by gcc-VER, for debhelper
 add_need flex # by pam
 add_need fribidi # by newt
 add_need gdbm # by perl, python3.X
-add_need gnutls28 # by gnupg2
+add_need gnutls28 # by gnupg2, openldap
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need gpm # by ncurses
 add_need groff # for man-db
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need kmod # by systemd
@@ -4019,11 +4020,12 @@ add_need isl # by gcc-VER
 add_need jansson # by binutils
 add_need krb5 # by audit
 add_need libassuan # by gnupg2
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any || add_need libbsd # by unbound
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libcap2 # by systemd
 add_need libdebian-installer # by cdebconf
 add_need libevent # by unbound
 add_need libffi # by glib2.0
-add_need libgcrypt20 # by gnupg2
+add_need libgcrypt20 # by gnupg2, systemd
 add_need libgpg-error # by gnupg2
 add_need libksba # by gnupg2
 dpkg-architecture "-a$HOST_ARCH" -ilinux-any && add_need libsepol # by libselinux
@@ -4048,11 +4050,11 @@ add_need pcre2 # by glib2.0, libselinux
 add_need pkgconf # by glib2.0, gnupg2
 add_need popt # by newt
 add_need slang2 # by cdebconf, newt
-add_need sqlite3 # by python3.X
+add_need sqlite3 # by cyrus-sasl2
 add_need tcl8.6 # by newt
 add_need tcltk-defaults # by python3.X
 add_need tcp-wrappers # by audit
-add_need xz-utils # by libxml2
+add_need xz-utils # by elfutils, libxml2, systemd
 
 automatically_cross_build_packages() {
 	local dosetmp profiles buildable new_needed line pkg missing source
