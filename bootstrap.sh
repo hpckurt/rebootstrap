@@ -2887,7 +2887,7 @@ patch_libselinux() {
 		echo "work around time64 abi duality build failure https://github.com/SELinuxProject/selinux/issues/476"
 		drop_privs sed -i -e '/^static_assert.*__ino_t/d' src/matchpathcon.c
 	fi
-	case "$HOST_ARCH" in m68k|sh3|sh4|x32)
+	case "$HOST_ARCH" in m68k|sh3|sh4|x32|musl-linux-*)
 		echo "fixing FTBFS #1123905"
 		drop_privs patch -p1 <<'EOF'
 --- a/src/Makefile
