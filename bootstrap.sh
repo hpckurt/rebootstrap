@@ -2821,6 +2821,13 @@ EOF
 }
 
 add_automatic groff
+buildenv_groff() {
+	test "$GCC_VER" -lt 15 && return 0
+	dpkg-architecture "-a$1" -imusl-any-any || return 0
+	echo "working around musl FTBFS with gcc-15 #1124128"
+	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -std=gnu17"
+	export DEB_CFLAGS_FOR_BUILD_APPEND="${DEB_CFLAGS_FOR_BUILD_APPEND:-} -std=gnu17"
+}
 
 add_automatic gzip
 buildenv_gzip() {
