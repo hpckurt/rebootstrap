@@ -3580,6 +3580,32 @@ else
 echo "host gcc version and build gcc version match. good for multiarch"
 fi
 
+apt_get_install gcc-for-host
+DEF_GCC_VER=$(dpkg-query -f '${Version}' -W gcc-for-host)
+DEF_GCC_VER=${DEF_GCC_VER#*:}
+DEF_GCC_VER=${DEF_GCC_VER%%.*}
+if test "$GCC_VER" != "$DEF_GCC_VER"; then
+	echo "host gcc version ($GCC_VER) and default gcc version ($DEF_GCC_VER) mismatch. need to rebuild gcc-defaults"
+if test -f "$REPODIR/gcc-defaults_0"; then
+	echo "skipping rebuild of build gcc-defaults"
+else
+	cross_build_setup gcc-defaults gcc-defaults_0
+	apt_get_build_dep --arch-only ./
+	drop_privs dpkg-buildpackage -b -uc -us
+	cd ..
+	ls -l
+	reprepro include rebootstrap-native ./*.changes
+	$APT_GET update
+	apt_get_install g++-for-host
+	touch "$REPODIR/stamps/gcc-defaults_0"
+	cd ..
+	drop_privs rm -Rf gcc-defaults_0
+fi
+progress_mark "build arch gcc-defaults"
+else
+echo "host gcc version and default gcc version match. good for multiarch"
+fi
+
 if test -f "$REPODIR/stamps/build-essential_native"; then
 	echo "skipping rebuild of native build-essential"
 else
