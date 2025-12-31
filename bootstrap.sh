@@ -2652,6 +2652,8 @@ buildenv_gdbm() {
 }
 
 patch_glib2_0() {
+	echo "work around FTBFS #1124385"
+	drop_privs sed -i -e 's/python3-packaging:native/python3-packaging/' debian/control
 	dpkg-architecture "-a$HOST_ARCH" -ix32-any-any-any || return 0
 	# https://github.com/mesonbuild/meson/issues/9845
 	echo "working around wrong cc_can_run on x32"
