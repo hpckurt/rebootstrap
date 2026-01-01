@@ -4319,9 +4319,17 @@ mark_built elfutils
 
 automatically_cross_build_packages
 
+if dpkg-architecture "-a$HOST_ARCH" -ilinux-any; then
+	cross_build sysprof "pkg.sysprof.nogui pkg.sysprof.nounwind" sysprof_1
+	mark_built sysprof
+	# needed by glib2.0
+
+	automatically_cross_build_packages
+fi
+
 assert_built "elfutils libffi"
-dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "util-linux libselinux"
-cross_build glib2.0 "nogir pkg.glib2.0.nosysprof" glib2.0_1
+dpkg-architecture "-a$HOST_ARCH" -ilinux-any && assert_built "util-linux libselinux sysprof"
+cross_build glib2.0 nogir glib2.0_1
 mark_built glib2.0
 # needed by libverto
 
