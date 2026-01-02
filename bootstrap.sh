@@ -2821,6 +2821,24 @@ EOF
 }
 
 add_automatic groff
+patch_groff() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "skipping installation of charset.alias for musl #1124527"
+		drop_privs patch -p1 <<'EOF'
+--- a/src/libs/libgroff/libgroff.am
++++ b/src/libs/libgroff/libgroff.am
+@@ -150,7 +150,7 @@
+ 	    $(DESTDIR)$(libdir)/charset.alias; \
+ 	  rm -f $(DESTDIR)$(libdir)/t-charset.alias; \
+ 	else \
+-	  if test $(GLIBC21) = no; then \
++	  if test $(GLIBC21) = no && grep -q '^[^#]' charset.alias; then \
+ 	    sed -f ref-add.sed charset.alias \
+ 	      > $(DESTDIR)$(libdir)/t-charset.alias; \
+ 	    $(INSTALL_DATA) $(DESTDIR)$(libdir)/t-charset.alias \
+EOF
+	fi
+}
 buildenv_groff() {
 	test "$GCC_VER" -lt 15 && return 0
 	dpkg-architecture "-a$1" -imusl-any-any || return 0
