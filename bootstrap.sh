@@ -312,6 +312,18 @@ Package: *-$HOST_ARCH-cross *$HOST_ARCH_SUFFIX gcc-*$HOST_ARCH_SUFFIX-base
 Pin: version *
 Pin-Priority: -1
 EOF
+if ! apt-cache show "gcc-$GCC_VER" >/dev/null 2>&1; then
+	echo "deb [arch-=$HOST_ARCH] $MIRROR experimental main" >/etc/apt/sources.list.d/experimental.list
+	cat >/etc/apt/preferences.d/experimental.pref <<EOF
+Package: *
+Pin: release a=experimental
+Pin-Priority: -1
+
+Package: src:gcc-$GCC_VER
+Pin: release a=experimental
+Pin-Priority: 900
+EOF
+fi
 $APT_GET update
 
 # Since most libraries (e.g. libgcc_s) do not include ABI-tags,
@@ -3564,11 +3576,7 @@ BUILD_GCC_MULTIARCH_VER=`apt-cache show --no-all-versions libatomic1 | sed 's/^S
 if test "$GCC_VER" != "$BUILD_GCC_MULTIARCH_VER"; then
 	echo "host gcc version ($GCC_VER) and build gcc version ($BUILD_GCC_MULTIARCH_VER) mismatch. need different build gcc"
 if dpkg --compare-versions "$GCC_VER" gt "$BUILD_GCC_MULTIARCH_VER"; then
-	echo "deb [ arch=$(dpkg --print-architecture) ] $MIRROR experimental main" > /etc/apt/sources.list.d/tmp-experimental.list
-	$APT_GET update
-	$APT_GET -t experimental install g++ "g++-$GCC_VER"
-	rm -f /etc/apt/sources.list.d/tmp-experimental.list
-	$APT_GET update
+	apt_get_install "g++-$GCC_VER"
 elif test -f "$REPODIR/stamps/gcc_0"; then
 	echo "skipping rebuild of build gcc"
 	$APT_GET --force-yes dist-upgrade # downgrade!
@@ -4005,11 +4013,19 @@ fi
 
 apt_get_install dose-builddebcheck dctrl-tools
 
+apt_list_files() {
+	local apt_suite_pattern
+	apt_suite_pattern="^($SUITE|rebootstrap|rebootstrap-native)\$"
+	apt-get indextargets |
+		grep-dctrl "(" -FCodename -e "$apt_suite_pattern" -o -FRelease -e "$apt_suite_pattern" -o -FSuite -e "$apt_suite_pattern" ")" -a -FIdentifier -X "$1" -n -sFilename
+}
+
 call_dose_builddebcheck() {
 	local package_list source_list errcode
 	package_list=`mktemp packages.XXXXXXXXXX`
 	source_list=`mktemp sources.XXXXXXXXXX`
-	cat /var/lib/apt/lists/*_Packages - > "$package_list" <<EOF
+	apt_list_files Packages | xargs '-d\n' cat >"$package_list"
+	cat >>"$package_list" <<EOF
 Package: crossbuild-essential-$HOST_ARCH
 Version: 0
 Architecture: $HOST_ARCH
@@ -4019,8 +4035,13 @@ Description: fake crossbuild-essential package for dose-builddebcheck
 
 EOF
 	sed -i -e '/^Conflicts:.* libc[0-9][^ ]*-dev\(,\|$\)/d' "$package_list" # also make dose ignore the glibc conflict
-	apt-cache show "gcc-${GCC_VER}-base=installed" libgcc-s1=installed libstdc++6=installed libatomic1=installed >> "$package_list" # helps when pulling gcc from experimental
-	cat /var/lib/apt/lists/*_Sources > "$source_list"
+	if ! grep-dctrl -FPackage -X "gcc-$GCC_VER" -a -FArchitecture -X "$(dpkg --print-architecture)" -s: "$package_list"; then
+		# Add experimental native compiler if needed.
+		apt-get indextargets |
+			grep-dctrl -FSuite -X experimental -a -FIdentifier -X Packages -n -sFilename |
+			xargs grep-dctrl -FSource:Package -e "^gcc-$GCC_VER( |\$)" >> "$package_list"
+	fi
+	apt_list_files Sources | xargs '-d\n' cat > "$source_list"
 	errcode=0
 	dose-builddebcheck --deb-tupletable=/usr/share/dpkg/tupletable --deb-cputable=/usr/share/dpkg/cputable "--deb-native-arch=$(dpkg --print-architecture)" "--deb-host-arch=$HOST_ARCH" "$@" "$package_list" "$source_list" || errcode=$?
 	if test "$errcode" -gt 1; then
@@ -4033,27 +4054,27 @@ EOF
 # determine whether a given binary package refers to an arch:all package
 # $1 is a binary package name
 is_arch_all() {
-	grep-dctrl -P -X "$1" -a -F Architecture all -s /var/lib/apt/lists/*_Packages
+	# We want to not output any fields. ":" is not valid within a field.
+	apt_list_files Packages | xargs '-d\n' grep-dctrl -FPackage -X "$1" -a -FArchitecture -X all -s:
 }
 
 # determine which source packages build a given binary package
 # $1 is a binary package name
 # prints a set of source packages
 what_builds() {
-	local newline pattern source
+	local newline pattern
 	newline='
 '
 	pattern=`echo "$1" | sed 's/[+.]/\\\\&/g'`
 	pattern="$newline $pattern "
 	# exit codes 0 and 1 signal successful operation
-	source=`grep-dctrl -F Package-List -e "$pattern" -s Package -n /var/lib/apt/lists/*_Sources || test "$?" -eq 1`
-	set_create "$source"
+	set_create "$(apt_list_files Sources | xargs '-d\n' grep-dctrl -FPackage-List -e "$pattern" -sPackage -n || test "$?" -eq 1)"
 }
 
 # determine a set of source package names which are essential to some
 # architecture
 discover_essential() {
-	set_create "$(grep-dctrl -F Package-List -e '\bessential=yes\b' -s Package -n /var/lib/apt/lists/*_Sources)"
+	set_create "$(apt_list_files Sources | xargs '-d\n' grep-dctrl -FPackage-List -e '\bessential=yes\b' -sPackage -n)"
 }
 
 need_packages=
@@ -4432,6 +4453,6 @@ assert_built "$need_packages"
 echo "checking installability of build-essential with dose"
 apt_get_install botch
 package_list=$(mktemp -t packages.XXXXXXXXXX)
-grep-dctrl --exact --field Architecture '(' "$HOST_ARCH" --or all ')' /var/lib/apt/lists/*_Packages > "$package_list"
+apt_list_files Packages | xargs '-d\n' grep-dctrl -FArchitecture -e "^($HOST_ARCH|all)\$" > "$package_list"
 botch-distcheck-more-problems "--deb-native-arch=$HOST_ARCH" --successes --failures --explain --checkonly "build-essential:$HOST_ARCH, debhelper:$HOST_ARCH" "--bg=deb://$package_list" "--fg=deb://$package_list" || :
 rm -f "$package_list"
