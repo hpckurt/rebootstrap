@@ -2674,11 +2674,11 @@ EOF
 
 builddep_glibc() {
 	test "$1" = "$HOST_ARCH"
-	apt_get_install gettext file quilt autoconf gawk debhelper rdfind symlinks binutils bison netbase "gcc-$GCC_VER$HOST_ARCH_SUFFIX"
+	apt_get_install gettext dpkg-dev xz-utils file quilt autoconf gawk debhelper rdfind symlinks netbase gperf bison "binutils-for-host:$1" "gcc-$GCC_VER$HOST_ARCH_SUFFIX" python3 libc-bin
 	if dpkg-architecture "-a$1" -ilinux-any; then
 		apt_get_install linux-libc-dev
 	elif dpkg-architecture "-a$1" -ihurd-any; then
-		apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig$HOST_ARCH_SUFFIX"
+		apt_get_install "gnumach-dev:$1" "hurd-headers-dev:$1" "mig-for-host:$1"
 	else
 		echo "rebootstrap-error: unsupported kernel"
 		exit 1
