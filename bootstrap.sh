@@ -894,6 +894,23 @@ patch_build_essential() {
    dependency since debian/rules will need it even if dpkg-dev
    stopped depending on it
 EOF
+	if test "$HOST_ARCH" = sparc; then
+		echo "deleting libc6-dev-sparc64 #1125006"
+		drop_privs patch -p1 <<'EOF'
+--- a/list
++++ b/list
+@@ -30,9 +30,6 @@
+   Indirectly depended on by g++, but we'll ignore
+   it since libc6-dev is used for non-C++ programs too.
+
+-libc6-dev-sparc64 [sparc]
+-  Used only on the sparc architecture.
+-
+ gcc-for-build (>= 4:14.2)
+ gcc-for-host (>= 4:14.2)
+
+EOF
+	fi
 	cat - debian/changelog <<EOF |
 build-essential ($(dpkg-parsechangelog -SVersion)+rebootstrap1) $SUITE; urgency=medium
 
