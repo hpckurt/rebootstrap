@@ -3437,6 +3437,45 @@ add_automatic shadow
 add_automatic slang2
 add_automatic spdylay
 add_automatic sqlite3
+
+patch_systemd() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "disabling nss on musl https://salsa.debian.org/systemd-team/systemd/-/merge_requests/305"
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -56,6 +56,12 @@
+ # we set here (By default DEB_BUILD_MAINT_OPTIONS overrides DEB_BUILD_OPTIONS).
+ export DEB_BUILD_MAINT_OPTIONS = optimize=+lto hardening=+pie $(DEB_BUILD_OPTIONS)
+
++ifeq ($(DEB_HOST_ARCH_LIBC),musl)
++NSS = false
++else
++NSS = true
++endif
++
+ CONFFLAGS = \
+ 	-Dstatic-libsystemd=true \
+ 	-Dversion-tag="$(VERSION_TAG)" \
+@@ -103,10 +109,10 @@
+ 	-Dman=$(if $(filter nodoc,$(DEB_BUILD_PROFILES)),disabled,enabled) \
+ 	-Ddbus-interfaces-dir=$(if $(filter nodoc,$(DEB_BUILD_PROFILES)),no,yes) \
+ 	-Dtranslations=true \
+-	-Dnss-myhostname=true \
+-	-Dnss-mymachines=enabled \
+-	-Dnss-resolve=enabled \
+-	-Dnss-systemd=true \
++	-Dnss-myhostname=$(NSS) \
++	-Dnss-mymachines=$(NSS) \
++	-Dnss-resolve=$(NSS) \
++	-Dnss-systemd=$(NSS) \
+ 	-Dresolve=true \
+ 	-Dstatus-unit-format-default=combined \
+ 	-Dstandalone-binaries=true \
+EOF
+	fi
+}
+
 add_automatic sysvinit
 
 add_automatic tar
