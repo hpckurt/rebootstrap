@@ -3517,10 +3517,6 @@ buildenv_tar() {
 		echo "forcing broken posix acl check to fail on non-linux #850668"
 		export gl_cv_getxattr_with_posix_acls=no
 	fi
-	case "$1" in x32)
-		echo "work around time64 inconsistency FTBFS to be fixed via #1030159"
-		export DEB_CPPFLAGS_APPEND="${DEB_CPPFLAGS_APPEND:+$DEB_CPPFLAGS_APPEND }-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
-	esac
 }
 
 add_automatic tcl8.6
