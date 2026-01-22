@@ -2795,54 +2795,6 @@ EOF
 -ln -s ../$(DEB_HOST_MULTIARCH)/mach/x86_64 $(debian-tmp)/usr/include/mach/x86_64
  endef
 EOF
-	echo "skipping nscd in stage2 https://salsa.debian.org/glibc-team/glibc/-/merge_requests/36"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control.in/main
-+++ b/debian/control.in/main
-@@ -4,7 +4,7 @@ Priority: required
- Build-Depends: gettext, xz-utils, file, quilt,
-  autoconf, gawk, debhelper-compat (= 13), rdfind, symlinks, netbase, gperf, bison,
-  linux-libc-dev [linux-any],
-- libaudit-dev [linux-any], libcap-dev [linux-any] <!stage2>, libselinux1-dev [linux-any] <!stage2>,
-+ libaudit-dev [linux-any] <!nocheck> <!stage1 !stage2>, libcap-dev [linux-any] <!stage2>, libselinux1-dev [linux-any] <!stage2>,
-  mig-for-host (>= 1.8+git20200618-7~) [hurd-any], gnumach-dev (>= 2:1.8+git20200710-2~) [hurd-any],
-  hurd-dev (>= 1:0.9.git20201127-4~) [hurd-any] | hurd-headers-dev [hurd-any],
-  binutils-for-host, binutils-for-host (>= 2.45) [amd64 arm64 i386 x32],
-@@ -159,7 +159,7 @@ Priority: optional
- Depends: ${shlibs:Depends}, ${misc:Depends}
- Pre-Depends: ${misc:Pre-Depends}
- Conflicts: unscd
--Build-Profiles: <!stage1>
-+Build-Profiles: <!stage1 !stage2>
- Description: GNU C Library: Name Service Cache Daemon
-  A daemon which handles passwd, group and host lookups
-  for running programs and caches the results for the next
---- a/debian/rules
-+++ b/debian/rules
-@@ -180,7 +180,7 @@ NOSTRIP_$(libc)-dbg = 1
- # Put the debug files from these packages in $(libc)-dbg
- DEBUG_$(libc) = 1
-
--ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
-+ifeq ($(filter stage1 stage2,$(DEB_BUILD_PROFILES)),)
-   ifeq ($(threads),yes)
-   DEB_ARCH_REGULAR_PACKAGES += nscd
-   endif
---- a/debian/rules.d/build.mk
-+++ b/debian/rules.d/build.mk
-@@ -22,6 +22,10 @@ ifneq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
-                                --enable-hacker-mode
- endif
-
-+ifneq ($(filter stage1 stage2,$(DEB_BUILD_PROFILES)),)
-+    libc_extra_config_options += --disable-build-nscd
-+endif
-+
- ifdef WITH_SYSROOT
-     libc_extra_config_options += --with-headers=$(WITH_SYSROOT)/$(includedir)
- endif
-EOF
-	regenerate_control=1
 	if test "$regenerate_control" = 1; then
 		drop_privs ./debian/rules debian/control
 	fi
