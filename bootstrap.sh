@@ -3950,6 +3950,7 @@ else
 	else
 		apt_get_build_dep "-a$HOST_ARCH" --arch-only ./
 	fi
+	check_binNMU
 	(
 		profiles=$(join_words , $DEFAULT_PROFILES)
 		if dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
