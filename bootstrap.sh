@@ -2362,6 +2362,26 @@ patch_gcc_for_host_in_rtlibs() {
  endif # ($(single_package),yes)
 EOF
 }
+patch_gcc_missing_symbols() {
+	echo "native builds ignore missing symbols, also ignore for cross"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules.defs
++++ b/debian/rules.defs
+@@ -2332,10 +2332,10 @@
+   cross_shlibdeps :=
+   cross_gencontrol :=
+   cross_makeshlibs :=
+-  # FIXME: Ignore missing symbols for a first build ...
+-  cross_makeshlibs := -
+   cross_clean :=
+ endif
++# FIXME: Ignore missing symbols for a first build ...
++cross_makeshlibs := -
+ 
+ printarch:
+ 	@echo DEB_TARGET_ARCH: $(DEB_TARGET_ARCH)
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -2649,6 +2669,7 @@ patch_gcc_16() {
 	patch_gcc_limits_h_test
 	patch_gcc_for_host_in_rtlibs
 	patch_gcc_default_pie_everywhere
+	patch_gcc_missing_symbols
 	patch_gcc_wdotap
 }
 
