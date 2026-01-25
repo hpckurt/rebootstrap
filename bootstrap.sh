@@ -3616,6 +3616,30 @@ EOF
 }
 
 add_automatic xz-utils
+patch_xz_utils() {
+	if ! dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+		echo "allow overriding DPKG_GENSYMBOLS_CHECK_LEVEL #1126384"
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -1,10 +1,12 @@
+ #!/usr/bin/make -f
+ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+-# Only do a strict symbol checking on Linux
++include /usr/share/dpkg/architecture.mk
++
++# Only do a strict symbol checking on Linux with glibc
+ # https://manpages.debian.org/testing/dpkg-dev/dpkg-gensymbols.1.en.html
+ # Level 4: Fails if some libraries have been introduced.
+-ifneq (,$(filter linux,$(DEB_HOST_ARCH_OS)))
++ifeq (linux-gnu,$(DEB_HOST_ARCH_OS)-$(DEB_HOST_ARCH_LIBC))
+     export DPKG_GENSYMBOLS_CHECK_LEVEL = 4
+ endif
+
+EOF
+	fi
+}
 
 builddep_zlib() {
 	# gcc-multilib dependency unsatisfiable
