@@ -1011,6 +1011,24 @@ EOF
 }
 
 add_automatic fontconfig
+patch_fontconfig() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "fixing gettext check #1126831"
+		drop_privs patch -p1 <<'EOF'
+--- a/configure.ac
++++ b/configure.ac
+@@ -118,6 +118,7 @@
+ AC_SUBST(GETTEXT_PACKAGE)
+ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Gettext package])
+ 
++AM_GNU_GETTEXT_REQUIRE_VERSION([0.19.8])
+ AM_GNU_GETTEXT_VERSION([0.19.7])
+ AM_GNU_GETTEXT([external])
+ 
+EOF
+	fi
+}
+
 add_automatic freetype
 add_automatic fribidi
 add_automatic fuse3
