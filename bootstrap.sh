@@ -3216,6 +3216,7 @@ patch_gcc_16() {
 	patch_gcc_missing_symbols
 	patch_gcc_musl_x86
 	patch_gcc_wdotap
+	patch_gcc_espresso
 }
 
 patch_gcc_defaults() {
@@ -3638,6 +3639,10 @@ buildenv_libgcrypt20() {
 }
 
 add_automatic libgpg-error
+buildenv_libgpg_error() {
+    export CFLAGS_FOR_BUILD="-O2 -g"
+    export CPPFLAGS_FOR_BUILD=""
+}
 add_automatic libice
 add_automatic libidn
 add_automatic libidn2
