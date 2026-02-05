@@ -717,6 +717,41 @@ EOF
 
 add_automatic blt
 
+patch_brotli() {
+	echo "fixing nopython FTBFS #1127021"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -6,13 +6,15 @@
+
+ export PYBUILD_NAME = brotli
+
++CMAKE_FLAGS := -DBROTLI_BUILD_FOR_PACKAGE=ON
++
+ ifeq (,$(filter nopython,$(DEB_BUILD_PROFILES)))
+ %:
+ 	dh $@ --buildsystem=pybuild --with=python3
+
+ override_dh_auto_configure:
+ 	dh_auto_configure
+-	dh_auto_configure --buildsystem=cmake -- -DBROTLI_BUILD_FOR_PACKAGE=ON
++	dh_auto_configure --buildsystem=cmake -- $(CMAKE_FLAGS)
+
+ override_dh_auto_build:
+ 	dh_auto_build
+@@ -32,6 +34,9 @@
+ else
+ %:
+ 	dh $@ --buildsystem=cmake
++
++override_dh_auto_configure:
++	dh_auto_configure --buildsystem=cmake -- $(CMAKE_FLAGS)
+ endif
+
+ override_dh_missing:
+EOF
+}
+
 add_automatic bsdmainutils
 patch_bsdmainutils() {
 	dpkg-architecture "-a$HOST_ARCH" -imusl-any-any || return 0
