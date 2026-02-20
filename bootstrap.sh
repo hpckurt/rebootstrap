@@ -714,6 +714,12 @@ EOF
 		drop_privs rm -f ./stamps/control
 	fi
 }
+buildenv_binutils() {
+	export DEB_BUILD_OPTIONS="${DEB_BUILD_OPTIONS:+$DEB_BUILD_OPTIONS }nopgo nomult nocross"
+	if test "$HOST_ARCH" != hppa; then
+		export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nohppa"
+	fi
+}
 
 add_automatic blt
 
@@ -3782,8 +3788,12 @@ else
 	cross_build_setup binutils
 	check_binNMU
 	apt_get_build_dep --arch-only -Pnocheck ./
-	drop_privs TARGET=$HOST_ARCH dpkg-buildpackage -B -Pnocheck --target=stamps/control
-	drop_privs TARGET=$HOST_ARCH dpkg-buildpackage -B -uc -us -Pnocheck
+	(
+		buildenv_binutils
+		export TARGET=$HOST_ARCH
+		drop_privs dpkg-buildpackage -B -Pnocheck --target=stamps/control
+		drop_privs_exec dpkg-buildpackage -B -uc -us -Pnocheck
+	)
 	cd ..
 	ls -l
 	pickup_packages *.changes
@@ -3803,8 +3813,12 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	cross_build_setup binutils binutils-hppa64
 	check_binNMU
 	apt_get_build_dep --arch-only -Pnocheck ./
-	drop_privs with_hppa64=yes DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult nopgo" dpkg-buildpackage -B -Pnocheck --target=stamps/control
-	drop_privs with_hppa64=yes DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult nopgo" dpkg-buildpackage -B -uc -us -Pnocheck
+	(
+		buildenv_binutils
+		export with_hppa64=yes
+		drop_privs dpkg-buildpackage -B -Pnocheck --target=stamps/control
+		drop_privs_exec dpkg-buildpackage -B -uc -us -Pnocheck
+	)
 	cd ..
 	ls -l
 	pickup_additional_packages binutils-hppa64-linux-gnu_*.deb
@@ -4554,7 +4568,10 @@ else
 	cross_build_setup binutils binutils_2
 	apt_get_build_dep "-a$HOST_ARCH" --arch-only -P nocheck,pkg.binutils.nojava ./
 	check_binNMU
-	DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocross nomult" drop_privs dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck,pkg.binutils.nojava -B -uc -us
+	(
+		buildenv_binutils
+		drop_privs_exec dpkg-buildpackage "-a$HOST_ARCH" -Pnocheck,pkg.binutils.nojava -B -uc -us
+	)
 	cd ..
 	ls -l
 	drop_privs sed -i -e '/^ .* binutils-for-host_.*deb$/d' ./*.changes
