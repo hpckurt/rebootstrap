@@ -249,7 +249,6 @@ case "$HOST_ARCH" in
 	mipsn32|mipsn32el) MULTILIB_NAMES="mips32 mips64" ;;
 	powerpc) MULTILIB_NAMES=ppc64 ;;
 	ppc64) MULTILIB_NAMES=powerpc ;;
-	s390x) MULTILIB_NAMES=s390 ;;
 	sparc) MULTILIB_NAMES=sparc64 ;;
 	sparc64) MULTILIB_NAMES=sparc ;;
 	x32) MULTILIB_NAMES="amd64 i386" ;;
@@ -3207,7 +3206,7 @@ builddep_ncurses() {
 	# g++-multilib dependency unsatisfiable
 	apt_get_install debhelper pkgconf autoconf-dickey
 	case "$ENABLE_MULTILIB:$1" in
-		yes:amd64|yes:i386|yes:powerpc|yes:ppc64|yes:s390|yes:sparc)
+		yes:amd64|yes:i386|yes:powerpc|yes:ppc64|yes:sparc)
 			test "$1" = "$HOST_ARCH"
 			apt_get_install "g++-$GCC_VER-multilib$HOST_ARCH_SUFFIX"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
@@ -3418,7 +3417,7 @@ builddep_readline() {
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
 			ln -sf "$(dpkg-architecture "-a$1" -qDEB_HOST_MULTIARCH)/asm" /usr/include/asm
 		;;
-		yes:i386|yes:powerpc|yes:sparc|yes:s390)
+		yes:i386|yes:powerpc|yes:sparc)
 			test "$1" = "$HOST_ARCH"
 			apt_get_install "gcc-$GCC_VER-multilib$HOST_ARCH_SUFFIX" "lib64ncurses-dev:$1"
 			# the unversioned gcc-multilib$HOST_ARCH_SUFFIX should contain the following link
