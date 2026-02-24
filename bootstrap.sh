@@ -3869,7 +3869,7 @@ if test "$HOST_ARCH" = hppa && ! test -f "$REPODIR/stamps/cross-binutils-hppa64"
 	check_arch test.o hppa64
 	touch "$REPODIR/stamps/cross-binutils-hppa64"
 	cd ..
-	drop_privs rm -Rf binutils-hppa64-linux-gnu
+	drop_privs rm -Rf binutils-hppa64
 	progress_mark "cross binutils-hppa64"
 fi
 
