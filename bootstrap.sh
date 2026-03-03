@@ -3580,8 +3580,8 @@ add_automatic spdylay
 add_automatic sqlite3
 
 patch_systemd() {
-	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
-		echo "disabling nss on musl https://salsa.debian.org/systemd-team/systemd/-/merge_requests/305"
+	if ! dpkg-architecture "-a$HOST_ARCH" -ignu-any-any; then
+		echo "disabling nss on non-glibc https://salsa.debian.org/systemd-team/systemd/-/merge_requests/305"
 		drop_privs patch -p1 <<'EOF'
 --- a/debian/rules
 +++ b/debian/rules
@@ -3589,10 +3589,10 @@ patch_systemd() {
  # we set here (By default DEB_BUILD_MAINT_OPTIONS overrides DEB_BUILD_OPTIONS).
  export DEB_BUILD_MAINT_OPTIONS = optimize=+lto hardening=+pie $(DEB_BUILD_OPTIONS)
 
-+ifeq ($(DEB_HOST_ARCH_LIBC),musl)
-+NSS = false
-+else
++ifeq ($(DEB_HOST_ARCH_LIBC),gnu)
 +NSS = true
++else
++NSS = false
 +endif
 +
  CONFFLAGS = \
@@ -3613,6 +3613,98 @@ patch_systemd() {
  	-Dresolve=true \
  	-Dstatus-unit-format-default=combined \
  	-Dstandalone-binaries=true \
+--- a/debian/control
++++ b/debian/control
+@@ -153,7 +153,7 @@ Pre-Depends: systemd
+ Depends: ${misc:Depends},
+          systemd (= ${binary:Version}),
+ Recommends: libpam-systemd,
+-            libnss-systemd
++            libnss-systemd [gnu-linux-any]
+ Description: system and service manager - SysV compatibility symlinks
+  This package provides manual pages and compatibility symlinks needed for
+  systemd to replace sysvinit.
+@@ -169,7 +169,7 @@ Depends: ${shlibs:Depends},
+          libarchive13t64 | libarchive13,
+          systemd,
+          default-dbus-system-bus | dbus-system-bus
+-Recommends: libnss-mymachines,
++Recommends: libnss-mymachines [gnu-linux-any],
+             ${dlopen:Recommends},
+ Suggests: ${dlopen:Suggests},
+ Conflicts: systemd (<< 256-2~),
+@@ -268,7 +268,7 @@ Description: system and service manager - PAM module
+  Packages that depend on logind functionality need to depend on libpam-systemd.
+
+ Package: libnss-myhostname
+-Architecture: linux-any
++Architecture: gnu-linux-any
+ Multi-Arch: same
+ Pre-Depends: ${misc:Pre-Depends}
+ Depends: ${shlibs:Depends},
+@@ -289,7 +289,7 @@ Description: nss module providing fallback resolution for the current hostname
+  Installing this package automatically adds myhostname to /etc/nsswitch.conf.
+
+ Package: libnss-mymachines
+-Architecture: linux-any
++Architecture: gnu-linux-any
+ Multi-Arch: same
+ Pre-Depends: ${misc:Pre-Depends}
+ Depends: ${shlibs:Depends},
+@@ -306,7 +306,7 @@ Description: nss module to resolve hostnames for local container instances
+  Installing this package automatically adds mymachines to /etc/nsswitch.conf.
+
+ Package: libnss-resolve
+-Architecture: linux-any
++Architecture: gnu-linux-any
+ Multi-Arch: same
+ Pre-Depends: ${misc:Pre-Depends}
+ Depends: ${shlibs:Depends},
+@@ -322,7 +322,7 @@ Description: nss module to resolve names via systemd-resolved
+  Installing this package automatically adds resolve to /etc/nsswitch.conf.
+
+ Package: libnss-systemd
+-Architecture: linux-any
++Architecture: gnu-linux-any
+ Multi-Arch: same
+ Priority: standard
+ Pre-Depends: ${misc:Pre-Depends}
+@@ -485,7 +485,7 @@ Architecture: linux-any
+ Multi-Arch: foreign
+ Depends: ${shlibs:Depends},
+          ${misc:Depends},
+-         libnss-systemd (= ${binary:Version}),
++         libnss-systemd (= ${binary:Version}) [gnu-linux-any],
+          systemd (= ${binary:Version}),
+ Recommends: ${dlopen:Recommends},
+ Suggests: ${dlopen:Suggests},
+@@ -616,8 +616,8 @@ Depends: ${shlibs:Depends},
+          ${misc:Depends},
+          systemd (= ${binary:Version}),
+          default-dbus-system-bus | dbus-system-bus
+-Recommends: libnss-myhostname,
+-            libnss-resolve,
++Recommends: libnss-myhostname [gnu-linux-any],
++            libnss-resolve [gnu-linux-any],
+             libidn2-0,
+             ${dlopen:Recommends},
+ Suggests: polkitd,
+EOF
+		echo "setting the libc option for musl #???????"
+		drop_privs patch -p1 <<'EOF'
+--- a/debian/rules
++++ b/debian/rules
+@@ -123,6 +123,10 @@ else
+ CONFFLAGS += -Dtests=true
+ endif
+
++ifeq ($(DEB_HOST_ARCH_LIBC),musl)
++CONFFLAGS += -Dlibc=musl
++endif
++
+ ifeq (, $(filter stage1, $(DEB_BUILD_PROFILES)))
+ CONFFLAGS += \
+ 	-Daudit=enabled \
 EOF
 	fi
 }
