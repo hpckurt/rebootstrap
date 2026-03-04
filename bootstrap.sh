@@ -3690,7 +3690,7 @@ patch_systemd() {
              ${dlopen:Recommends},
  Suggests: polkitd,
 EOF
-		echo "setting the libc option for musl #???????"
+		echo "setting the libc option for musl https://salsa.debian.org/systemd-team/systemd/-/merge_requests/311"
 		drop_privs patch -p1 <<'EOF'
 --- a/debian/rules
 +++ b/debian/rules
