@@ -930,7 +930,62 @@ EOF
 
 add_automatic bzip2
 add_automatic c-ares
+
 add_automatic coreutils
+patch_coreutils() {
+	if dpkg-architecture "-a$HOST_ARCH" -imusl-any-any; then
+		echo "fix musl ftbfs #1129960"
+		drop_privs patch -p1 <<'EOF'
+--- a/m4/gnulib-comp.m4
++++ b/m4/gnulib-comp.m4
+@@ -1786,7 +1786,6 @@
+   gl_CONDITIONAL([GL_COND_OBJ_GETLOGIN],
+                  [test $HAVE_GETLOGIN = 0 || test $REPLACE_GETLOGIN = 1])
+   gl_UNISTD_MODULE_INDICATOR([getlogin])
+-  AC_REQUIRE([gl_LIB_GETLOGIN])
+   gl_GETNDELIM2
+   gl_FUNC_GETOPT_GNU
+   dnl Because of the way gl_FUNC_GETOPT_GNU is implemented (the gl_getopt_required
+--- a/src/local.mk
++++ b/src/local.mk
+@@ -338,6 +338,7 @@
+ src_uptime_LDADD += $(READUTMP_LIB)
+ src_users_LDADD += $(READUTMP_LIB)
+ src_who_LDADD += $(READUTMP_LIB)
++src_logname_LDADD += $(GETLOGIN_LIB)
+
+ # for strsignal
+ src_kill_LDADD += $(LIBTHREAD)
+--- a/m4/getlogin.m4
++++ b/m4/getlogin.m4
+@@ -64,12 +64,6 @@
+       *) REPLACE_GETLOGIN=1 ;;
+     esac
+   fi
+-])
+-
+-dnl Determines the library needed by the implementation of the
+-dnl getlogin and getlogin_r functions.
+-AC_DEFUN([gl_LIB_GETLOGIN],
+-[
+   AC_REQUIRE([AC_CANONICAL_HOST])
+   case $host_os in
+     mingw* | windows*)
+@@ -77,6 +71,10 @@
+     *)
+       GETLOGIN_LIB= ;;
+   esac
++  if test "x$REPLACE_GETLOGIN" = x1; then
++    AC_REQUIRE([gl_READUTMP])
++    GETLOGIN_LIB="$READUTMP_LIB"
++  fi
+   AC_SUBST([GETLOGIN_LIB])
+   dnl For backward compatibility.
+   LIB_GETLOGIN="$GETLOGIN_LIB"
+EOF
+	fi
+}
+
 add_automatic curl
 
 add_automatic dash
