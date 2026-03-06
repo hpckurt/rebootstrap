@@ -3082,8 +3082,8 @@ add_automatic libsepol
 
 add_automatic libsigsegv
 buildenv_libsigsegv() {
-	if dpkg-architecture "-a$HOST_ARCH" -ignu-linux-any; then
-		echo "hinting that POSIX fault handlers do work on GNU/Linux"
+	if dpkg-architecture "-a$HOST_ARCH" -ignu-linux-any || dpkg-architecture "-a$HOST_ARCH" -imusl-linux-any; then
+		echo "hinting that POSIX fault handlers do work on GNU/Linux and musl/Linux"
 		export sv_cv_fault_posix=yes
 	fi
 }
