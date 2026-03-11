@@ -3246,47 +3246,6 @@ add_automatic lz4
 add_automatic m4
 add_automatic man-db
 add_automatic mawk
-
-patch_mig() {
-	echo "do build mig-for-host #1128787"
-	drop_privs patch -p1 <<'EOF'
---- a/debian/control.in
-+++ b/debian/control.in
-@@ -11,3 +11,14 @@
-  flex, libfl-dev, bison
- Rules-Requires-Root: no
- Standards-Version: 4.6.0
-+
-+Package: mig-for-host
-+Architecture: any
-+Multi-Arch: same
-+Depends: ${misc:Depends}, ${mig:host}
-+Description: GNU Mach Interface Generator - metapackage for host
-+ This is the GNU distribution of the MIG, which is needed to compile
-+ the GNU C library, the GNU Hurd and GNU Mach.
-+ .
-+ Like the mig package, this produces interfaces for the host architecture of
-+ this package, but as a triplet-mig command which is possibly a cross-generator.
---- a/debian/control.native.in
-+++ b/debian/control.native.in
-@@ -9,14 +9,3 @@
-  .
-  This package provides a mig command that generates interfaces for the host
-  architecture of this package.
--
--Package: mig-for-host
--Architecture: any
--Multi-Arch: same
--Depends: ${misc:Depends}, ${mig:host}
--Description: GNU Mach Interface Generator - metapackage for host
-- This is the GNU distribution of the MIG, which is needed to compile
-- the GNU C library, the GNU Hurd and GNU Mach.
-- .
-- Like the mig package, this produces interfaces for the host architecture of
-- this package, but as a triplet-mig command which is possibly a cross-generator.
-EOF
-}
-
 add_automatic mpclib3
 add_automatic mpfr4
 
