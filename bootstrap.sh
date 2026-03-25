@@ -2460,6 +2460,23 @@ patch_gcc_missing_symbols() {
  	@echo DEB_TARGET_ARCH: $(DEB_TARGET_ARCH)
 EOF
 }
+patch_gcc_musl_x86() {
+	dpkg-architecture "-a$HOST_ARCH" -ignu-any-any && return 0
+	echo "disabling multilib for non-glibc #1131165"
+	drop_privs patch -p1 <<'EOF'
+--- a/debian/rules2
++++ b/debian/rules2
+@@ -455,7 +455,7 @@
+     endif
+ endif
+
+-ifneq (,$(filter $(DEB_TARGET_GNU_TYPE), x86_64-linux-gnu x86_64-linux-gnux32 x86_64-gnu s390x-linux-gnu sparc64-linux-gnu))
++ifneq (,$(filter $(DEB_TARGET_GNU_CPU), x86_64 s390x sparc64))
+     ifneq ($(biarch32),yes)
+       CONFARGS += --disable-multilib
+     endif
+EOF
+}
 patch_gcc_wdotap() {
 	if test "$ENABLE_MULTIARCH_GCC" = yes; then
 		echo "applying patches for with_deps_on_target_arch_pkgs"
@@ -2737,6 +2754,7 @@ patch_gcc_15() {
 	patch_gcc_limits_h_test
 	patch_gcc_for_host_in_rtlibs
 	patch_gcc_default_pie_everywhere
+	patch_gcc_musl_x86
 	echo "build common libraries again, not a bug"
 	drop_privs sed -i -e 's/^\s*#\?\(with_common_libs\s*:\?=\).*/\1yes/' debian/rules.defs
 	patch_gcc_wdotap
@@ -2750,6 +2768,7 @@ patch_gcc_16() {
 	patch_gcc_for_host_in_rtlibs
 	patch_gcc_default_pie_everywhere
 	patch_gcc_missing_symbols
+	patch_gcc_musl_x86
 	patch_gcc_wdotap
 }
 
