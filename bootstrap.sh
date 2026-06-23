@@ -6,7 +6,7 @@ set -u
 
 export DEB_BUILD_OPTIONS="nocheck noddebs parallel=1"
 export DH_VERBOSE=1
-export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+#export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
 HOST_ARCH=undefined
 # select gcc version from gcc-defaults package unless set
 GCC_VER=
@@ -635,6 +635,9 @@ cross_build() {
 				echo "adding environment variables via buildenv hook for $pkg"
 				"$hook" "$HOST_ARCH"
 			fi
+			export DEB_HOST_CFLAGS_APPEND="${DEB_HOST_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+			export DEB_HOST_CXXFLAGS_APPEND="${DEB_HOST_CXXFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+			export DEB_HOST_FFLAGS_APPEND="${DEB_HOST_FFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
 			drop_privs_exec dpkg-buildpackage "-a$HOST_ARCH" -B "-P$profiles" $ignorebd -uc -us
 		) || buildpackage_failed "$?"
 		cd ..
@@ -3218,6 +3221,13 @@ patch_gcc_16() {
 	patch_gcc_wdotap
 	patch_gcc_espresso
 }
+buildenv_gcc_16() {
+    if test "$1" = "$HOST_ARCH"; then
+        export DEB_HOST_CFLAGS_APPEND="${DEB_HOST_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+        export DEB_HOST_CXXFLAGS_APPEND="${DEB_HOST_CXXFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+        export DEB_HOST_FFLAGS_APPEND="${DEB_HOST_FFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
+    fi
+}
 
 patch_gcc_defaults() {
 	regenerate_control=0
@@ -3512,6 +3522,7 @@ buildenv_glibc() {
 	export DEB_GCC_VERSION="-$GCC_VER"
 	# glibc passes -Werror by default as it uses a fixed gcc version. We change that version.
 	export DEB_CFLAGS_APPEND="${DEB_CFLAGS_APPEND:-} -Wno-error"
+	export DEB_HOST_CFLAGS_APPEND="${DEB_HOST_CFLAGS_APPEND:-} -mcpu=espresso -mno-altivec"
 }
 
 add_automatic gmp
